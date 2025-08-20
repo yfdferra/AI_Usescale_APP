@@ -37,12 +37,19 @@ def getdata():
     connection = sqlite3.connect("database/users.db")
     connection.row_factory = sqlite3.Row
     cursor = connection.cursor()
-
     cursor.execute("SELECT * FROM users")
     rows = cursor.fetchall()
-
-    # Convert rows to list of dicts
     data = [dict(row) for row in rows]
+    connection.close()
+    return jsonify(data)
 
+@app.route("/get_use_scales", methods=["GET"])
+def get_usescales():
+    connection = sqlite3.connect("database/usescales.db")
+    connection.row_factory = sqlite3.Row
+    cursor = connection.cursor()
+    cursor.execute("SELECT * FROM usescales")
+    rows = cursor.fetchall()
+    data = [dict(row) for row in rows]
     connection.close()
     return jsonify(data)

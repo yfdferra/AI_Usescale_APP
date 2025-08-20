@@ -1,14 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <title>Document</title>
-  </head>
-  <body>
-    <h1>This is the dashboard for {{ user }}</h1>
-    <button id="myButton">GET DATA FROM DATABASE</button>
-  </body>
-  <script src="{{ url_for('static', filename='test.js') }}"></script>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Document</title>
+</head>
+
+<body style="height: 100vh;">
+  <h1>This is the dashboard for {{ user }}</h1>
+  <div id="Flexx" style="display: flex;">
+    <div id="frame" style="flex-grow: 1"></div>
+    <button id="myButton" style="flex-grow: 1">Open Template</button>
+  </div>
+
+  <div id="template"></div>
+</body>
+<script src="{{ url_for('static', filename='dashboard.js') }}"></script>
+
 </html>
