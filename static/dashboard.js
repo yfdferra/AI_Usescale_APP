@@ -17,8 +17,32 @@ document.getElementById("open_template").addEventListener("click", () => {
   openTemplate();
 });
 
+// Event listener for adding rows
 document.getElementById("add_row").addEventListener("click", addRow);
 activateScript();
+
+// Event listener for getting JSON
+document.getElementById("jsonify").addEventListener("click", () => {
+  jsonify();
+});
+
+function jsonify() {
+  let rows = usescale.querySelectorAll("div");
+  let result = [];
+  rows.forEach((row) => {
+    let textareas = row.querySelectorAll("textarea");
+    if (textareas.length === 3) {
+      let obj = {
+        category: textareas[0].value,
+        description: textareas[1].value,
+        comments: textareas[2].value,
+      };
+      result.push(obj);
+    }
+  });
+  console.log(JSON.stringify(result, null, 1));
+  return JSON.stringify(result, null, 1);
+}
 
 function openTemplate() {
   dropdown = frame.querySelector("select");
@@ -35,6 +59,7 @@ function openTemplate() {
       usescale.innerHTML = "";
       data.forEach((element) => {
         var row = document.createElement("div");
+        row.dataset.id = element.row_id;
         var type = document.createElement("textarea");
         type.value = element.category;
         var shortDescription = document.createElement("textarea");
