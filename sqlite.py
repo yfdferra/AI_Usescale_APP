@@ -11,7 +11,13 @@ cursor = connection.cursor()
 
 
 # Accounts
-cursor.execute("create table users (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT, password TEXT)")
+cursor.execute("""
+CREATE TABLE users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT,
+    password TEXT
+)""")
+
 user_list = [
     ("admin", "admin"),
 ]
@@ -19,18 +25,49 @@ cursor.executemany("INSERT INTO users (username, password) VALUES (?, ?)", user_
 connection.commit()
 
 
-
 #  Usescales
 connection = sqlite3.connect("database/usescales.db")
 cursor = connection.cursor()
 
-cursor.execute("create table usescales (usescale_id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT)")
+cursor.execute("""
+CREATE TABLE usescales (
+    usescale_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title TEXT
+)""")
 usescale_list = [
     ("Essay Template",),
     ( "Mathematics Template",),
 ]
 cursor.executemany("INSERT INTO usescales (title) VALUES (?)", usescale_list)
 connection.commit()
+
+
+connection = sqlite3.connect("database/usescale_rows.db")
+cursor = connection.cursor()
+
+cursor.execute("""
+CREATE TABLE usescale_entries (
+    row_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    usescale_id INTEGER,
+    category TEXT,
+    description TEXT,
+    comments TEXT,
+    FOREIGN KEY (usescale_id) REFERENCES usescales(usescale_id)
+)""")
+
+entries = [
+    (1, "Idea Generation", "Allowed; all prompts must be submitted", "'Generate me a list of 10 concerns regarding coral reef sustainability'"),
+    (1, "Proofreading", "Not permitted", "DO NOT SUBMIT PROMPTS FOR PROOFREADING"),
+    (1, "Research", "Allowed; must cite sources", "'Prompt: summarise the main points of this paper with citations in the format (page number, line number, any figures references)'"),
+]
+
+cursor.executemany(
+    "INSERT INTO usescale_entries (usescale_id, category, description, comments) VALUES (?, ?, ?, ?)",
+    entries
+)
+
+connection.commit()
+connection.close()
 
 # for row in cursor.execute("select * from users"):
 #     print(row)

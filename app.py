@@ -53,3 +53,26 @@ def get_usescales():
     data = [dict(row) for row in rows]
     connection.close()
     return jsonify(data)
+
+@app.route("/get_usescale_rows", methods=["GET"])
+def get_usescale_rows():
+    usescale_id = request.args.get("usescale_id")
+    connection = sqlite3.connect("database/usescale_rows.db")
+    connection.row_factory = sqlite3.Row
+    cursor = connection.cursor()
+    cursor.execute("SELECT * FROM usescale_entries WHERE usescale_id = ?", (usescale_id,))
+    rows = cursor.fetchall()
+    data = [dict(row) for row in rows]
+    connection.close()
+    return jsonify(data)
+
+@app.route("/create_template", methods=["POST"])
+def create_template():
+    info = request.get_json()
+    title = info.get("title")
+    connection = sqlite3.connect("database/usescales.db")
+    cursor = connection.cursor()
+    cursor.execute("INSERT INTO usescales (title) VALUES (?)", (title,))
+    connection.commit()
+    cursor.close()
+    return {"status": "success", "message": "Template created successfully"} 

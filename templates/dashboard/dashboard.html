@@ -11,11 +11,17 @@
 <body style="height: 100vh;">
   <h1>This is the dashboard for {{ user }}</h1>
   <div id="Flexx" style="display: flex;">
-    <div id="frame" style="flex-grow: 1"></div>
-    <button id="myButton" style="flex-grow: 1">Open Template</button>
+    <form id="new_template_form">
+      <input type="text" id="new_template_title" name="new_template_title">
+      <button type="button" id="create_template" style="flex-grow: 1">Create New Template</button>
+    </form>
   </div>
-
-  <div id="template"></div>
+  <div id="Flexx" style="display: flex;">
+    <div id="frame"></div>
+    <button id="open_template">Open Template</button>
+  </div>
+  <div id="usescale"></div>
+  <button id="add_row">Add row</button>
 </body>
 <script src="{{ url_for('static', filename='dashboard.js') }}"></script>
 
