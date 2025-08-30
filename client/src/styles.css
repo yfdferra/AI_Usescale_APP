@@ -1,0 +1,88 @@
+:root {
+  --navy: #07112c;
+  --bg: #f6f7fb;
+  --text: #0f172a;
+}
+
+* {
+  box-sizing: border-box;
+}
+html,
+body,
+#root {
+  height: 100%;
+}
+body {
+  margin: 0;
+  font-family: ui-sans-serif, system-ui, Segoe UI, Roboto, Helvetica, Arial;
+  color: var(--text);
+}
+
+/* --- layout + sidebar --- */
+.layout {
+  display: flex;
+  height: 100vh;
+  width: 100%;
+}
+
+.sidebar {
+  width: 64px;
+  background: var(--navy);
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 0;
+}
+@media (min-width: 768px) {
+  .sidebar {
+    width: 80px;
+  }
+}
+@media (min-width: 1024px) {
+  .sidebar {
+    width: 96px;
+  }
+}
+
+.profile_picture {
+  width: 24px;
+  height: 24px;
+  border-radius: 3px;
+  background: linear-gradient(135deg, #00d5ff, #04ff00);
+}
+.widgets {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-top: 12px;
+  align-items: center;
+}
+.widget_box {
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* --- main area --- */
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+}
+
+/* simple top bar + content padding (no cards or extra components) */
+.topbar {
+  height: 64px;
+  background: #fff;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+}
+.content {
+  padding: 24px;
+}
