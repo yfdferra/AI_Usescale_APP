@@ -1,9 +1,4 @@
-export default function Dashboard() {
-  return (
-    <section className="content">
-      <p style={{ margin: 0, color: "#475569" }}>
-        This is your main dashboard area (plain placeholder).
-      </p>
-    </section>
-  );
+export default function Dashboard({ children }) {
+  // Future: add media permissions or other logic here
+  return <section className="dashboard">{children}</section>;
 }

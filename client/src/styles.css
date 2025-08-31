@@ -1,6 +1,5 @@
 :root {
   --navy: #07112c;
-  --bg: #f6f7fb;
   --text: #0f172a;
 }
 
@@ -18,14 +17,19 @@ body {
   color: var(--text);
 }
 
-/* --- layout + sidebar --- */
+/* --- layout --- */
 .layout {
   display: flex;
   height: 100vh;
   width: 100%;
 }
 
+/* --- sidebar --- */
 .sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
   width: 4rem;
   background: var(--navy);
   color: #fff;
@@ -34,6 +38,7 @@ body {
   align-items: center;
   gap: 1rem;
   padding: 1rem 0;
+  z-index: 100;
 }
 @media (min-width: 768px) {
   .sidebar {
@@ -46,6 +51,7 @@ body {
   }
 }
 
+/* --- items inside sidebar --- */
 .profile_picture {
   width: 2.5rem;
   height: 2.5rem;
@@ -66,12 +72,26 @@ body {
   background: rgba(255, 255, 255, 0.08);
 }
 
-/* --- main area --- */
-.main {
+/* --- dashboard --- */
+.dashboard {
   flex: 1;
   display: flex;
   flex-direction: column;
-  background: var(--bg);
+  background: #fcf2f263;
+  min-height: 100vh;
+  width: 100%;
+  margin-left: 4rem; /* match sidebar width */
+}
+
+@media (min-width: 768px) {
+  .main {
+    margin-left: 5rem;
+  }
+}
+@media (min-width: 1024px) {
+  .main {
+    margin-left: 6rem;
+  }
 }
 
 /* simple top bar + content padding (no cards or extra components) */
@@ -85,4 +105,73 @@ body {
 }
 .content {
   padding: 24px;
+}
+
+/* --- square --- */
+.square {
+  background: #07114c;
+  color: #fff;
+  border-radius: 0.75rem;
+  width: 12rem;
+  height: 10.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  font-weight: 500;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: box-shadow 0.15s, border 0.15s;
+  margin: 0.5rem;
+  padding: 0;
+}
+.square:hover {
+  box-shadow: 0 4px 16px 0 rgb(6, 28, 114);
+}
+.square--selected {
+  border: 2px solid #a78bfa;
+}
+.square__title {
+  text-align: center;
+  width: 100%;
+}
+
+/* --- base templates section --- */
+.base-templates-section {
+  margin-bottom: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch; /* Ensures title is left-aligned */
+}
+
+.base-templates-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-left: 5rem; /* Optional: for spacing from sidebar */
+}
+
+.base-templates-row {
+  display: flex;
+  gap: 2rem;
+  justify-content: center;
+}
+
+/* --- custom templates section --- */
+.custom-templates-section {
+  margin-bottom: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.custom-templates-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-left: 5rem; /* Optional: for spacing from sidebar */
+}
+
+.custom-templates-row {
+  display: flex;
+  gap: 2rem;
+  justify-content: center;
 }
