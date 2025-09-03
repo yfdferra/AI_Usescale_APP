@@ -152,8 +152,10 @@ body {
 
 .base-templates-row {
   display: flex;
+  flex-wrap: wrap;
   gap: 2rem;
-  justify-content: center;
+  justify-content: flex-start;
+  margin-left: 5rem;
 }
 
 /* --- custom templates section --- */
@@ -172,6 +174,8 @@ body {
 
 .custom-templates-row {
   display: flex;
+  flex-wrap: wrap;
   gap: 2rem;
-  justify-content: center;
+  justify-content: flex-start;
+  margin-left: 5rem;
 }

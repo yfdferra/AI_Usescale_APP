@@ -16,7 +16,9 @@ export default function MainTemplate({ children }) {
             "INFO30006 presentation",
             "Another",
             "More",
-            "Even More",
+            "More",
+            "More",
+            "More",
             "Overflow Row",
           ]}
         />
