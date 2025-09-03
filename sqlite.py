@@ -44,7 +44,7 @@ connection.commit()
 
 connection = sqlite3.connect("database/usescale_rows.db")
 cursor = connection.cursor()
-
+## THIS IS THE RELEVANT TABLE FOR IMPLEMENTATION OF USE CASES
 cursor.execute("""
 CREATE TABLE usescale_entries (
     row_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -59,6 +59,9 @@ entries = [
     (1, "Idea Generation", "Allowed; all prompts must be submitted", "'Generate me a list of 10 concerns regarding coral reef sustainability'"),
     (1, "Proofreading", "Not permitted", "DO NOT SUBMIT PROMPTS FOR PROOFREADING"),
     (1, "Research", "Allowed; must cite sources", "'Prompt: summarise the main points of this paper with citations in the format (page number, line number, any figures references)'"),
+    (2, "Problem Solving", "Allowed; must show work", "'Solve the equation 2x + 3 = 7 and show all steps'"),
+    (2, "Concept Explanation", "Allowed; must be clear and concise", "'Explain the concept of derivatives in calculus with examples'"),
+    (2, "Graph Interpretation", "Allowed; must reference specific graphs", "'Interpret the following graph showing the relationship between x and y coordinates'"),
 ]
 
 cursor.executemany(

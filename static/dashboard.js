@@ -133,19 +133,3 @@ function addRow() {
 }
 
 function fetchUseScaleItems() {}
-
-// function fetchUseScaleItems() {
-//   fetch(HOST + "/get_use_scale_items")
-//     .then((response) => response.json())
-//     .then((data) => {
-//       usescale.innerHTML = "";
-//       data.forEach((element) => {
-//         var div = document.createElement("div");
-//         div.textContent = element.title;
-//         usescale.appendChild(div);
-//       });
-//     })
-//     .catch((error) => {
-//       console.error("Error fetching data:", error);
-//     });
-// }

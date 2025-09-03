@@ -10,6 +10,36 @@ CORS(app)
 def hello_world():
     return render_template("home/index.html")
 
+#Function skeleton for usecase
+@app.route("/usecase")
+def usecase():
+    connection = sqlite3.connect("database/usescale_rows.db")
+    connection.row_factory = sqlite3.Row
+    cursor = connection.cursor()
+
+    #Assume you are given this as the subjectID
+    englishID = 1
+    mathsID = 2
+    #Please find the relevant query to get usecase from the database, the sqlite.py is your friend :3
+    #change with relevant query to get data
+    cursor.execute("SELECT * FROM usescale_entries")
+    rows = cursor.fetchall()
+    data = [dict(row) for row in rows]
+
+    connection.close()
+    return jsonify(data)
+
+
+
+
+
+
+
+
+
+
+
+
 
 @app.route("/login", methods=["POST"])
 def login():
