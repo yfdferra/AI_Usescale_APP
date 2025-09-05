@@ -22,7 +22,7 @@ def usecase():
     mathsID = 2
     #Please find the relevant query to get usecase from the database, the sqlite.py is your friend :3
     #change with relevant query to get data
-    cursor.execute("SELECT * FROM usescale_entries")
+    cursor.execute("SELECT * FROM usescale_entries WHERE usescale_id IN (?,?)", (englishID, mathsID))
     rows = cursor.fetchall()
     data = [dict(row) for row in rows]
 
