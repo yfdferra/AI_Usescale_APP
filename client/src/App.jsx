@@ -5,19 +5,19 @@ import UseScalePage from "./templates/UseScalePage";
 
 export default function App() {
   const [loggedIn, setLoggedIn] = useState(false);
-  const [showUseScale, setShowUseScale] = useState(false);
+  const [currentUseScaleID, setCurrentUseScaleID] = useState(null);
 
   const handleNext = () => {
     setLoggedIn(true);
   };
 
-  const handleWrittenAssessmentClick = () => {
-    setShowUseScale(true);
+  const handleTemplateClick = (usescale_id) => {
+    setCurrentUseScaleID(usescale_id);
   };
 
   if (!loggedIn) return <Login onNext={handleNext} />;
-  if (showUseScale) return <UseScalePage />;
-  return (
-    <MainTemplate onWrittenAssessmentClick={handleWrittenAssessmentClick} />
-  );
+  if (currentUseScaleID !== null) {
+    return <UseScalePage usescale_id={currentUseScaleID} />;
+  }
+  return <MainTemplate onTemplateClick={handleTemplateClick} />;
 }

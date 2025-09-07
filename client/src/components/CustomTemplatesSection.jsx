@@ -10,7 +10,7 @@ import Square from "./Square";
 //  return result;
 //}
 
-export default function CustomTemplatesSection({ templates }) {
+export default function CustomTemplatesSection({ templates, onTemplateClick }) {
   // Example usage: pass templates as a prop or fetch from state/api
   // const templates = ["Template 1", "Template 2", ...];
 
@@ -26,7 +26,7 @@ export default function CustomTemplatesSection({ templates }) {
             text={title}
             usescale_id={id}
             onClick={() => {
-              window.location.href = `http://localhost:5000/login`;
+              onTemplateClick(id);
             }}
           />
         ))}
