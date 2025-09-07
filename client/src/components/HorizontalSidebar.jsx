@@ -1,18 +1,14 @@
 import React, { useState } from "react";
 
-export default function HorizontalSidebar({ children }) {
-  const [open, setOpen] = useState(false);
+export default function HorizontalSidebar({ children, open, setOpen }) {
   const sidebarWidth = "6vw";
 
   return (
     <div
       className={open ? "horizontal-sidebar open" : "horizontal-sidebar"}
       style={{
-        position: "fixed",
-        left: sidebarWidth,
-        top: 0,
-        height: "100vh",
-        width: open ? "400px" : "32px",
+        height: "100%",
+        width:"100%",
         background: "#f1e6e6ff",
         color: "#222",
         boxShadow: "0 0 8px rgba(0,0,0,0.1)",
@@ -25,16 +21,10 @@ export default function HorizontalSidebar({ children }) {
       }}
     >
       {/* Content area (takes all but the toggle button width) */}
-      <div
-        style={{
-          flex: 1,
-          height: "100%",
-          display: "flex",
-          alignItems: "flex-start",
-        }}
-      >
+      <div style={{ flex: 1, height: "100%", display: "flex", alignItems: "flex-start" }}>
         {open ? <div style={{ width: "100%" }}>{children}</div> : null}
       </div>
+
       {/* Toggle button on the right edge */}
       <button
         onClick={(e) => {
