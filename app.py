@@ -50,16 +50,17 @@ def login():
     cursor = connection.cursor()
 
     cursor.execute("SELECT password FROM users WHERE username = ?", (username,))
-    dbPassword = cursor.fetchone()[0]
-    print(dbPassword)
+    account = cursor.fetchone()
     cursor.close()
 
+    if account is None:
+        return jsonify({"logged_in": False})
+    dbPassword = account[0]
 
     if (password == dbPassword):
-        return render_template("dashboard/dashboard.html", user=username)
-        #return f"<h2>Welcome, {username}</h2>"
+        return jsonify({"logged_in": True})
     else:
-        return f"<h2>Incorrect Username/Pasword</h2>"
+        return jsonify({"logged_in": False})
     
 
 @app.route("/data", methods=["GET"])

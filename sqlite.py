@@ -71,8 +71,3 @@ cursor.executemany(
 
 connection.commit()
 connection.close()
-
-# for row in cursor.execute("select * from users"):
-#     print(row)
-
-connection.close()
