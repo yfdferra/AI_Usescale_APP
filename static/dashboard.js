@@ -19,8 +19,6 @@ document.getElementById("open_template").addEventListener("click", () => {
 
 // Event listener for adding rows
 document.getElementById("add_row").addEventListener("click", addRow);
-document.getElementById("remove_row").addEventListener("click", removeRow);
-document.getElementById("jsonify").addEventListener("click", saveTemplate);
 activateScript();
 
 // Event listener for getting JSON
@@ -46,52 +44,34 @@ function jsonify() {
   return JSON.stringify(result, null, 1);
 }
 
-function removeRow() {
-  const rows = usescale.querySelectorAll("div");
-  if (rows.length > 0) {
-    rows[rows.length - 1].remove(); // remove the last row
-  }
-}
-
 function openTemplate() {
-  const dropdown = frame.querySelector("select");
-  const templateId = dropdown.value;
-  console.log("Opening template:", templateId);
-
-  fetch(HOST + `/get_template?template_id=${templateId}`)
+  dropdown = frame.querySelector("select");
+  console.log(dropdown.value);
+  fetch(HOST + "/get_usescale_rows?usescale_id=" + dropdown.value, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  })
     .then((response) => response.json())
     .then((data) => {
-      if (data.error) {
-        alert(data.error);
-      } else {
-        console.log("Template loaded:", data);
-
-        const templateData = JSON.parse(data.templateJson);
-        console.log("Parsed template JSON:", templateData);
-
-        usescale.innerHTML = "";
-
-        templateData.forEach((item) => {
-          const row = document.createElement("div");
-
-          const category = document.createElement("textarea");
-          category.value = item.category || "";
-
-          const description = document.createElement("textarea");
-          description.value = item.description || "";
-
-          const comments = document.createElement("textarea");
-          comments.value = item.comments || "";
-
-          row.appendChild(category);
-          row.appendChild(description);
-          row.appendChild(comments);
-
-          usescale.appendChild(row);
-        });
-      }
-    })
-    .catch((error) => console.error("Error loading template:", error));
+      console.log("success :" + data);
+      usescale.innerHTML = "";
+      data.forEach((element) => {
+        var row = document.createElement("div");
+        row.dataset.id = element.row_id;
+        var type = document.createElement("textarea");
+        type.value = element.category;
+        var shortDescription = document.createElement("textarea");
+        shortDescription.value = element.description;
+        var declaration = document.createElement("textarea");
+        declaration.value = element.comments;
+        row.appendChild(type);
+        row.appendChild(shortDescription);
+        row.appendChild(declaration);
+        usescale.appendChild(row);
+      });
+    });
 }
 
 function createTemplate(event) {
@@ -124,19 +104,19 @@ function activateScript() {
     var dropdown = document.createElement("select");
   }
   frame.appendChild(dropdown);
-  fetch(HOST + "/get_templates")
+  fetch(HOST + "/get_use_scales")
     .then((response) => response.json())
     .then((data) => {
       data.forEach((element) => {
         var option = document.createElement("option");
-        option.value = element.templateID;
-        option.textContent = element.templateName;
+        option.value = element.usescale_id;
+        option.textContent = element.title;
         dropdown.appendChild(option);
-        console.log(element.templateName);
+        console.log(element.title);
       });
     })
     .catch((error) => {
-      console.error("Unable to get data", error);
+      console.error("Error fetching data:", error);
     });
 }
 
@@ -152,23 +132,4 @@ function addRow() {
   usescale.appendChild(row);
 }
 
-function saveTemplate() {
-  const dropdown = frame.querySelector("select");
-  const templateId = dropdown.value;
-  const jsonData = jsonify();
-
-  fetch(HOST + "/save_template", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      templateID: templateId,
-      templateJson: jsonData,
-    }),
-  })
-    .then((response) => response.json())
-    .then((data) => {
-      console.log("Saved:", data);
-      alert("Template saved");
-    })
-    .catch((error) => console.error("Error saving template:", error));
-}
+function fetchUseScaleItems() {}

@@ -10,6 +10,36 @@ CORS(app)
 def hello_world():
     return render_template("home/index.html")
 
+#Function skeleton for usecase
+@app.route("/usecase")
+def usecase():
+    connection = sqlite3.connect("database/usescale_rows.db")
+    connection.row_factory = sqlite3.Row
+    cursor = connection.cursor()
+
+    #Assume you are given this as the subjectID
+    englishID = 1
+    mathsID = 2
+    #Please find the relevant query to get usecase from the database, the sqlite.py is your friend :3
+    #change with relevant query to get data
+    cursor.execute("SELECT * FROM usescale_entries WHERE usescale_id IN (?,?)", (englishID, mathsID))
+    rows = cursor.fetchall()
+    data = [dict(row) for row in rows]
+
+    connection.close()
+    return jsonify(data)
+
+
+
+
+
+
+
+
+
+
+
+
 
 @app.route("/login", methods=["POST"])
 def login():
@@ -20,15 +50,17 @@ def login():
     cursor = connection.cursor()
 
     cursor.execute("SELECT password FROM users WHERE username = ?", (username,))
-    dbPassword = cursor.fetchone()[0]
-    print(dbPassword)
+    account = cursor.fetchone()
     cursor.close()
 
+    if account is None:
+        return jsonify({"logged_in": False})
+    dbPassword = account[0]
 
     if (password == dbPassword):
-        return render_template("dashboard/dashboard.html", user=username)
+        return jsonify({"logged_in": True})
     else:
-        return f"<h2>Incorrect Username/Pasword</h2>"
+        return jsonify({"logged_in": False})
     
 
 @app.route("/data", methods=["GET"])
@@ -42,56 +74,36 @@ def getdata():
     connection.close()
     return jsonify(data)
 
-@app.route("/get_templates", methods=["GET"])
-def get_templates():
-    conn = sqlite3.connect("database/templates.db")
-    conn.row_factory = sqlite3.Row
-    cursor = conn.cursor()
-    cursor.execute("SELECT templateID, templateName FROM templates")
+@app.route("/get_use_scales", methods=["GET"])
+def get_usescales():
+    connection = sqlite3.connect("database/usescales.db")
+    connection.row_factory = sqlite3.Row
+    cursor = connection.cursor()
+    cursor.execute("SELECT * FROM usescales")
     rows = cursor.fetchall()
-    conn.close()
-    return jsonify([dict(row) for row in rows])
+    data = [dict(row) for row in rows]
+    connection.close()
+    return jsonify(data)
 
-
-@app.route("/get_template", methods=["GET"])
-def get_template():
-    template_id = request.args.get("template_id")
-
-    conn = sqlite3.connect("database/templates.db")
-    conn.row_factory = sqlite3.Row
-    cursor = conn.cursor()
-
-    cursor.execute("SELECT * FROM templates WHERE templateID = ?", (template_id,))
-    row = cursor.fetchone()
-    conn.close()
-
-    if row:
-        return jsonify(dict(row))
-    else:
-        return jsonify({"error": "Template does not exist"})
+@app.route("/get_usescale_rows", methods=["GET"])
+def get_usescale_rows():
+    usescale_id = request.args.get("usescale_id")
+    connection = sqlite3.connect("database/usescale_rows.db")
+    connection.row_factory = sqlite3.Row
+    cursor = connection.cursor()
+    cursor.execute("SELECT * FROM usescale_entries WHERE usescale_id = ?", (usescale_id,))
+    rows = cursor.fetchall()
+    data = [dict(row) for row in rows]
+    connection.close()
+    return jsonify(data)
 
 @app.route("/create_template", methods=["POST"])
 def create_template():
     info = request.get_json()
     title = info.get("title")
-    connection = sqlite3.connect("database/templates.db")
+    connection = sqlite3.connect("database/usescales.db")
     cursor = connection.cursor()
-    cursor.execute("INSERT INTO templates (templateName, templateJson) VALUES (?, ?)", (title, "[]"))
+    cursor.execute("INSERT INTO usescales (title) VALUES (?)", (title,))
     connection.commit()
     cursor.close()
-    return {"status": "success", "message": "Template created successfully"}
-
-@app.route("/save_template", methods=["POST"])
-def save_template():
-    info = request.get_json()
-    template_id = info.get("templateID")
-    template_json = info.get("templateJson")
-
-    conn = sqlite3.connect("database/templates.db")
-    cursor = conn.cursor()
-    cursor.execute("UPDATE templates SET templateJson = ? WHERE templateID = ?", (template_json, template_id))
-    conn.commit()
-    conn.close()
-
-    return {"status": "success", "message": "Template update successful"}
-
+    return {"status": "success", "message": "Template created successfully"} 
