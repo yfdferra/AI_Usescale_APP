@@ -18,6 +18,7 @@ export default function FilterSearchBar({
         border: "1px solid #e5e7eb",
         overflow: "hidden",
         height: "40px",
+        width:"353px"
       }}
     >
       <select

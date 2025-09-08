@@ -1,14 +1,13 @@
 import React, { useState } from "react";
 
 export default function HorizontalSidebar({ children, open, setOpen }) {
-  const sidebarWidth = "6vw";
 
   return (
     <div
       className={open ? "horizontal-sidebar open" : "horizontal-sidebar"}
       style={{
         height: "100%",
-        width:"100%",
+        width: "100%",
         background: "#ffffffff",
         color: "#222",
         boxShadow: "0 0 8px rgba(0,0,0,0.1)",
@@ -22,7 +21,7 @@ export default function HorizontalSidebar({ children, open, setOpen }) {
       }}
     >
       {/* Content area (takes all but the toggle button width) */}
-      <div style={{ flex: 1, height: "100%", display: "flex", alignItems: "flex-start", background: "#f7f9fc", }}>
+      <div style={{ flex: 1, height: "100%", display: "flex", alignItems: "flex-start", background: "#f7f9fc", overflowY: "auto",}}>
         {open ? <div style={{ width: "100%" }}>{children}</div> : null}
       </div>
 
@@ -34,8 +33,8 @@ export default function HorizontalSidebar({ children, open, setOpen }) {
         }}
         style={{
           position: "absolute",
-          top: "8px",
-          right: "7px",
+          top: "17px",
+          right: "0.5px",
           width: "32px",
           height: "32px",
           border: "none",
@@ -49,7 +48,7 @@ export default function HorizontalSidebar({ children, open, setOpen }) {
         tabIndex={0}
         aria-label={open ? "Close sidebar" : "Open sidebar"}
       >
-        <span style={{ fontSize: 24 }}>{open ? "⟨" : "≡"}</span>
+        <span style={{ fontSize: 22 }}>{open ? "<" : ">"}</span>
       </button>
     </div>
   );
