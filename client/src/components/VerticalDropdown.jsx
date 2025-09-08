@@ -7,24 +7,26 @@ export default function VerticalDropdown({ title, children }) {
     <div
       className="vertical-dropdown"
       style={{
-        margin: "1rem",
-        border: "1px solid #e5e7eb",
-        borderRadius: "8px",
-        background: "#fff",
+        border: "1px solid #e2e3e4da",
+        background: "#f7f9fcd8",
       }}
     >
       <div
         className="vertical-dropdown-header"
         style={{
-          padding: "0.75rem 1rem",
+          padding: "0.5rem 1rem",
           cursor: "pointer",
           fontWeight: "bold",
-          borderBottom: open ? "1px solid #e5e7eb" : "none",
+          fontSize: ".9rem",
+          display: "flex",
+          alignItems: "center",
         }}
         onClick={() => setOpen(!open)}
       >
+        <span style={{ fontSize: "0.9rem", marginRight: "0.5rem" }}>
+          {open ? "▲" : "▼"}
+        </span>
         {title}
-        <span style={{ float: "right" }}>{open ? "▲" : "▼"}</span>
       </div>
       {open && (
         <div className="vertical-dropdown-content" style={{ padding: "1rem" }}>

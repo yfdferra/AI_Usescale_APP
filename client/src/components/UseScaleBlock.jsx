@@ -3,17 +3,16 @@ import React from "react";
 export default function UseScaleBlock({
   level = "LEVEL N",
   label = "NO AI",
-  labelBg = "#ff00ffff", // <-- set a default color here
+  labelBg = "#f600f6ff",
 }) {
   return (
     <div
       style={{
         display: "flex",
-        border: "1px solid #cfd0d1ff",
-        borderRadius: "6px",
+        border: "2px solid #cfd0d1ff",
         overflow: "hidden",
-        width: "240px",
-        height: "48px",
+        width: "22rem",
+        height: "7rem",
         background: "#fff",
         margin: "0.5rem",
       }}
@@ -26,19 +25,20 @@ export default function UseScaleBlock({
           justifyContent: "center",
           color: "#222",
           fontSize: "1rem",
-          background: "#f8fafc",
+          background: "#ecf2f7ff",
         }}
       >
         {level}
       </div>
       <div
         style={{
-          flex: 2,
+          flex: 3,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
           background: labelBg,
-          borderLeft: "1px solid #cfd0d1ff",
+          border: "1px solid #cfd0d1ff",
+          borderLeft: "2px solid #cfd0d1ff",
           color: "#222",
           fontSize: "1rem",
         }}

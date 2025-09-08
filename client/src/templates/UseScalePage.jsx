@@ -3,15 +3,23 @@ import Sidebar from "../components/Sidebar";
 import HorizontalSidebar from "../components/HorizontalSidebar";
 import VerticalDropdown from "../components/VerticalDropdown";
 import UseScaleBlock from "../components/UseScaleBlock";
+import FilterSearchBar from "../components/FilterSearchBar";
 import TableSection from "../components/TableSection";
 
 export default function UseScalePage() {
+  const handleFilterChange = () => {};
+  const handleSearch = () => {};
   const [open, setOpen] = useState(false);
   return (
     <div style={{ display:"flex", height: "100vh" }}>
       <Sidebar />
       <div style={{ width: open ? 400: 32, transition: "width 0.3s"}}>
       <HorizontalSidebar open ={open} setOpen={setOpen}>
+        <FilterSearchBar
+          filterOptions={["All", "No AI", "Some AI"]}
+          onFilterChange={handleFilterChange}
+          onSearch={handleSearch}
+        />
         <VerticalDropdown title="Written Assessments">
           {/* Any dropdown content here */}
           <UseScaleBlock level="LEVEL N" label="NO AI" labelBg="#ffb3b3" />
