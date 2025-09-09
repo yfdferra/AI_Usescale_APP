@@ -13,7 +13,10 @@ export default function UseScalePage() {
   return (
     <div style={{ display:"flex", height: "100vh" }}>
       <Sidebar />
-      <div style={{ width: open ? 400: 32, transition: "width 0.3s"}}>
+      <div style={{ 
+        width: open ? 400: 32, 
+        transition: "width 0.3s"
+      }}>
       <HorizontalSidebar open ={open} setOpen={setOpen}>
         <FilterSearchBar
           filterOptions={["All", "No AI", "Some AI"]}
@@ -30,17 +33,26 @@ export default function UseScalePage() {
 
         <VerticalDropdown title="Coding Assessments">
           {/* Any dropdown content here */}
-          <div>Dropdown content goes here!</div>
+          <UseScaleBlock level="LEVEL N" label="NO AI" labelBg="#ffb3b3" />
+          <UseScaleBlock level="LEVEL R-1" label="" labelBg="#ffcfb3ff" />
+          <UseScaleBlock level="LEVEL R-2" label="" labelBg="#ffffb3ff" />
+          <UseScaleBlock level="LEVEL G" label="" labelBg="#d9b3ffff" />
         </VerticalDropdown>
 
         <VerticalDropdown title="Oral Assessments">
           {/* Any dropdown content here */}
-          <div>Dropdown content goes here!</div>
+          <UseScaleBlock level="LEVEL N" label="NO AI" labelBg="#ffb3b3" />
+          <UseScaleBlock level="LEVEL R-1" label="" labelBg="#ffcfb3ff" />
+          <UseScaleBlock level="LEVEL R-2" label="" labelBg="#ffffb3ff" />
+          <UseScaleBlock level="LEVEL G" label="" labelBg="#d9b3ffff" />
         </VerticalDropdown>
 
         <VerticalDropdown title="Presentation Assessments">
           {/* Any dropdown content here */}
-          <div>Dropdown content goes here!</div>
+          <UseScaleBlock level="LEVEL N" label="NO AI" labelBg="#ffb3b3" />
+          <UseScaleBlock level="LEVEL R-1" label="" labelBg="#ffcfb3ff" />
+          <UseScaleBlock level="LEVEL R-2" label="" labelBg="#ffffb3ff" />
+          <UseScaleBlock level="LEVEL G" label="" labelBg="#d9b3ffff" />
         </VerticalDropdown>
       </HorizontalSidebar>
       </div>

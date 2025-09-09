@@ -11,7 +11,7 @@ export default function UseScaleBlock({
         display: "flex",
         border: "2px solid #cfd0d1ff",
         overflow: "hidden",
-        width: "22rem",
+        width: "20rem",
         height: "7rem",
         background: "#fff",
         margin: "0.5rem",
