@@ -1,0 +1,31 @@
+.use-scale-block {
+  display: flex;
+  border: 0.125rem solid #cfd0d1ff;
+  overflow: hidden;
+  width: 20rem;
+  height: 7rem;
+  background: #fff;
+  margin: 0.5rem;
+}
+
+.use-scale-block-level {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #222;
+  font-size: 1rem;
+  background: #ecf2f7ff;
+}
+
+.use-scale-block-label {
+  flex: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--label-bg, #f600f6ff);
+  border: 0.0625rem solid #cfd0d1ff;
+  border-left: 0.125rem solid #cfd0d1ff;
+  color: #222;
+  font-size: 1rem;
+}
