@@ -1,4 +1,6 @@
 import logo from "../assets/logo.png";
+import "../templates/Login.css";
+
 export default function Login({ onNext }) {
   const handleSubmit = (e) => {
     e.preventDefault();
