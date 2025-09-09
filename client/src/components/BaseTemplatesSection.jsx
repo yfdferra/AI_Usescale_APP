@@ -1,5 +1,5 @@
-import React from "react";
 import Square from "./Square";
+import "./BaseTemplatesSection.css";
 
 export default function BaseTemplatesSection({ onWrittenAssessmentClick }) {
   const baseTemplates = [

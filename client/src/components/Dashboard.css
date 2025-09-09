@@ -1,0 +1,9 @@
+.dashboard {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: #ffffffa5;
+  min-height: 100vh;
+  width: 100%;
+  margin-left: 6vw; /* match sidebar width */
+}

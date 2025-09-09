@@ -1,5 +1,5 @@
-import React from "react";
 import Square from "./Square";
+import "./CustomTemplatesSection.css";
 
 // Helper to split array into chunks of 5
 //function chunkArray(array, size = 5) {
@@ -19,11 +19,11 @@ export default function CustomTemplatesSection({ templates }) {
   return (
     <section className="custom-templates-section">
       <h2 className="custom-templates-title">Custom Templates</h2>
-        <div className="custom-templates-row">
-          {templates.map((title, idx) => (
-            <Square key={idx} text={title} />
-          ))}
-        </div>
+      <div className="custom-templates-row">
+        {templates.map((title, idx) => (
+          <Square key={idx} text={title} />
+        ))}
+      </div>
     </section>
   );
 }

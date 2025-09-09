@@ -1,0 +1,33 @@
+.filter-search-bar {
+  display: flex;
+  align-items: center;
+  margin: 1rem;
+  background: #fff;
+  border-radius: 0.5rem;
+  box-shadow: 0 0.0625rem 0.25rem rgba(0, 0, 0, 0.04);
+  border: 0.0625rem solid #e5e7eb;
+  overflow: hidden;
+  height: 2.5rem;
+  width: 21.25rem;
+}
+
+.filter-select {
+  padding: 0.5rem 1rem;
+  border: none;
+  outline: none;
+  height: 100%;
+  border-top-left-radius: 0.5rem;
+  border-bottom-left-radius: 0.5rem;
+  background: #f8fafc;
+}
+
+.filter-input {
+  padding: 0.5rem 1rem;
+  border: none;
+  outline: none;
+  flex: 1;
+  height: 100%;
+  background: #fff;
+  border-top-right-radius: 0.5rem;
+  border-bottom-right-radius: 0.5rem;
+}
