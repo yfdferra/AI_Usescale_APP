@@ -1,0 +1,25 @@
+.table-section {
+  padding: 0.5rem;
+}
+
+.table-section-title {
+  margin-bottom: 1rem;
+}
+
+.table-section-container {
+  overflow: auto;
+  max-height: 88vh;
+  border: 0.0625rem solid #ccc;
+  border-radius: 0.5rem;
+}
+
+.table-section-table {
+  border-collapse: collapse;
+  min-width: 62.5rem;
+}
+
+.table-section-th,
+.table-section-td {
+  border: 0.0625rem solid #ccc;
+  padding: 0.5rem;
+}

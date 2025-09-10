@@ -1,3 +1,5 @@
+import "./Sqaure.css";
+
 export default function Square({ text, onClick, selected }) {
   return (
     <button

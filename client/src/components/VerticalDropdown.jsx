@@ -1,9 +1,14 @@
 import React, { useState } from "react";
+<<<<<<< HEAD
+=======
+import "./VerticalDropdown.css";
+>>>>>>> Frontend
 
 export default function VerticalDropdown({ title, children }) {
   const [open, setOpen] = useState(false);
 
   return (
+<<<<<<< HEAD
     <div
       className="vertical-dropdown"
       style={{
@@ -31,6 +36,16 @@ export default function VerticalDropdown({ title, children }) {
           {children}
         </div>
       )}
+=======
+    <div className="vertical-dropdown">
+      <div className="vertical-dropdown-header" onClick={() => setOpen(!open)}>
+        <span className="vertical-dropdown-header-icon">
+          {open ? "▲" : "▼"}
+        </span>
+        {title}
+      </div>
+      {open && <div className="vertical-dropdown-content">{children}</div>}
+>>>>>>> Frontend
     </div>
   );
 }

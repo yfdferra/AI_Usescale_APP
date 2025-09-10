@@ -1,5 +1,7 @@
 import logo from "../assets/logo.png";
 import HOST from "../GLOBALS/Globals";
+import "../templates/Login.css";
+
 export default function Login({ onNext }) {
   const handleSubmit = async (e) => {
     e.preventDefault();

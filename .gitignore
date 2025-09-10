@@ -1,0 +1,32 @@
+# --- Python / Flask ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+instance/
+*.log
+
+# Local SQLite databases (keep schema/seed scripts, ignore runtime DBs)
+*.sqlite3
+*.db
+database/*.db
+
+# --- Node / Vite ---
+client/node_modules/
+client/dist/
+client/.vite/
+
+# --- Env & secrets ---
+.env
+.env.*
+*.local
+# (If you want to share example envs, commit a .env.example separately)
+
+# --- OS / editor junk ---
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/

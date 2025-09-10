@@ -1,8 +1,13 @@
+<<<<<<< HEAD
 import React from "react";
+=======
+import "./UseScaleBlock.css";
+>>>>>>> Frontend
 
 export default function UseScaleBlock({
   level = "LEVEL N",
   label = "NO AI",
+<<<<<<< HEAD
   labelBg = "#ff00ffff", // <-- set a default color here
 }) {
   return (
@@ -43,6 +48,14 @@ export default function UseScaleBlock({
           fontSize: "1rem",
         }}
       >
+=======
+  labelBg = "#f600f6ff",
+}) {
+  return (
+    <div className="use-scale-block">
+      <div className="use-scale-block-level">{level}</div>
+      <div className="use-scale-block-label" style={{ background: labelBg }}>
+>>>>>>> Frontend
         {label}
       </div>
     </div>

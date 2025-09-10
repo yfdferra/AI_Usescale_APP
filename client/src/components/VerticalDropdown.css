@@ -1,0 +1,22 @@
+.vertical-dropdown {
+  border: 0.0625rem solid #e2e3e4da;
+  background: #f7f9fcd8;
+}
+
+.vertical-dropdown-header {
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+}
+
+.vertical-dropdown-header-icon {
+  font-size: 0.9rem;
+  margin-right: 0.5rem;
+}
+
+.vertical-dropdown-content {
+  padding: 1rem;
+}
