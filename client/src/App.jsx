@@ -19,5 +19,5 @@ export default function App() {
   if (currentUseScaleID !== null) {
     return <UseScalePage usescale_id={currentUseScaleID} />;
   }
-  return <MainTemplate onTemplateClick={handleTemplateClick} />;
+  return <MainTemplate onTemplateClick={handleTemplateClick} onWrittenAsseessmentClick={handleTemplateClick} />;  // added BaseTemplatesClick handle for Written Assessment
 }
