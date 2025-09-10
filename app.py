@@ -101,3 +101,8 @@ def create_template():
     connection.commit()
     cursor.close()
     return {"status": "success", "message": "Template created successfully"} 
+
+# tesintg react and flask connetion 
+@app.route("/api/ping")
+def ping():
+    return jsonify({"message": "pong"})

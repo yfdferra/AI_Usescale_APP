@@ -1,0 +1,19 @@
+.use-scale-page {
+  display: flex;
+  height: 100vh;
+}
+
+.use-scale-page-sidebar {
+  transition: width 0.3s;
+  width: 25rem;
+}
+
+.use-scale-page-sidebar.closed {
+  width: 2rem;
+}
+
+.use-scale-page-content {
+  flex: 1;
+  padding: 1rem;
+  overflow: auto;
+}

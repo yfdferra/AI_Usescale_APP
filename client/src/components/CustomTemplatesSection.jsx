@@ -1,5 +1,6 @@
 import React from "react";
 import Square from "./Square";
+import "./CustomTemplatesSection.css";
 
 // Helper to split array into chunks of 5
 //function chunkArray(array, size = 5) {
