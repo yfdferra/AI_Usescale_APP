@@ -1,8 +1,13 @@
 import logo from "../assets/logo.png";
 import HOST from "../GLOBALS/Globals";
+import PopUp from "../components/PopUp";
+import React, { useState } from "react";
 import "../templates/Login.css";
 
 export default function Login({ onNext }) {
+  // pop up for forgot password
+  const [showPopup, setShowPopup] = useState(false);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     var formData = new FormData(e.target);
@@ -56,7 +61,37 @@ export default function Login({ onNext }) {
           >
             Next
           </button>
+          <div className="login-links">
+            <a
+              href="#"
+              className="login-link"
+              onClick={(e) => {
+                e.preventDefault();
+                setShowPopup(true);
+              }}
+            >
+              Forgot Password ?
+            </a>
+
+            {/* Not sure if we need to be able to create accounts from here */}
+            {/* <a href="#" className="login-link">
+              Create Account
+            </a> */}
+          </div>
         </form>
+        {showPopup && (
+          <PopUp
+            title="Forgot Password"
+            message="Please contact the admin for this problem."
+            subtitle="For security reasons, password reset is handled by the administrator."
+            icon={
+              <span role="img" aria-label="alert">
+                🚨
+              </span>
+            }
+            onClose={() => setShowPopup(false)}
+          />
+        )}
       </div>
     </div>
   );

@@ -58,3 +58,15 @@
   cursor: pointer;
   margin-top: 1rem;
 }
+
+.login-links {
+  margin-top: 1rem;
+  text-align: center;
+}
+
+.login-link {
+  margin: 0 0.8rem 0 0.8rem;
+  color: #ffffff;
+  text-decoration: underline;
+  font-size: 1rem;
+}
