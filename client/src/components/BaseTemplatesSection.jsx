@@ -17,9 +17,14 @@ export default function BaseTemplatesSection({ onWrittenAssessmentClick }) {
       <div className="base-templates-row">
         {baseTemplates.map((title, idx) =>
           idx === 0 ? (
-            <Square key={idx} text={title} onClick={() => {       // changed this to mimick CustomTemplatesSection click handling
-              onWrittenAssessmentClick(idx);                      // such that a table pops up after clicking WrittenAssessment too
-            }} />
+            <Square
+              key={idx}
+              text={title}
+              onClick={() => {
+                // changed this to mimick CustomTemplatesSection click handling
+                onWrittenAssessmentClick(idx); // such that a table pops up after clicking WrittenAssessment too
+              }}
+            />
           ) : (
             <Square key={idx} text={title} />
           )
