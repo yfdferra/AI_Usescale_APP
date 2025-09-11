@@ -26,8 +26,7 @@
 .profile_picture {
   width: 2.5rem;
   height: 2.5rem;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #00d5ff, #04ff00);
+  border-radius: 25%;
 }
 .widgets {
   display: flex;
@@ -36,9 +35,14 @@
   margin-top: 0.75rem;
   align-items: center;
 }
-.widget_box {
-  width: 1.25rem;
-  height: 1.25rem;
+.widget_icon {
+  width: 2rem;
+  height: 2.5rem;
   border-radius: 0.375rem;
-  background: rgba(255, 255, 255, 0.08);
+}
+.widget_button {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
 }
