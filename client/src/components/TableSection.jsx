@@ -1,6 +1,7 @@
 import "./TableSection.css";
 import MenuButton from "./MenuButton";
 import TagInput from "./TagInput";
+import DropdownTagInput from "./DropdownTagInput";
 
 export default function TableSection({ open }) {
   const menuItems = [
@@ -14,13 +15,7 @@ export default function TableSection({ open }) {
       <div className="table-section-header">
         <h2 className="table-section-title">Untitled student declaration</h2>
 
-          <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-          <TagInput />
-        </div>
-
-
-
-        <MenuButton
+          <MenuButton
           inline
           items={[
             { label: "Edit Title", onClick: () => console.log("Edit Title") },
@@ -29,7 +24,13 @@ export default function TableSection({ open }) {
             { label: "Download Scale", onClick: () => console.log("Download Scale") },
             { label: "Download Declaration", onClick: () => console.log("Download Declaration") },
           ]}
-        />
+          />
+
+          <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+          <TagInput placeholder="*Subject" />
+          <TagInput placeholder="*Year" />
+          <DropdownTagInput placeholder="*Semester" options={["Sem 1", "Sem 2"]} />
+          </div>
       </div>
       <div className="table-section-container">
         <table className="table-section-table">

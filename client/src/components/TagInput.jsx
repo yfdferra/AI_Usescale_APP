@@ -1,37 +1,38 @@
 import { useState } from "react";
 import "./TagInput.css";
 
-export default function TagInput() {
-  const [tags, setTags] = useState([]);
+export default function TagInput({placeholder = "*Subject"}) {
+  const [tags, setTags] = useState(null);
   const [inputValue, setInputValue] = useState("");
 
   const handleKeyDown = (e) => {
-    if (e.key === "Enter" && inputValue.trim()) {
+    if (e.key === "Enter" && inputValue.trim && !tags) {
       e.preventDefault();
-      setTags([...tags, inputValue.trim()]);
+      setTags(inputValue.trim());
       setInputValue("");
     }
   };
 
-  const removeTag = (indexToRemove) => {
-    setTags(tags.filter((_, i) => i !== indexToRemove));
+  const removeTag = () => {
+    setTags(null);
   };
 
   return (
     <div className="tag-input">
-      {tags.map((tag, idx) => (
-        <div key={idx} className="tag">
-          {tag}
-          <button onClick={() => removeTag(idx)}>×</button>
+      {tags ? (
+        <div className="tag">
+          {tags}
+          <button onClick={removeTag}>×</button>
         </div>
-      ))}
+      ) : (
       <input
         type="text"
-        placeholder="Tags"
+        placeholder={placeholder}
         value={inputValue}
         onChange={(e) => setInputValue(e.target.value)}
         onKeyDown={handleKeyDown}
       />
+      )}
     </div>
   );
 }

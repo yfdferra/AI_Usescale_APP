@@ -6,23 +6,26 @@
   border: 1px solid #ccc;
   border-radius: 0.5rem;
   padding: 0.25rem 0.5rem;
-  min-width: 12rem;
+  width: 9rem;
+  height: 2rem;
 }
 
 .tag-input input {
   border: none;
   outline: none;
-  flex: 1;
-  min-width: 6rem;
+  width: 8rem;
 }
 
 .tag {
-  background: #f0f0f0;
+  background: #f7f9fc;
   border-radius: 0.25rem;
   padding: 0.25rem 0.5rem;
   display: flex;
   align-items: center;
   gap: 0.25rem;
+  height: 1.25rem;
+  font-size: 0.75rem;
+  line-height: 1;
 }
 
 .tag button {
