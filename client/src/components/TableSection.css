@@ -3,11 +3,13 @@
 }
 
 .table-section-title {
-  margin-bottom: 1rem;
+  margin: 0rem;
+  font-size: 1.5rem;
 }
 
 .table-section-container {
-  overflow: auto;
+  overflow-x: auto;
+  overflow-y: auto;
   max-height: 88vh;
   border: 0.0625rem solid #ccc;
   border-radius: 0.5rem;
@@ -20,6 +22,27 @@
 
 .table-section-th,
 .table-section-td {
-  border: 0.0625rem solid #ccc;
+  border: 0.0625rem solid #9e9e9e;
   padding: 0.5rem;
+}
+
+.table-section-table thead tr {
+  background-color: #f7f9fc;
+  top: 0;
+  position: sticky;
+  z-index: 2;
+  font-weight: normal;
+}
+
+.cell-with-menu {
+  position: relative;
+  padding: 0.5rem;
+}
+
+.table-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 1rem;
+  margin-bottom: 1rem;
 }
