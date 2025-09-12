@@ -1,5 +1,6 @@
 import "./TableSection.css";
 import MenuButton from "./MenuButton";
+import TagInput from "./TagInput";
 
 export default function TableSection({ open }) {
   const menuItems = [
@@ -8,9 +9,17 @@ export default function TableSection({ open }) {
     { label: "View", onClick: () => console.log("View clicked") },
   ];
   return (
+    
     <div className="table-section">
       <div className="table-section-header">
         <h2 className="table-section-title">Untitled student declaration</h2>
+
+          <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+          <TagInput />
+        </div>
+
+
+
         <MenuButton
           inline
           items={[
