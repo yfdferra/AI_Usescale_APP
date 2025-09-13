@@ -75,7 +75,7 @@ export default function UseScalePage({ usescale_id }) {
         </HorizontalSidebar>
       </div>
       <div className="use-scale-page-content">
-        <TableSection />
+        <TableSection tableData={usecase} />
       </div>
     </div>
   );

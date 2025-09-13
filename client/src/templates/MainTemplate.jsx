@@ -6,16 +6,6 @@ import Dashboard from "../components/Dashboard";
 import { useState, useEffect } from "react";
 import HOST from "../GLOBALS/Globals.jsx";
 
-// [
-//             "INFO30006 written",
-//             "INFO30006 presentation",
-//             "Another",
-//             "More",
-//             "More",
-//             "More",
-//             "More",
-//             "Overflow Row",
-//           ]
 export default function MainTemplate({
   children,
   onTemplateClick,

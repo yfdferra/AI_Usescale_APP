@@ -22,7 +22,10 @@ export default function Sidebar() {
             className="widget_icon"
           />
         </button>
-        <button className="widget_button">
+        <button
+          className="widget_button"
+          onClick={() => console.log("Back button clicked")}
+        >
           <img src={folderIcon} alt="Folder" className="widget_icon" />
         </button>
         <button className="widget_button">
