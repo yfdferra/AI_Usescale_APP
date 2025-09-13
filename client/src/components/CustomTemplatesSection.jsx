@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useState } from "react";
 import Square from "./Square";
 import "./CustomTemplatesSection.css";
+import FilterSearchBar from "./FilterSearchBar";
 
 // Helper to split array into chunks of 5
 //function chunkArray(array, size = 5) {
@@ -17,9 +18,23 @@ export default function CustomTemplatesSection({ templates, onTemplateClick }) {
 
   //const rows = chunkArray(templates, 5);
 
+  const [search, setSearch] = useState("");
+
+  // Filter templates by search text
+  const filteredTemplates = templates.filter(({ title }) =>
+    title.toLowerCase().includes(search.toLowerCase())
+  );
+
   return (
     <section className="custom-templates-section">
-      <h2 className="custom-templates-title">Custom Templates</h2>
+      <div className="custom-templates-header">
+        <h2 className="custom-templates-title">Custom Templates</h2>
+        <FilterSearchBar
+          filterOptions={["Default", "Most Used", "Recent", "Favorites"]}
+          onFilterChange={() => {}} // Implement if you add filter logic
+          onSearch={(e) => setSearch(e.target.value)}
+        />
+      </div>
       <div className="custom-templates-row">
         {templates.map(({ id, title }) => (
           <Square

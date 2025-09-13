@@ -1,14 +1,33 @@
 import "./Sidebar.css";
+import settingsIcon from "../assets/settings-icon.svg";
+import notificationIcon from "../assets/notification-icon.png";
+import folderIcon from "../assets/folder-icon.png";
+import profile_picture from "../assets/profile-pic.png";
 
 export default function Sidebar() {
   return (
     <aside className="sidebar">
-      <div className="profile_picture" />
       <div className="widgets">
-        <div className="widget_box" />
-        <div className="widget_box" />
-        <div className="widget_box" />
-        <div className="widget_box" />
+        <button className="widget_button">
+          <img
+            src={profile_picture}
+            alt="Profile"
+            className="profile_picture"
+          />
+        </button>
+        <button className="widget_button">
+          <img
+            src={notificationIcon}
+            alt="Notifications"
+            className="widget_icon"
+          />
+        </button>
+        <button className="widget_button">
+          <img src={folderIcon} alt="Folder" className="widget_icon" />
+        </button>
+        <button className="widget_button">
+          <img src={settingsIcon} alt="Settings" className="widget_icon" />
+        </button>
       </div>
     </aside>
   );

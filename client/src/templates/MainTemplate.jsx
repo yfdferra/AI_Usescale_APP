@@ -16,7 +16,11 @@ import HOST from "../GLOBALS/Globals.jsx";
 //             "More",
 //             "Overflow Row",
 //           ]
-export default function MainTemplate({ children, onTemplateClick, onWrittenAsseessmentClick }) {
+export default function MainTemplate({
+  children,
+  onTemplateClick,
+  onWrittenAsseessmentClick,
+}) {
   const [templates, setTemplates] = useState([]);
   useEffect(() => {
     fetch(HOST + "/get_use_scales")
@@ -36,8 +40,8 @@ export default function MainTemplate({ children, onTemplateClick, onWrittenAssee
     <div className="layout">
       <Sidebar />
       <Dashboard>
-        <BaseTemplatesSection 
-          onWrittenAssessmentClick={onWrittenAsseessmentClick}  // changes in App.jsx and BaseTemplatesSection.jsx too
+        <BaseTemplatesSection
+          onWrittenAssessmentClick={onWrittenAsseessmentClick} // changes in App.jsx and BaseTemplatesSection.jsx too
         />
         <CustomTemplatesSection
           templates={templates}

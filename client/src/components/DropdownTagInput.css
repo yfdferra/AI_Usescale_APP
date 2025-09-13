@@ -1,0 +1,8 @@
+.dropdown-tag {
+  border: none;
+  outline: none;
+  font-size: 0.85rem;
+  padding: 0.2rem;
+  background: transparent;
+  cursor: pointer;
+}

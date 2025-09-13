@@ -18,3 +18,8 @@
   justify-content: flex-start;
   margin-left: 5rem;
 }
+.custom-templates-header {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 1rem; /* space below header */
+}
