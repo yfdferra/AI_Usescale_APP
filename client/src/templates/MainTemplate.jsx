@@ -31,7 +31,7 @@ export default function MainTemplate({
       <Sidebar />
       <Dashboard>
         <BaseTemplatesSection
-          onWrittenAssessmentClick={onWrittenAsseessmentClick} // changes in App.jsx and BaseTemplatesSection.jsx too
+          onWrittenAssessmentClick={onWrittenAsseessmentClick}
         />
         <CustomTemplatesSection
           templates={templates}

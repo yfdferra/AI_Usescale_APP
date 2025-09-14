@@ -19,7 +19,7 @@ export default function FilterSearchBar({
         type="text"
         className="filter-input"
         placeholder="Search"
-        onChange={onSearch}
+        onChange={(e) => onSearch(e.target.value)}
       />
       {/* Add filter/search icons as needed */}
     </div>

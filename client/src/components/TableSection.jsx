@@ -1,14 +1,25 @@
+import { useState, useEffect } from "react";
 import "./TableSection.css";
 import MenuButton from "./MenuButton";
 import TagInput from "./TagInput";
 import DropdownTagInput from "./DropdownTagInput";
 
-export default function TableSection({ open, tableData }) {
+export default function TableSection({ open, tableData, initialTitle }) {
+  const [title, setTitle] = useState(
+    initialTitle || "Untitled student declaration"
+  );
+
+  useEffect(() => {
+    if (initialTitle) {
+      setTitle(initialTitle);
+    }
+  }, [initialTitle]);
+
   const editTitle = () => {
     let userInput = prompt("Please enter new Title", "Title");
 
     if (userInput !== null) {
-      alert("No changes saved. You entered: ");
+      setTitle(userInput);
     } else {
       alert("You cancelled the input.");
     }
@@ -23,7 +34,7 @@ export default function TableSection({ open, tableData }) {
   return (
     <div className="table-section">
       <div className="table-section-header">
-        <h2 className="table-section-title">Untitled student declaration</h2>
+        <h2 className="table-section-title">{title}</h2>
 
         <MenuButton
           inline

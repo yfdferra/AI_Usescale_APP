@@ -10,7 +10,7 @@ import FilterSearchBar from "../components/FilterSearchBar";
 import TableSection from "../components/TableSection";
 import "./UseScalePage.css";
 
-export default function UseScalePage({ usescale_id }) {
+export default function UseScalePage({ usescale_id, template_title }) {
   const handleFilterChange = () => {};
   const handleSearch = () => {};
   const [open, setOpen] = useState(false);
@@ -75,7 +75,7 @@ export default function UseScalePage({ usescale_id }) {
         </HorizontalSidebar>
       </div>
       <div className="use-scale-page-content">
-        <TableSection tableData={usecase} />
+        <TableSection tableData={usecase} initialTitle={template_title} />
       </div>
     </div>
   );
