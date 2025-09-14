@@ -30,7 +30,7 @@ export default function CustomTemplatesSection({ templates, onTemplateClick }) {
       <div className="custom-templates-header">
         <h2 className="custom-templates-title">Custom Templates</h2>
         <FilterSearchBar
-          filterOptions={["Default", "Most Used", "Recent", "Favorites"]}
+          filterOptions={["Default", "Recent", "Favorites"]}
           onFilterChange={() => {}} // Implement if you add filter logic
           onSearch={(e) => setSearch(e.target.value)}
         />
