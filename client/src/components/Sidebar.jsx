@@ -1,8 +1,8 @@
 import "./Sidebar.css";
-import settingsIcon from "../assets/settings-icon.svg";
-import notificationIcon from "../assets/notification-icon.png";
-import folderIcon from "../assets/folder-icon.png";
-import profile_picture from "../assets/profile-pic.png";
+import settingsIcon from "../assets/settings.png";
+import notificationIcon from "../assets/appointment-reminders.png";
+import folderIcon from "../assets/folder-invoices--v2.png";
+import profile_picture from "../assets/logov2.png";
 import PopUp from "./PopUp";
 import React, { useState } from "react";
 
