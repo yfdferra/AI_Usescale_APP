@@ -2,6 +2,7 @@ import "./TableSection.css";
 import MenuButton from "./MenuButton";
 import TagInput from "./TagInput";
 import DropdownTagInput from "./DropdownTagInput";
+import Star from "./Star";
 
 export default function TableSection({ open }) {
   const menuItems = [
@@ -14,6 +15,8 @@ export default function TableSection({ open }) {
     <div className="table-section">
       <div className="table-section-header">
         <h2 className="table-section-title">Untitled student declaration</h2>
+
+          <Star onClick={() => console.log("Favourite clicked")} />
 
           <MenuButton
           inline
