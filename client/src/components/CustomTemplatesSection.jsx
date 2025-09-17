@@ -31,18 +31,20 @@ export default function CustomTemplatesSection({ templates, onTemplateClick }) {
         <h2 className="custom-templates-title">Custom Templates</h2>
         <FilterSearchBar
           filterOptions={["Default", "Most Used", "Recent", "Favorites"]}
-          onFilterChange={() => {}} // Implement if you add filter logic
-          onSearch={(e) => setSearch(e.target.value)}
+          onFilterChange={() => {}}
+          onSearch={(value) => {
+            setSearch(value);
+          }}
         />
       </div>
       <div className="custom-templates-row">
-        {templates.map(({ id, title }) => (
+        {filteredTemplates.map(({ id, title }) => (
           <Square
             key={id}
             text={title}
             usescale_id={id}
             onClick={() => {
-              onTemplateClick(id);
+              onTemplateClick(id, title);
             }}
           />
         ))}

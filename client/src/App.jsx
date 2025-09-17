@@ -7,30 +7,25 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import { useParams } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 
-function UseScaleRoute( { onLogout } ) {  // extract usescale_id from the route path (i.e.: /usescale/1)
+function UseScaleRoute( { onLogout, template_title } ) {  // extract usescale_id from the route path (i.e.: /usescale/1)
   const { id } = useParams();
-  return <UseScalePage usescale_id={id} onLogout={onLogout} />
+  return <UseScalePage usescale_id={id} template_title={template_title} onLogout={onLogout} />
 }
 
 export default function App() {
   const [loggedIn, setLoggedIn] = useState(false);
   const [currentUseScaleID, setCurrentUseScaleID] = useState(null);
+  const [templateData, setTemplateData] = useState(null);
 
-  // const handleNext = () => {
-  //   setLoggedIn(true);
-  // };
 
   const navigate = useNavigate();
 
-  const handleTemplateClick = (usescale_id) => {
+  const handleTemplateClick = (usescale_id, templateData) => {
     setCurrentUseScaleID(usescale_id);
+    setTemplateData(templateData || null);
     navigate(`/usescale/${usescale_id}`);
   };
 
-  // if (!loggedIn) return <Login onNext={handleNext} />;
-  // if (currentUseScaleID !== null) {
-  //   return <UseScalePage usescale_id={currentUseScaleID} />;
-  // }
   return (
     <Routes>
       {/* Default Page */}
@@ -43,7 +38,7 @@ export default function App() {
       <Route path="/main" element = {loggedIn ? (<MainTemplate onTemplateClick={handleTemplateClick} onWrittenAsseessmentClick={handleTemplateClick} onLogout={() => setLoggedIn(false)}/>) : <Navigate to="/login" replace /> } />
 
       {/* Might want to ADD USESCALE ID AS ROUTES TOO (backtrackable) */}
-      <Route path="/usescale/:id" element={loggedIn ? (<UseScaleRoute onLogout={() => setLoggedIn(false)} />) : <Navigate to="/login" replace /> } />  
+      <Route path="/usescale/:id" element={loggedIn ? (<UseScaleRoute onLogout={() => setLoggedIn(false)} template_title={templateData} />) : <Navigate to="/login" replace /> } />  
       {/* load in by usescale_id */}
 
       {/* Catch All Others */}

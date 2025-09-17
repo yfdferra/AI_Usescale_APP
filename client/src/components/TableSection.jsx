@@ -1,9 +1,8 @@
+import { useState, useEffect } from "react";
 import "./TableSection.css";
 import MenuButton from "./MenuButton";
 import TagInput from "./TagInput";
 import DropdownTagInput from "./DropdownTagInput";
-
-import { useState } from "react";
 
 const LEVEL_COLORS = {
   "LEVEL N": "#ffb3b3",
@@ -12,16 +11,96 @@ const LEVEL_COLORS = {
   "LEVEL G": "#d9b3ffff",
 }
 
-export default function TableSection({ open, tableData, toHighlight, onChangeScale }) {
+export default function TableSection({ open, tableData, initialTitle, toHighlight, onChangeScale, onRowsChange }) {
+  const [title, setTitle] = useState(
+    initialTitle || "Untitled student declaration"
+  );
+
+  // local state for table rows
+  const [rows, setRows] = useState(tableData || []);
+
+  useEffect(() => {
+    if (initialTitle) {
+      setTitle(initialTitle);
+    }
+  }, [initialTitle]);
+
+  // sync rows whenever backend data is received
+  useEffect(() => {
+    if (tableData) {
+      setRows(tableData);
+    }
+  }, [tableData]);
+
   const editTitle = () => {
     let userInput = prompt("Please enter new Title", "Title");
 
     if (userInput !== null) {
-      alert("No changes saved. You entered: ");
+      setTitle(userInput);
     } else {
       alert("You cancelled the input.");
     }
   };
+
+
+  // Helper functions for manipualting rows
+  // empty row template
+  const emptyRow = {
+    instruction: "",
+    example: "",
+    declaration: "",
+    version: "",
+    purpose: "",
+    key_prompts: "",
+  };
+  
+  // add row above
+  const addRowAbove = (rowIdx) => {
+    const newRows = [
+      ...rows.slice(0, rowIdx),
+      { ...emptyRow },
+      ...rows.slice(rowIdx),
+    ];
+    setRows(newRows);
+    onRowsChange(newRows);
+  };
+
+  // add row below
+  const addRowBelow = (rowIdx) => {
+    const newRows = [
+      ...rows.slice(0, rowIdx + 1),
+      {...emptyRow },
+       ...rows.slice(rowIdx + 1),
+    ];
+    setRows(newRows);
+    onRowsChange(newRows);
+  };
+
+  // delete row
+  const deleteRow = (rowIdx) => {
+    // first check if they are sure they want to delete the row
+    // might need to make this prettier, for now its just browser defailt pop up
+    const confirmed = window.confirm("Are you sure you want to delete this row?");
+    if (!confirmed) return;
+
+    const newRows = rows.filter((_, idx) => idx !== rowIdx);
+    setRows(newRows);
+    onRowsChange(newRows);
+  };
+
+  // duplicate row
+  const duplicateRow = (rowIdx) => {
+    const rowCopy = rows[rowIdx];
+    const newRows = [
+      ...rows.slice(0, rowIdx + 1),
+      { ...rowCopy },
+      ...rows.slice(rowIdx + 1),
+    ];
+    setRows(newRows);
+    onRowsChange(newRows);
+  };
+
+
 
   console.log("TableSection data:", tableData);
   const menuItems = [
@@ -32,7 +111,7 @@ export default function TableSection({ open, tableData, toHighlight, onChangeSca
   return (
     <div className="table-section">
       <div className="table-section-header">
-        <h2 className="table-section-title">Untitled student declaration</h2>
+        <h2 className="table-section-title">{title}</h2>
 
         <MenuButton
           inline
@@ -75,8 +154,8 @@ export default function TableSection({ open, tableData, toHighlight, onChangeSca
             </tr>
           </thead>
           <tbody>
-            {tableData &&
-              tableData.map((data, rowIdx) => {
+            {rows && // changes these to be rows instead of tableData since tableData cannot be modified
+              rows.map((data, rowIdx) => {
                 const shouldHighlight = toHighlight === rowIdx;
 
                 return (
@@ -90,19 +169,19 @@ export default function TableSection({ open, tableData, toHighlight, onChangeSca
                         items={[
                           {
                             label: "Add Row Above",
-                            onClick: () => console.log("Add Row Above", rowIdx),
+                            onClick: () => addRowAbove(rowIdx),
                           },
                           {
                             label: "Add Row Below",
-                            onClick: () => console.log("Add Row Below", rowIdx),
+                            onClick: () => addRowBelow(rowIdx),
                           },
                           {
                             label: "Delete Row",
-                            onClick: () => console.log("Delete Row", rowIdx),
+                            onClick: () => deleteRow(rowIdx),
                           },
                           {
                             label: "Duplicate Row",
-                            onClick: () => console.log("Duplicate Row", rowIdx),
+                            onClick: () => duplicateRow(rowIdx),
                           },
                         ]}
                       />
@@ -114,7 +193,7 @@ export default function TableSection({ open, tableData, toHighlight, onChangeSca
                         items={[
                           {
                             label: "Change Scale",
-                            onClick: () => onChangeScale?.(rowIdx),
+                            onClick: () => onChangeScale(rowIdx),
                           },
                         ]}
                       />

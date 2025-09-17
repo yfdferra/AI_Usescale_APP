@@ -32,7 +32,7 @@ export default function MainTemplate({
       <Sidebar onLogout={onLogout}/>
       <Dashboard>
         <BaseTemplatesSection
-          onWrittenAssessmentClick={onWrittenAsseessmentClick} // changes in App.jsx and BaseTemplatesSection.jsx too
+          onWrittenAssessmentClick={onWrittenAsseessmentClick}
         />
         <CustomTemplatesSection
           templates={templates}

@@ -10,9 +10,8 @@ import FilterSearchBar from "../components/FilterSearchBar";
 import TableSection from "../components/TableSection";
 import "./UseScalePage.css";
 
-export default function UseScalePage({ usescale_id, onLogout }) {
+export default function UseScalePage({ usescale_id, template_title, onLogout }) {
 
-  const [caseuse, setCaseuse] = useState([]);
   const [pendingRowIdx, setPendingRowIdx] = useState(null);
 
   const LEVEL_BASE = {
@@ -61,7 +60,8 @@ export default function UseScalePage({ usescale_id, onLogout }) {
     }
 
     setUsecase((prev) => {
-      const next = Array.from(prev);  // create copy of reference
+      if (!Array.isArray(prev) || !prev[pendingRowIdx]) return prev;
+      const next = prev.slice();  // create copy
       if (!next[pendingRowIdx]) return prev;
 
       // Keep ID
@@ -138,7 +138,13 @@ export default function UseScalePage({ usescale_id, onLogout }) {
         </HorizontalSidebar>
       </div>
       <div className="use-scale-page-content">
-        <TableSection tableData={usecase} toHighlight={pendingRowIdx} onChangeScale={(rowIdx) => setPendingRowIdx(rowIdx)}/>
+        <TableSection 
+          tableData={usecase} 
+          initialTitle={template_title} 
+          toHighlight={pendingRowIdx} 
+          onChangeScale={(rowIdx) => setPendingRowIdx(rowIdx)}
+          onRowsChange={(nextRows) => setUsecase(nextRows)}  // bring new rows to useScalePage too
+        />
       </div>
     </div>
   );
