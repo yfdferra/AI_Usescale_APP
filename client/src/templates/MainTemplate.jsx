@@ -10,6 +10,7 @@ export default function MainTemplate({
   children,
   onTemplateClick,
   onWrittenAsseessmentClick,
+  onLogout, 
 }) {
   const [templates, setTemplates] = useState([]);
   useEffect(() => {
@@ -28,7 +29,7 @@ export default function MainTemplate({
 
   return (
     <div className="layout">
-      <Sidebar />
+      <Sidebar onLogout={onLogout}/>
       <Dashboard>
         <BaseTemplatesSection
           onWrittenAssessmentClick={onWrittenAsseessmentClick} // changes in App.jsx and BaseTemplatesSection.jsx too

@@ -20,6 +20,22 @@
   min-width: 62.5rem;
 }
 
+.table-section-table tbody tr.row-highlight td:not(:first-child) {
+  background-color: #fff6cc;
+  transition: background-color 120ms ease-in;
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,0.06);
+}
+
+.table-section-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background-color: #dadada9a;
+
+  border: 0.0625rem solid #9e9e9e;
+  padding: 0.5rem;
+}
+
 .table-section-th,
 .table-section-td {
   border: 0.0625rem solid #9e9e9e;

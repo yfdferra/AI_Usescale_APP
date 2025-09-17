@@ -4,9 +4,13 @@ import PopUp from "../components/PopUp";
 import React, { useState } from "react";
 import "../templates/Login.css";
 
-export default function Login({ onNext }) {
+import { useNavigate } from "react-router-dom";
+
+export default function Login( { onLogin }) {  // export default function Login({ onNext }) {
   // pop up for forgot password
   const [showPopup, setShowPopup] = useState(false);
+  // navigation (to main page on successful login)
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -17,7 +21,9 @@ export default function Login({ onNext }) {
     });
     var data = await res.json();
     if (data.logged_in) {
-      onNext();
+      // onNext();
+      onLogin();
+      navigate("/main", { replace: true });  // replace: true -> replaces /login from history stack as /main | wont be able to go back to login page
     } else {
       alert("Incorrect Username/Password");
     }
