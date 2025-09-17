@@ -1,4 +1,4 @@
-import logo from "../assets/logo.png";
+import logo from "../assets/logov2.png";
 import HOST from "../GLOBALS/Globals";
 import PopUp from "../components/PopUp";
 import React, { useState } from "react";
