@@ -7,8 +7,7 @@
 
 .custom-templates-title {
   font-size: 1.5rem;
-  font-weight: bold;
-  margin-left: 5rem; /* Optional: for spacing from sidebar */
+  font-weight: bold; /* Optional: for spacing from sidebar */
 }
 
 .custom-templates-row {
@@ -16,10 +15,11 @@
   flex-wrap: wrap;
   gap: 2rem;
   justify-content: flex-start;
-  margin-left: 5rem;
+  
 }
 .custom-templates-header {
   display: flex;
   align-items: flex-start;
   margin-bottom: 1rem; /* space below header */
+  margin-top: 5.5rem;
 }
