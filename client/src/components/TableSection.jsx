@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import "./TableSection.css";
 import MenuButton from "./MenuButton";
 import TagInput from "./TagInput";
@@ -51,7 +52,105 @@ const handleExport = () => {
   );
 };
 
-export default function TableSection({ open }) {
+const LEVEL_COLORS = {
+  "LEVEL N": "#ffb3b3",
+  "LEVEL R-1": "#ffcfb3ff",
+  "LEVEL R-2": "#ffffb3ff",
+  "LEVEL G": "#d9b3ffff",
+}
+
+export default function TableSection({ open, tableData, initialTitle, toHighlight, onChangeScale, onRowsChange }) {
+  const [title, setTitle] = useState(
+    initialTitle || "Untitled student declaration"
+  );
+
+  // local state for table rows
+  const [rows, setRows] = useState(tableData || []);
+
+  useEffect(() => {
+    if (initialTitle) {
+      setTitle(initialTitle);
+    }
+  }, [initialTitle]);
+
+  // sync rows whenever backend data is received
+  useEffect(() => {
+    if (tableData) {
+      setRows(tableData);
+    }
+  }, [tableData]);
+
+  const editTitle = () => {
+    let userInput = prompt("Please enter new Title", "Title");
+
+    if (userInput !== null) {
+      setTitle(userInput);
+    } else {
+      alert("You cancelled the input.");
+    }
+  };
+
+
+  // Helper functions for manipualting rows
+  // empty row template
+  const emptyRow = {
+    instruction: "",
+    example: "",
+    declaration: "",
+    version: "",
+    purpose: "",
+    key_prompts: "",
+  };
+  
+  // add row above
+  const addRowAbove = (rowIdx) => {
+    const newRows = [
+      ...rows.slice(0, rowIdx),
+      { ...emptyRow },
+      ...rows.slice(rowIdx),
+    ];
+    setRows(newRows);
+    onRowsChange(newRows);
+  };
+
+  // add row below
+  const addRowBelow = (rowIdx) => {
+    const newRows = [
+      ...rows.slice(0, rowIdx + 1),
+      {...emptyRow },
+       ...rows.slice(rowIdx + 1),
+    ];
+    setRows(newRows);
+    onRowsChange(newRows);
+  };
+
+  // delete row
+  const deleteRow = (rowIdx) => {
+    // first check if they are sure they want to delete the row
+    // might need to make this prettier, for now its just browser defailt pop up
+    const confirmed = window.confirm("Are you sure you want to delete this row?");
+    if (!confirmed) return;
+
+    const newRows = rows.filter((_, idx) => idx !== rowIdx);
+    setRows(newRows);
+    onRowsChange(newRows);
+  };
+
+  // duplicate row
+  const duplicateRow = (rowIdx) => {
+    const rowCopy = rows[rowIdx];
+    const newRows = [
+      ...rows.slice(0, rowIdx + 1),
+      { ...rowCopy },
+      ...rows.slice(rowIdx + 1),
+    ];
+    setRows(newRows);
+    onRowsChange(newRows);
+  };
+
+
+
+  console.log("TableSection data:", tableData);
   const menuItems = [
     { label: "Edit", onClick: () => console.log("Edit clicked") },
     { label: "Delete", onClick: () => console.log("Delete clicked") },
@@ -60,14 +159,14 @@ export default function TableSection({ open }) {
   return (
     <div className="table-section">
       <div className="table-section-header">
-        <h2 className="table-section-title">Untitled student declaration</h2>
+        <h2 className="table-section-title">{title}</h2>
 
         <Star onClick={() => console.log("Favourite clicked")} />
 
         <MenuButton
           inline
           items={[
-            { label: "Edit Title", onClick: () => console.log("Edit Title") },
+            { label: "Edit Title", onClick: () => editTitle() },
             { label: "Make a Copy", onClick: () => console.log("Make a Copy") },
             { label: "Save", onClick: () => console.log("Save") },
             {
@@ -102,7 +201,7 @@ export default function TableSection({ open }) {
                 General Learning or Assessment Tasks
               </th>
               <th className="table-section-th">AI Use Scale Level</th>
-              <th className="table-section-th">Instructions to Students</th>
+              <th className="table-section-th">Instruction to Students</th>
               <th className="table-section-th">Examples</th>
               <th className="table-section-th">
                 AI Generated Content in Submission
@@ -115,51 +214,60 @@ export default function TableSection({ open }) {
             </tr>
           </thead>
           <tbody>
-            {Array.from({ length: 30 }).map((_, rowIdx) => (
-              <tr key={rowIdx}>
-                <td className="table-section-td cell-with-menu">
-                  <span>Row {rowIdx + 1} - Col 1</span>
-                  <MenuButton
-                    items={[
-                      {
-                        label: "Add Row Above",
-                        onClick: () => console.log("Add Row Above", rowIdx),
-                      },
-                      {
-                        label: "Add Row Below",
-                        onClick: () => console.log("Add Row Below", rowIdx),
-                      },
-                      {
-                        label: "Delete Row",
-                        onClick: () => console.log("Delete Row", rowIdx),
-                      },
-                      {
-                        label: "Duplicate Row",
-                        onClick: () => console.log("Duplicate Row", rowIdx),
-                      },
-                    ]}
-                  />
-                </td>
+            {rows && // changes these to be rows instead of tableData since tableData cannot be modified
+              rows.map((data, rowIdx) => {
+                const shouldHighlight = toHighlight === rowIdx;
 
-                <td className="table-section-td cell-with-menu">
-                  <span>Row {rowIdx + 1} - Col 2</span>
-                  <MenuButton
-                    items={[
-                      {
-                        label: "Change Scale",
-                        onClick: () => console.log("Change Scale", rowIdx),
-                      },
-                    ]}
-                  />
-                </td>
+                return (
+                  <tr 
+                    key={`row-${rowIdx}`}
+                    className={shouldHighlight ? "row-highlight" : ""}
+                  >
+                    <td className="table-section-td cell-with-menu">
+                      <span>{data.instruction}</span>
+                      <MenuButton
+                        items={[
+                          {
+                            label: "Add Row Above",
+                            onClick: () => addRowAbove(rowIdx),
+                          },
+                          {
+                            label: "Add Row Below",
+                            onClick: () => addRowBelow(rowIdx),
+                          },
+                          {
+                            label: "Delete Row",
+                            onClick: () => deleteRow(rowIdx),
+                          },
+                          {
+                            label: "Duplicate Row",
+                            onClick: () => duplicateRow(rowIdx),
+                          },
+                        ]}
+                      />
+                    </td>
 
-                {Array.from({ length: 6 }).map((_, colIdx) => (
-                  <td className="table-section-td" key={colIdx + 2}>
-                    Row {rowIdx + 1} - Col {colIdx + 3}
-                  </td>
-                ))}
-              </tr>
-            ))}
+                    <td className="table-section-td cell-with-menu" style={{ backgroundColor: LEVEL_COLORS[data?.level] || undefined }}>  {/* prevents unknown level */}
+                      <span>AI Scale Placeholder</span>
+                      <MenuButton
+                        items={[
+                          {
+                            label: "Change Scale",
+                            onClick: () => onChangeScale(rowIdx),
+                          },
+                        ]}
+                      />
+                    </td>
+
+                    <td className="table-section-td">{data.instruction}</td>
+                    <td className="table-section-td">{data.example}</td>
+                    <td className="table-section-td">{data.declaration}</td>
+                    <td className="table-section-td">{data.version}</td>
+                    <td className="table-section-td">{data.purpose}</td>
+                    <td className="table-section-td">{data.key_prompts}</td>
+                  </tr>
+                )
+              })}
           </tbody>
         </table>
       </div>

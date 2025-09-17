@@ -3,8 +3,11 @@ import settingsIcon from "../assets/settings.png";
 import notificationIcon from "../assets/appointment-reminders.png";
 import folderIcon from "../assets/folder-invoices--v2.png";
 import profile_picture from "../assets/logov2.png";
+import logoutIcon from "../assets/logout-icon.svg";
 import PopUp from "./PopUp";
 import React, { useState } from "react";
+
+import { NavLink, useNavigate } from "react-router-dom";
 
 const widgetPopups = {
   profile: {
@@ -49,7 +52,8 @@ const widgetPopups = {
   },
 };
 
-export default function Sidebar() {
+export default function Sidebar( { onLogout } ) {
+  const navigate = useNavigate();
   const [popupType, setPopupType] = useState(null);
 
   const handleWidgetClick = (type) => {
@@ -84,7 +88,7 @@ export default function Sidebar() {
         </button>
         <button
           className="widget_button"
-          onClick={() => handleWidgetClick("folder")}
+          onClick={() => navigate("/main")}   // redirect to main page
         >
           <img src={folderIcon} alt="Folder" className="widget_icon" />
         </button>
@@ -93,6 +97,15 @@ export default function Sidebar() {
           onClick={() => handleWidgetClick("settings")}
         >
           <img src={settingsIcon} alt="Settings" className="widget_icon" />
+        </button>
+        <button
+          className="widget_button"
+          onClick={() => {
+            onLogout();
+            navigate("/login", { replace: true });
+          }}  // treat as a log out button
+        >
+          <img src={logoutIcon} alt="LogOut" className="widget_icon" />
         </button>
       </div>
       {popupType && (

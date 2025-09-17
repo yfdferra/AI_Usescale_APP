@@ -6,20 +6,11 @@ import Dashboard from "../components/Dashboard";
 import { useState, useEffect } from "react";
 import HOST from "../GLOBALS/Globals.jsx";
 
-// [
-//             "INFO30006 written",
-//             "INFO30006 presentation",
-//             "Another",
-//             "More",
-//             "More",
-//             "More",
-//             "More",
-//             "Overflow Row",
-//           ]
 export default function MainTemplate({
   children,
   onTemplateClick,
   onWrittenAsseessmentClick,
+  onLogout, 
 }) {
   const [templates, setTemplates] = useState([]);
   useEffect(() => {
@@ -38,10 +29,10 @@ export default function MainTemplate({
 
   return (
     <div className="layout">
-      <Sidebar />
+      <Sidebar onLogout={onLogout}/>
       <Dashboard>
         <BaseTemplatesSection
-          onWrittenAssessmentClick={onWrittenAsseessmentClick} // changes in App.jsx and BaseTemplatesSection.jsx too
+          onWrittenAssessmentClick={onWrittenAsseessmentClick}
         />
         <CustomTemplatesSection
           templates={templates}
