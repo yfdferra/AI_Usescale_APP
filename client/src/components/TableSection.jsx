@@ -57,9 +57,16 @@ const LEVEL_COLORS = {
   "LEVEL R-1": "#ffcfb3ff",
   "LEVEL R-2": "#ffffb3ff",
   "LEVEL G": "#d9b3ffff",
-}
+};
 
-export default function TableSection({ open, tableData, initialTitle, toHighlight, onChangeScale, onRowsChange }) {
+export default function TableSection({
+  open,
+  tableData,
+  initialTitle,
+  toHighlight,
+  onChangeScale,
+  onRowsChange,
+}) {
   const [title, setTitle] = useState(
     initialTitle || "Untitled student declaration"
   );
@@ -90,7 +97,6 @@ export default function TableSection({ open, tableData, initialTitle, toHighligh
     }
   };
 
-
   // Helper functions for manipualting rows
   // empty row template
   const emptyRow = {
@@ -101,7 +107,7 @@ export default function TableSection({ open, tableData, initialTitle, toHighligh
     purpose: "",
     key_prompts: "",
   };
-  
+
   // add row above
   const addRowAbove = (rowIdx) => {
     const newRows = [
@@ -117,8 +123,8 @@ export default function TableSection({ open, tableData, initialTitle, toHighligh
   const addRowBelow = (rowIdx) => {
     const newRows = [
       ...rows.slice(0, rowIdx + 1),
-      {...emptyRow },
-       ...rows.slice(rowIdx + 1),
+      { ...emptyRow },
+      ...rows.slice(rowIdx + 1),
     ];
     setRows(newRows);
     onRowsChange(newRows);
@@ -128,7 +134,9 @@ export default function TableSection({ open, tableData, initialTitle, toHighligh
   const deleteRow = (rowIdx) => {
     // first check if they are sure they want to delete the row
     // might need to make this prettier, for now its just browser defailt pop up
-    const confirmed = window.confirm("Are you sure you want to delete this row?");
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this row?"
+    );
     if (!confirmed) return;
 
     const newRows = rows.filter((_, idx) => idx !== rowIdx);
@@ -147,8 +155,6 @@ export default function TableSection({ open, tableData, initialTitle, toHighligh
     setRows(newRows);
     onRowsChange(newRows);
   };
-
-
 
   console.log("TableSection data:", tableData);
   const menuItems = [
@@ -219,7 +225,7 @@ export default function TableSection({ open, tableData, initialTitle, toHighligh
                 const shouldHighlight = toHighlight === rowIdx;
 
                 return (
-                  <tr 
+                  <tr
                     key={`row-${rowIdx}`}
                     className={shouldHighlight ? "row-highlight" : ""}
                   >
@@ -247,8 +253,37 @@ export default function TableSection({ open, tableData, initialTitle, toHighligh
                       />
                     </td>
 
-                    <td className="table-section-td cell-with-menu" style={{ backgroundColor: LEVEL_COLORS[data?.level] || undefined }}>  {/* prevents unknown level */}
-                      <span>AI Scale Placeholder</span>
+                    <td
+                      className="table-section-td cell-with-menu"
+                      style={{
+                        backgroundColor: LEVEL_COLORS[data?.level] || undefined,
+                      }}
+                      onDragOver={(e) => e.preventDefault()}
+                      onDrop={(e) => {
+                        e.preventDefault();
+                        let newLevel = "";
+                        let newLabel = "";
+                        try {
+                          const data = JSON.parse(
+                            e.dataTransfer.getData("application/json")
+                          );
+                          newLevel = data.level;
+                          newLabel = data.label;
+                        } catch {
+                          // fallback for old drag data
+                          newLevel = e.dataTransfer.getData("text/plain");
+                        }
+                        if (!newLevel) return;
+                        const updatedRows = rows.map((row, idx) =>
+                          idx === rowIdx
+                            ? { ...row, level: newLevel, label: newLabel }
+                            : row
+                        );
+                        setRows(updatedRows);
+                        onRowsChange(updatedRows);
+                      }}
+                    >
+                      <span>{data.label || "AI Scale Placeholder"}</span>
                       <MenuButton
                         items={[
                           {
@@ -266,7 +301,7 @@ export default function TableSection({ open, tableData, initialTitle, toHighligh
                     <td className="table-section-td">{data.purpose}</td>
                     <td className="table-section-td">{data.key_prompts}</td>
                   </tr>
-                )
+                );
               })}
           </tbody>
         </table>
