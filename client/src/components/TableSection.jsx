@@ -100,6 +100,7 @@ export default function TableSection({
   // Helper functions for manipualting rows
   // empty row template
   const emptyRow = {
+    task: "",
     instruction: "",
     example: "",
     declaration: "",
@@ -107,6 +108,16 @@ export default function TableSection({
     purpose: "",
     key_prompts: "",
   };
+
+  // update cell and notify parent
+  const updateCell = (rowIdx, key, value) => {
+    const next = rows.slice();
+    const keep = next[rowIdx]?.id ? { id: next[rowIdx].id }: {};  // keep id if available
+    next[rowIdx] = { ...keep, ...next[rowIdx], [key]:value };  // new row object, starting with id, and all other row cells, and overwrite old value with new value
+    setRows(next);  // update local row state
+    onRowsChange && onRowsChange(next);  // if it was changed, call it so the parent will stay in sync too
+  }
+
 
   // add row above
   const addRowAbove = (rowIdx) => {
@@ -230,7 +241,15 @@ export default function TableSection({
                     className={shouldHighlight ? "row-highlight" : ""}
                   >
                     <td className="table-section-td cell-with-menu">
-                      <span>{data.instruction}</span>
+                      <div 
+                        contentEditable  // make <div> editable
+                        suppressContentEditableWarning  // ignore React's warning
+                        onBlur={(e) =>   // when finished typing (blurs out of textbox), update cell
+                          updateCell(rowIdx, "task", e.currentTarget.textContent)  // created task: new rows/data created will contain task and instructions | while old rows (from backend) will only have instruction | for now, can change
+                        }
+                      >
+                        {data.instruction}  {/* backward compatibility */}
+                      </div>
                       <MenuButton
                         items={[
                           {
@@ -294,12 +313,77 @@ export default function TableSection({
                       />
                     </td>
 
-                    <td className="table-section-td">{data.instruction}</td>
-                    <td className="table-section-td">{data.example}</td>
-                    <td className="table-section-td">{data.declaration}</td>
-                    <td className="table-section-td">{data.version}</td>
-                    <td className="table-section-td">{data.purpose}</td>
-                    <td className="table-section-td">{data.key_prompts}</td>
+                    <td className="table-section-td">
+                      <div 
+                        contentEditable
+                        suppressContentEditableWarning
+                        onBlur={(e) => 
+                          updateCell(rowIdx, "instruction", e.currentTarget.textContent)
+                        }
+                      >
+                        {data.instruction}
+                      </div>
+                    </td>
+
+                    <td className="table-section-td">
+                      <div 
+                        contentEditable
+                        suppressContentEditableWarning
+                        onBlur={(e) => 
+                          updateCell(rowIdx, "example", e.currentTarget.textContent)
+                        }
+                      >
+                        {data.example}
+                      </div>
+                    </td>
+
+                    <td className="table-section-td">
+                      <div 
+                        contentEditable
+                        suppressContentEditableWarning
+                        onBlur={(e) => 
+                          updateCell(rowIdx, "declaration", e.currentTarget.textContent)
+                        }
+                      >
+                        {data.declaration}
+                      </div>
+                    </td>
+
+                    <td className="table-section-td">
+                      <div 
+                        contentEditable
+                        suppressContentEditableWarning
+                        onBlur={(e) => 
+                          updateCell(rowIdx, "version", e.currentTarget.textContent)
+                        }
+                      >
+                        {data.version}
+                      </div>
+                    </td>
+
+                    <td className="table-section-td">
+                      <div 
+                        contentEditable
+                        suppressContentEditableWarning
+                        onBlur={(e) => 
+                          updateCell(rowIdx, "purpose", e.currentTarget.textContent)
+                        }
+                      >
+                        {data.purpose}
+                      </div>
+                    </td>
+
+                    <td className="table-section-td">
+                      <div 
+                        contentEditable
+                        suppressContentEditableWarning
+                        onBlur={(e) => 
+                          updateCell(rowIdx, "key_prompts", e.currentTarget.textContent)
+                        }
+                      >
+                        {data.key_prompts}
+                      </div>
+                    </td>
                   </tr>
                 );
               })}
