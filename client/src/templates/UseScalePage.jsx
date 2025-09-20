@@ -13,6 +13,7 @@ import "./UseScalePage.css";
 export default function UseScalePage({
   usescale_id,
   template_title,
+  subject_id,
   onLogout,
 }) {
   const [pendingRowIdx, setPendingRowIdx] = useState(null);
@@ -92,17 +93,49 @@ export default function UseScalePage({
     setPendingRowIdx(null); // empty the row
   };
 
+  const handleSaveTemplate = () => {
+    if (!usecase || !Array.isArray(usecase)) {
+      console.error("No data to save.");
+      return;
+    }
+
+    const payload = {
+      usescale_id,
+      subject_id,
+      rows: usecase,
+    };
+
+    fetch(`${HOST}/save_template`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          alert("Template saved successfully!");
+        } else {
+          console.error("Error saving template:", data.error);
+          alert("Failed to save template.");
+        }
+      })
+      .catch((error) => {
+        console.error("Network error:", error);
+        alert("Failed to save template due to a network error.");
+      });
+  };
+
   const handleFilterChange = () => {};
   const handleSearch = () => {};
   const [open, setOpen] = useState(false);
-  console.log("UseScalePage for ID:", usescale_id);
   var [usecase, setUsecase] = React.useState(null);
   useEffect(() => {
     fetch(`${HOST}/usecase?usescale_id=${usescale_id}`)
       .then((res) => res.json())
       .then((data) => {
         setUsecase(data);
-        console.log("Fetched data:", data);
       })
       .catch((error) => {
         console.error("Error fetching data:", error);
@@ -238,10 +271,12 @@ export default function UseScalePage({
       <div className="use-scale-page-content">
         <TableSection
           tableData={usecase}
+          subjectId={subject_id}
           initialTitle={template_title}
           toHighlight={pendingRowIdx}
           onChangeScale={(rowIdx) => setPendingRowIdx(rowIdx)}
-          onRowsChange={(nextRows) => setUsecase(nextRows)} // bring new rows to useScalePage too
+          onRowsChange={(nextRows) => setUsecase(nextRows)}
+          onSaveTemplate={handleSaveTemplate}
         />
       </div>
     </div>

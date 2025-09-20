@@ -10,7 +10,7 @@ export default function MainTemplate({
   children,
   onTemplateClick,
   onWrittenAsseessmentClick,
-  onLogout, 
+  onLogout,
 }) {
   const [templates, setTemplates] = useState([]);
   useEffect(() => {
@@ -21,6 +21,7 @@ export default function MainTemplate({
           data.map((item) => ({
             id: item.usescale_id,
             title: item.title,
+            subject_id: item.subject_id,
           }))
         );
       })
@@ -29,7 +30,7 @@ export default function MainTemplate({
 
   return (
     <div className="layout">
-      <Sidebar onLogout={onLogout}/>
+      <Sidebar onLogout={onLogout} />
       <Dashboard>
         <BaseTemplatesSection
           onWrittenAssessmentClick={onWrittenAsseessmentClick}

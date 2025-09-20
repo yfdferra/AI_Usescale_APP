@@ -32,13 +32,15 @@ cursor = connection.cursor()
 cursor.execute("""
 CREATE TABLE usescales (
     usescale_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    title TEXT
+    subject_id INTEGER,
+    title TEXT,
+    FOREIGN KEY (subject_id) REFERENCES subjects(subject_id)
 )""")
 usescale_list = [
-    ("Essay Template",),
-    ( "Mathematics Template",),
+    (1, "Essay Template"),
+    (2, "Mathematics Template"),
 ]
-cursor.executemany("INSERT INTO usescales (title) VALUES (?)", usescale_list)
+cursor.executemany("INSERT INTO usescales (subject_id, title) VALUES (?, ?)", usescale_list)
 connection.commit()
 
 #Subjects
@@ -53,10 +55,8 @@ CREATE TABLE subjects (
 )""")
 
 entries = [
-    ("Mathematics", "2025", "Semester 1"),
-    ("Computer Science", "2025", "Semester 2"),
-    ("History", "2024", "Semester 2"),
-    ("Physics", "2025", "Semester 1"),
+    ("English", "2025", "Semester 1"),
+    ("Mathematics", "2025", "Semester 2"),
 ]
 
 cursor.executemany(
