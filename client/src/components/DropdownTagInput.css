@@ -1,8 +1,13 @@
 .dropdown-tag {
   border: none;
   outline: none;
-  font-size: 0.85rem;
-  padding: 0.2rem;
   background: transparent;
+  width: 100%;
+  font-size: 0.85rem;
+  color: #777777;
   cursor: pointer;
+}
+
+.dropdown-tag option[value=""] {
+  color: #999;
 }
