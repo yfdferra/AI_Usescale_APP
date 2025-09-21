@@ -27,7 +27,7 @@ export default function TagInput({ placeholder, value }) {
       ) : (
         <input
           type="text"
-          placeholder={value}
+          placeholder={placeholder}
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
           onKeyDown={handleKeyDown}
