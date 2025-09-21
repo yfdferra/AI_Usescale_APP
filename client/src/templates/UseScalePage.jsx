@@ -87,6 +87,7 @@ export default function UseScalePage({
 
     const FLAT = {
       level: levelKey,
+      label: copy.ai_title,
       ...copy,
     };
 
