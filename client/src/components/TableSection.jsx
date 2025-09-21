@@ -8,6 +8,8 @@ import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import HOST from "../GLOBALS/Globals";
 
+const NOAI = "LEVEL N";
+
 // Function to handle exporting the table to Excel
 const handleExport = () => {
   const table = document.querySelector(".table-section-table");
@@ -62,7 +64,7 @@ const LEVEL_COLORS = {
 };
 
 // Editable cell component
-function EditableCell({ value, onChange, multiline = false }) {
+function EditableCell({ value, onChange, multiline = false, grayed = false }) {
   const [editing, setEditing] = useState(false);
   const [tempValue, setTempValue] = useState(value || "");
 
@@ -70,11 +72,28 @@ function EditableCell({ value, onChange, multiline = false }) {
     setTempValue(value || "");
   }, [value]);
 
+  useEffect(() => {
+    if (grayed && editing) {
+      setEditing(false);
+    }
+  }, [grayed, editing]);
+
   const handleBlur = () => {
     setEditing(false);
     onChange(tempValue);
   };
 
+  // if grayed out, unclickable
+  if (grayed) {
+    return (
+      <div
+        className="editable-cell grayed"
+        title="Uneditable for NO-AI rows"
+      >
+        {"Not Applicable"}
+      </div>
+    )
+  }
   if (!editing) {
     return (
       <div
@@ -312,6 +331,7 @@ export default function TableSection({
           <tbody>
             {rows.map((data, rowIdx) => {
               const shouldHighlight = toHighlight === rowIdx;
+              const noAI = data?.level === NOAI;
 
               return (
                 <tr
@@ -368,9 +388,24 @@ export default function TableSection({
                         newLevel = e.dataTransfer.getData("text/plain");
                       }
                       if (!newLevel) return;
+
+                      const nullify = newLevel === NOAI;  // if the chosen level is NO AI: all columns are stored as null
+
                       const updatedRows = rows.map((row, idx) =>
                         idx === rowIdx
-                          ? { ...row, level: newLevel, label: newLabel }
+                          ? { 
+                              ...row, 
+                              level: newLevel, 
+                              label: newLabel,
+                              ...(nullify && {
+                                instruction: null,
+                                example: null,
+                                declaration: null,
+                                version: null,
+                                purpose: null,
+                                key_prompts: null, 
+                              }),
+                            }
                           : row
                       );
                       setRows(updatedRows);
@@ -396,6 +431,7 @@ export default function TableSection({
                         handleCellChange(rowIdx, "instruction", val)
                       }
                       multiline
+                      grayed={noAI}
                     />
                   </td>
 
@@ -407,6 +443,7 @@ export default function TableSection({
                         handleCellChange(rowIdx, "example", val)
                       }
                       multiline
+                      grayed={noAI}
                     />
                   </td>
 
@@ -418,6 +455,7 @@ export default function TableSection({
                         handleCellChange(rowIdx, "declaration", val)
                       }
                       multiline
+                      grayed={noAI}
                     />
                   </td>
 
@@ -428,6 +466,7 @@ export default function TableSection({
                       onChange={(val) =>
                         handleCellChange(rowIdx, "version", val)
                       }
+                      grayed={noAI}
                     />
                   </td>
 
@@ -439,6 +478,7 @@ export default function TableSection({
                         handleCellChange(rowIdx, "purpose", val)
                       }
                       multiline
+                      grayed={noAI}
                     />
                   </td>
 
@@ -450,6 +490,7 @@ export default function TableSection({
                         handleCellChange(rowIdx, "key_prompts", val)
                       }
                       multiline
+                      grayed={noAI}
                     />
                   </td>
                 </tr>

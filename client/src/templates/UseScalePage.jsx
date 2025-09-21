@@ -10,6 +10,9 @@ import FilterSearchBar from "../components/FilterSearchBar";
 import TableSection from "../components/TableSection";
 import "./UseScalePage.css";
 
+const NOAI = "LEVEL N";
+const TO_NULL = ["instruction", "example", "declaration", "version", "purpose", "key_prompts"];
+
 export default function UseScalePage({
   usescale_id,
   template_title,
@@ -68,15 +71,23 @@ export default function UseScalePage({
     },
   };
 
-  const handleLevelClick = (levelKey) => {
+  const handleLevelClick = (levelKey, lable) => {
     if (pendingRowIdx == null) return;
     const copy = LEVEL_BASE[levelKey];
     if (!copy) return;
 
     const FLAT = {
       level: levelKey,
+      label: lable || "",
       ...copy.data,
     };
+
+    // save as nulls
+    if (levelKey === NOAI) {
+      for (const k of TO_NULL) {
+        FLAT[k] = null;
+      }
+    }
 
     setUsecase((prev) => {
       if (!Array.isArray(prev) || !prev[pendingRowIdx]) return prev;
@@ -161,25 +172,25 @@ export default function UseScalePage({
               level="LEVEL N"
               label="NO AI"
               labelBg="#ffb3b3"
-              onClick={() => handleLevelClick("LEVEL N")}
+              onClick={() => handleLevelClick("LEVEL N", "NO AI")}
             />
             <UseScaleBlock
               level="LEVEL R-1"
               label="Some AI"
               labelBg="#ffcfb3ff"
-              onClick={() => handleLevelClick("LEVEL R-1")}
+              onClick={() => handleLevelClick("LEVEL R-1", "Some AI")}
             />
             <UseScaleBlock
               level="LEVEL R-2"
               label="More AI"
               labelBg="#ffffb3ff"
-              onClick={() => handleLevelClick("LEVEL R-2")}
+              onClick={() => handleLevelClick("LEVEL R-2", "More AI")}
             />
             <UseScaleBlock
               level="LEVEL G"
               label="Generative AI"
               labelBg="#d9b3ffff"
-              onClick={() => handleLevelClick("LEVEL G")}
+              onClick={() => handleLevelClick("LEVEL G", "Generative AI")}
             />
           </VerticalDropdown>
 
@@ -189,25 +200,25 @@ export default function UseScalePage({
               level="LEVEL N"
               label="NO AI"
               labelBg="#ffb3b3"
-              onClick={() => handleLevelClick("LEVEL N")}
+              onClick={() => handleLevelClick("LEVEL N", "NO AI")}
             />
             <UseScaleBlock
               level="LEVEL R-1"
               label="Some AI"
               labelBg="#ffcfb3ff"
-              onClick={() => handleLevelClick("LEVEL R-1")}
+              onClick={() => handleLevelClick("LEVEL R-1", "Some AI")}
             />
             <UseScaleBlock
               level="LEVEL R-2"
               label="More AI"
               labelBg="#ffffb3ff"
-              onClick={() => handleLevelClick("LEVEL R-2")}
+              onClick={() => handleLevelClick("LEVEL R-2", "More AI")}
             />
             <UseScaleBlock
               level="LEVEL G"
               label="Generative AI"
               labelBg="#d9b3ffff"
-              onClick={() => handleLevelClick("LEVEL G")}
+              onClick={() => handleLevelClick("LEVEL G", "Generative AI")}
             />
           </VerticalDropdown>
 
@@ -217,25 +228,25 @@ export default function UseScalePage({
               level="LEVEL N"
               label="NO AI"
               labelBg="#ffb3b3"
-              onClick={() => handleLevelClick("LEVEL N")}
+              onClick={() => handleLevelClick("LEVEL N", "NO AI")}
             />
             <UseScaleBlock
               level="LEVEL R-1"
               label="Some AI"
               labelBg="#ffcfb3ff"
-              onClick={() => handleLevelClick("LEVEL R-1")}
+              onClick={() => handleLevelClick("LEVEL R-1", "Some AI")}
             />
             <UseScaleBlock
               level="LEVEL R-2"
               label="More AI"
               labelBg="#ffffb3ff"
-              onClick={() => handleLevelClick("LEVEL R-2")}
+              onClick={() => handleLevelClick("LEVEL R-2", "More AI")}
             />
             <UseScaleBlock
               level="LEVEL G"
               label="Generative AI"
               labelBg="#d9b3ffff"
-              onClick={() => handleLevelClick("LEVEL G")}
+              onClick={() => handleLevelClick("LEVEL G", "Generative AI")}
             />
           </VerticalDropdown>
 
@@ -245,25 +256,25 @@ export default function UseScalePage({
               level="LEVEL N"
               label="NO AI"
               labelBg="#ffb3b3"
-              onClick={() => handleLevelClick("LEVEL N")}
+              onClick={() => handleLevelClick("LEVEL N", "NO AI")}
             />
             <UseScaleBlock
               level="LEVEL R-1"
               label="Some AI"
               labelBg="#ffcfb3ff"
-              onClick={() => handleLevelClick("LEVEL R-1")}
+              onClick={() => handleLevelClick("LEVEL R-1", "Some AI")}
             />
             <UseScaleBlock
               level="LEVEL R-2"
               label="More AI"
               labelBg="#ffffb3ff"
-              onClick={() => handleLevelClick("LEVEL R-2")}
+              onClick={() => handleLevelClick("LEVEL R-2", "More AI")}
             />
             <UseScaleBlock
               level="LEVEL G"
               label="Generative AI"
               labelBg="#d9b3ffff"
-              onClick={() => handleLevelClick("LEVEL G")}
+              onClick={() => handleLevelClick("LEVEL G", "Generative AI")}
             />
           </VerticalDropdown>
         </HorizontalSidebar>
