@@ -1,60 +1,13 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useLayoutEffect } from "react";
 import "./TableSection.css";
 import MenuButton from "./MenuButton";
 import TagInput from "./TagInput";
 import DropdownTagInput from "./DropdownTagInput";
 import Star from "./Star";
-import * as XLSX from "xlsx";
-import { saveAs } from "file-saver";
 import HOST from "../GLOBALS/Globals";
+import ExportButton from "./ExportButton";
 
 const NOAI = "LEVEL N";
-
-// Function to handle exporting the table to Excel
-const handleExport = () => {
-  const table = document.querySelector(".table-section-table");
-  if (!table || !table.rows.length) return;
-
-  const title =
-    document.querySelector(".table-section-title")?.textContent || "table";
-
-  // Create worksheet and workbook
-  const ws = XLSX.utils.table_to_sheet(table);
-
-  // Calculate autofit column widths
-  const colCount = table.rows[0]?.cells.length || 8;
-  const rowCount = table.rows.length;
-  const colWidths = [];
-
-  for (let c = 0; c < colCount; ++c) {
-    let maxLen = 10; // minimum width
-    for (let r = 0; r < rowCount; ++r) {
-      const cell = table.rows[r].cells[c];
-      if (cell) {
-        const text = cell.innerText || cell.textContent || "";
-        maxLen = Math.max(maxLen, text.length);
-      }
-    }
-    colWidths.push({ wch: maxLen + 2 }); // padding
-  }
-
-  ws["!cols"] = colWidths;
-
-  // row heights
-  ws["!rows"] = [
-    { hpt: 30 }, // header row
-    ...Array(rowCount - 1).fill({ hpt: 20 }), // body rows
-  ];
-
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
-
-  const wbout = XLSX.write(wb, { bookType: "xlsx", type: "array" });
-  saveAs(
-    new Blob([wbout], { type: "application/octet-stream" }),
-    `${title}.xlsx`
-  );
-};
 
 const LEVEL_COLORS = {
   "LEVEL N": "#ffb3b3",
@@ -67,11 +20,19 @@ const LEVEL_COLORS = {
 function EditableCell({ value, onChange, multiline = false, grayed = false }) {
   const [editing, setEditing] = useState(false);
   const [tempValue, setTempValue] = useState(value || "");
+  const textareaRef = useRef(null);
 
   useEffect(() => {
     setTempValue(value || "");
   }, [value]);
 
+  useLayoutEffect(() => {
+    if (multiline && textareaRef.current) {
+      const ta = textareaRef.current;
+      ta.style.height = "auto"; // reset
+      ta.style.height = ta.scrollHeight + "px"; // fit content
+    }
+  }, [editing, tempValue, multiline]);
   useEffect(() => {
     if (grayed && editing) {
       setEditing(false);
@@ -109,6 +70,7 @@ function EditableCell({ value, onChange, multiline = false, grayed = false }) {
   if (multiline) {
     return (
       <textarea
+        ref={textareaRef}
         autoFocus
         value={tempValue}
         onChange={(e) => setTempValue(e.target.value)}
@@ -283,29 +245,19 @@ export default function TableSection({
               label: "Save",
               onClick: () => onSaveTemplate(),
             },
-            {
-              label: "Download Scale",
-              onClick: () => console.log("Download Scale"),
-            },
-            {
-              label: "Download Declaration",
-              onClick: () => console.log("Download Declaration"),
-            },
           ]}
         />
 
         <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-          <TagInput value={subjectName} />
-          <TagInput value={subjectYear} />
+          <TagInput value={subjectName} placeholder="*Subject code" />
+          <TagInput value={subjectYear} placeholder="*Year" />
           <DropdownTagInput
-            placeholder={subjectSemester}
+            placeholder= "*Semester"
             options={["Semester 1", "Semester 2"]}
           />
         </div>
 
-        <button className="table-section-export-btn" onClick={handleExport}>
-          Export
-        </button>
+        <ExportButton />
       </div>
 
       <div className="table-section-container">

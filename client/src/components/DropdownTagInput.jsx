@@ -1,17 +1,16 @@
 import { useState } from "react";
 import "./TagInput.css";
+import "./DropdownTagInput.css";
 
 export default function DropdownTagInput({ placeholder, options = [] }) {
-  const [selected, setSelected] = useState(null);
+  const [selected, setSelected] = useState("");
 
   const handleChange = (e) => {
-    if (e.target.value) {
-      setSelected(e.target.value);
-    }
+    setSelected(e.target.value);
   };
 
   const clearSelection = () => {
-    setSelected(null);
+    setSelected("");
   };
 
   return (
@@ -23,11 +22,11 @@ export default function DropdownTagInput({ placeholder, options = [] }) {
         </div>
       ) : (
         <select
-          defaultValue={placeholder}
+          value={selected}
           onChange={handleChange}
           className="dropdown-tag"
         >
-          <option value="" disabled>
+          <option value="" disabled hidden>
             {placeholder}
           </option>
           {options.map((opt) => (

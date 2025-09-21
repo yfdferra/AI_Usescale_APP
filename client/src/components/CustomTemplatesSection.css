@@ -1,5 +1,5 @@
 .custom-templates-section {
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
   display: flex;
   flex-direction: column;
   align-items: stretch;
@@ -15,11 +15,10 @@
   flex-wrap: wrap;
   gap: 2rem;
   justify-content: flex-start;
-  
 }
 .custom-templates-header {
   display: flex;
   align-items: flex-start;
   margin-bottom: 1rem; /* space below header */
-  margin-top: 5.5rem;
+  margin-top: 3rem;
 }
