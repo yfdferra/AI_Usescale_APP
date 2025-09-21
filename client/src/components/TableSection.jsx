@@ -312,9 +312,7 @@ export default function TableSection({
           />
         </div>
 
-        <button className="table-section-export-btn" onClick={handleExport}>
-          Export
-        </button>
+        <ExportButton />
       </div>
 
       <div className="table-section-container">
