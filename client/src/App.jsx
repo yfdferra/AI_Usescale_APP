@@ -53,7 +53,7 @@ export default function App() {
           loggedIn ? (
             <MainTemplate 
               onTemplateClick={handleTemplateClick} 
-              onWrittenAsseessmentClick={handleTemplateClick}
+              onWrittenAssessmentClick={handleTemplateClick}
               onCreateFromScratchClick={handleTemplateClick} 
               onLogout={() => setLoggedIn(false)}
             />
