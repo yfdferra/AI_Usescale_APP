@@ -38,17 +38,22 @@ export default function CustomTemplatesSection({ templates, onTemplateClick }) {
         />
       </div>
       <div className="custom-templates-row">
-        {filteredTemplates.map(({ id, title, subject_id }) => (
-          <Square
-            key={id}
-            text={title}
-            usescale_id={id}
-            onClick={() => {
-              onTemplateClick(id, title, subject_id);
-            }}
-          />
-        ))}
+  {filteredTemplates.map(({ id, title, subject_id }) => (
+    <div key={id} className="custom-square-wrapper">
+      <Square
+        text={title}
+        usescale_id={id}
+        onClick={() => {
+          onTemplateClick(id, title, subject_id);
+        }}
+      />
+      <div className="custom-square-overlay">
+        <span className="star">⭐</span>
+        <span className="dots">⋯</span>
       </div>
+    </div>
+  ))}
+</div>
     </section>
   );
 }
