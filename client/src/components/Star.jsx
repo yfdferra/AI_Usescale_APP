@@ -3,7 +3,7 @@ import starClosed from "../assets/starFilled.png";
 import starOpen from "../assets/starEmpty.png";
 
 export default function StarToggle() {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(true);
 
   const handleClick = () => {
     setIsOpen((prev) => !prev);

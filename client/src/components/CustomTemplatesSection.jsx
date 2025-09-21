@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import Square from "./Square";
 import "./CustomTemplatesSection.css";
 import FilterSearchBar from "./FilterSearchBar";
+import StarToggle from "./Star";
+
 
 // Helper to split array into chunks of 5
 //function chunkArray(array, size = 5) {
@@ -48,7 +50,7 @@ export default function CustomTemplatesSection({ templates, onTemplateClick }) {
         }}
       />
       <div className="custom-square-overlay">
-        <span className="star">⭐</span>
+        <StarToggle />
         <span className="dots">⋯</span>
       </div>
     </div>
