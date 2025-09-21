@@ -1,7 +1,7 @@
 import { useState } from "react";
 import "./TagInput.css";
 
-export default function DropdownTagInput({ placeholder = "*Semester", options = [] }) {
+export default function DropdownTagInput({ placeholder, options = [] }) {
   const [selected, setSelected] = useState(null);
 
   const handleChange = (e) => {
@@ -23,7 +23,7 @@ export default function DropdownTagInput({ placeholder = "*Semester", options = 
         </div>
       ) : (
         <select
-          defaultValue=""
+          defaultValue={placeholder}
           onChange={handleChange}
           className="dropdown-tag"
         >

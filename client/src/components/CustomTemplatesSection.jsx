@@ -38,13 +38,13 @@ export default function CustomTemplatesSection({ templates, onTemplateClick }) {
         />
       </div>
       <div className="custom-templates-row">
-        {filteredTemplates.map(({ id, title }) => (
+        {filteredTemplates.map(({ id, title, subject_id }) => (
           <Square
             key={id}
             text={title}
             usescale_id={id}
             onClick={() => {
-              onTemplateClick(id, title);
+              onTemplateClick(id, title, subject_id);
             }}
           />
         ))}

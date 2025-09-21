@@ -1,7 +1,7 @@
 import { useState } from "react";
 import "./TagInput.css";
 
-export default function TagInput({placeholder = "*Subject"}) {
+export default function TagInput({ placeholder, value }) {
   const [tags, setTags] = useState(null);
   const [inputValue, setInputValue] = useState("");
 
@@ -25,13 +25,13 @@ export default function TagInput({placeholder = "*Subject"}) {
           <button onClick={removeTag}>×</button>
         </div>
       ) : (
-      <input
-        type="text"
-        placeholder={placeholder}
-        value={inputValue}
-        onChange={(e) => setInputValue(e.target.value)}
-        onKeyDown={handleKeyDown}
-      />
+        <input
+          type="text"
+          placeholder={value}
+          value={inputValue}
+          onChange={(e) => setInputValue(e.target.value)}
+          onKeyDown={handleKeyDown}
+        />
       )}
     </div>
   );

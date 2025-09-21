@@ -10,9 +10,13 @@ import FilterSearchBar from "../components/FilterSearchBar";
 import TableSection from "../components/TableSection";
 import "./UseScalePage.css";
 
+const NOAI = "LEVEL N";
+const TO_NULL = ["instruction", "example", "declaration", "version", "purpose", "key_prompts"];
+
 export default function UseScalePage({
   usescale_id,
   template_title,
+  subject_id,
   onLogout,
 }) {
   const [pendingRowIdx, setPendingRowIdx] = useState(null);
@@ -67,15 +71,23 @@ export default function UseScalePage({
     },
   };
 
-  const handleLevelClick = (levelKey) => {
+  const handleLevelClick = (levelKey, lable) => {
     if (pendingRowIdx == null) return;
     const copy = LEVEL_BASE[levelKey];
     if (!copy) return;
 
     const FLAT = {
       level: levelKey,
+      label: lable || "",
       ...copy.data,
     };
+
+    // save as nulls
+    if (levelKey === NOAI) {
+      for (const k of TO_NULL) {
+        FLAT[k] = null;
+      }
+    }
 
     setUsecase((prev) => {
       if (!Array.isArray(prev) || !prev[pendingRowIdx]) return prev;
@@ -92,17 +104,49 @@ export default function UseScalePage({
     setPendingRowIdx(null); // empty the row
   };
 
+  const handleSaveTemplate = () => {
+    if (!usecase || !Array.isArray(usecase)) {
+      console.error("No data to save.");
+      return;
+    }
+
+    const payload = {
+      usescale_id,
+      subject_id,
+      rows: usecase,
+    };
+
+    fetch(`${HOST}/save_template`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          alert("Template saved successfully!");
+        } else {
+          console.error("Error saving template:", data.error);
+          alert("Failed to save template.");
+        }
+      })
+      .catch((error) => {
+        console.error("Network error:", error);
+        alert("Failed to save template due to a network error.");
+      });
+  };
+
   const handleFilterChange = () => {};
   const handleSearch = () => {};
   const [open, setOpen] = useState(false);
-  console.log("UseScalePage for ID:", usescale_id);
   var [usecase, setUsecase] = React.useState(null);
   useEffect(() => {
     fetch(`${HOST}/usecase?usescale_id=${usescale_id}`)
       .then((res) => res.json())
       .then((data) => {
         setUsecase(data);
-        console.log("Fetched data:", data);
       })
       .catch((error) => {
         console.error("Error fetching data:", error);
@@ -128,25 +172,25 @@ export default function UseScalePage({
               level="LEVEL N"
               label="NO AI"
               labelBg="#ffb3b3"
-              onClick={() => handleLevelClick("LEVEL N")}
+              onClick={() => handleLevelClick("LEVEL N", "NO AI")}
             />
             <UseScaleBlock
               level="LEVEL R-1"
               label="Some AI"
               labelBg="#ffcfb3ff"
-              onClick={() => handleLevelClick("LEVEL R-1")}
+              onClick={() => handleLevelClick("LEVEL R-1", "Some AI")}
             />
             <UseScaleBlock
               level="LEVEL R-2"
               label="More AI"
               labelBg="#ffffb3ff"
-              onClick={() => handleLevelClick("LEVEL R-2")}
+              onClick={() => handleLevelClick("LEVEL R-2", "More AI")}
             />
             <UseScaleBlock
               level="LEVEL G"
               label="Generative AI"
               labelBg="#d9b3ffff"
-              onClick={() => handleLevelClick("LEVEL G")}
+              onClick={() => handleLevelClick("LEVEL G", "Generative AI")}
             />
           </VerticalDropdown>
 
@@ -156,25 +200,25 @@ export default function UseScalePage({
               level="LEVEL N"
               label="NO AI"
               labelBg="#ffb3b3"
-              onClick={() => handleLevelClick("LEVEL N")}
+              onClick={() => handleLevelClick("LEVEL N", "NO AI")}
             />
             <UseScaleBlock
               level="LEVEL R-1"
               label="Some AI"
               labelBg="#ffcfb3ff"
-              onClick={() => handleLevelClick("LEVEL R-1")}
+              onClick={() => handleLevelClick("LEVEL R-1", "Some AI")}
             />
             <UseScaleBlock
               level="LEVEL R-2"
               label="More AI"
               labelBg="#ffffb3ff"
-              onClick={() => handleLevelClick("LEVEL R-2")}
+              onClick={() => handleLevelClick("LEVEL R-2", "More AI")}
             />
             <UseScaleBlock
               level="LEVEL G"
               label="Generative AI"
               labelBg="#d9b3ffff"
-              onClick={() => handleLevelClick("LEVEL G")}
+              onClick={() => handleLevelClick("LEVEL G", "Generative AI")}
             />
           </VerticalDropdown>
 
@@ -184,25 +228,25 @@ export default function UseScalePage({
               level="LEVEL N"
               label="NO AI"
               labelBg="#ffb3b3"
-              onClick={() => handleLevelClick("LEVEL N")}
+              onClick={() => handleLevelClick("LEVEL N", "NO AI")}
             />
             <UseScaleBlock
               level="LEVEL R-1"
               label="Some AI"
               labelBg="#ffcfb3ff"
-              onClick={() => handleLevelClick("LEVEL R-1")}
+              onClick={() => handleLevelClick("LEVEL R-1", "Some AI")}
             />
             <UseScaleBlock
               level="LEVEL R-2"
               label="More AI"
               labelBg="#ffffb3ff"
-              onClick={() => handleLevelClick("LEVEL R-2")}
+              onClick={() => handleLevelClick("LEVEL R-2", "More AI")}
             />
             <UseScaleBlock
               level="LEVEL G"
               label="Generative AI"
               labelBg="#d9b3ffff"
-              onClick={() => handleLevelClick("LEVEL G")}
+              onClick={() => handleLevelClick("LEVEL G", "Generative AI")}
             />
           </VerticalDropdown>
 
@@ -212,25 +256,25 @@ export default function UseScalePage({
               level="LEVEL N"
               label="NO AI"
               labelBg="#ffb3b3"
-              onClick={() => handleLevelClick("LEVEL N")}
+              onClick={() => handleLevelClick("LEVEL N", "NO AI")}
             />
             <UseScaleBlock
               level="LEVEL R-1"
               label="Some AI"
               labelBg="#ffcfb3ff"
-              onClick={() => handleLevelClick("LEVEL R-1")}
+              onClick={() => handleLevelClick("LEVEL R-1", "Some AI")}
             />
             <UseScaleBlock
               level="LEVEL R-2"
               label="More AI"
               labelBg="#ffffb3ff"
-              onClick={() => handleLevelClick("LEVEL R-2")}
+              onClick={() => handleLevelClick("LEVEL R-2", "More AI")}
             />
             <UseScaleBlock
               level="LEVEL G"
               label="Generative AI"
               labelBg="#d9b3ffff"
-              onClick={() => handleLevelClick("LEVEL G")}
+              onClick={() => handleLevelClick("LEVEL G", "Generative AI")}
             />
           </VerticalDropdown>
         </HorizontalSidebar>
@@ -238,10 +282,12 @@ export default function UseScalePage({
       <div className="use-scale-page-content">
         <TableSection
           tableData={usecase}
+          subjectId={subject_id}
           initialTitle={template_title}
           toHighlight={pendingRowIdx}
           onChangeScale={(rowIdx) => setPendingRowIdx(rowIdx)}
-          onRowsChange={(nextRows) => setUsecase(nextRows)} // bring new rows to useScalePage too
+          onRowsChange={(nextRows) => setUsecase(nextRows)}
+          onSaveTemplate={handleSaveTemplate}
         />
       </div>
     </div>

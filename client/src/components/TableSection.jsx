@@ -6,6 +6,9 @@ import DropdownTagInput from "./DropdownTagInput";
 import Star from "./Star";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
+import HOST from "../GLOBALS/Globals";
+
+const NOAI = "LEVEL N";
 
 // Function to handle exporting the table to Excel
 const handleExport = () => {
@@ -61,7 +64,7 @@ const LEVEL_COLORS = {
 };
 
 // Editable cell component
-function EditableCell({ value, onChange, multiline = false }) {
+function EditableCell({ value, onChange, multiline = false, grayed = false }) {
   const [editing, setEditing] = useState(false);
   const [tempValue, setTempValue] = useState(value || "");
   const textareaRef = useRef(null);
@@ -77,12 +80,28 @@ function EditableCell({ value, onChange, multiline = false }) {
       ta.style.height = ta.scrollHeight + "px"; // fit content
     }
   }, [editing, tempValue, multiline]);
+  useEffect(() => {
+    if (grayed && editing) {
+      setEditing(false);
+    }
+  }, [grayed, editing]);
 
   const handleBlur = () => {
     setEditing(false);
     onChange(tempValue);
   };
 
+  // if grayed out, unclickable
+  if (grayed) {
+    return (
+      <div
+        className="editable-cell grayed"
+        title="Uneditable for NO-AI rows"
+      >
+        {"Not Applicable"}
+      </div>
+    )
+  }
   if (!editing) {
     return (
       <div
@@ -132,10 +151,12 @@ function EditableCell({ value, onChange, multiline = false }) {
 export default function TableSection({
   open,
   tableData,
+  subjectId,
   initialTitle,
   toHighlight,
   onChangeScale,
   onRowsChange,
+  onSaveTemplate,
 }) {
   const [title, setTitle] = useState(
     initialTitle || "Untitled student declaration"
@@ -143,6 +164,24 @@ export default function TableSection({
 
   // local state for table rows
   const [rows, setRows] = useState(tableData || []);
+  const [subjectName, setSubjectName] = useState("");
+  const [subjectYear, setSubjectYear] = useState("");
+  const [subjectSemester, setSubjectSemester] = useState("");
+
+  useEffect(() => {
+    fetch(HOST + `/get_subject_info?subject_id=${subjectId}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (!data.error) {
+          setSubjectName(data.subject_name || "");
+          setSubjectYear(data.subject_year || "");
+          setSubjectSemester(data.subject_semester || "");
+        } else {
+          console.error("Error fetching subject info:", data.error);
+        }
+      })
+      .catch((err) => console.error("Fetch error:", err));
+  }, [subjectId]);
 
   useEffect(() => {
     if (initialTitle) setTitle(initialTitle);
@@ -177,12 +216,11 @@ export default function TableSection({
   // update cell and notify parent
   const updateCell = (rowIdx, key, value) => {
     const next = rows.slice();
-    const keep = next[rowIdx]?.id ? { id: next[rowIdx].id }: {};  // keep id if available
-    next[rowIdx] = { ...keep, ...next[rowIdx], [key]:value };  // new row object, starting with id, and all other row cells, and overwrite old value with new value
-    setRows(next);  // update local row state
-    onRowsChange && onRowsChange(next);  // if it was changed, call it so the parent will stay in sync too
-  }
-
+    const keep = next[rowIdx]?.id ? { id: next[rowIdx].id } : {}; // keep id if available
+    next[rowIdx] = { ...keep, ...next[rowIdx], [key]: value }; // new row object, starting with id, and all other row cells, and overwrite old value with new value
+    setRows(next); // update local row state
+    onRowsChange && onRowsChange(next); // if it was changed, call it so the parent will stay in sync too
+  };
 
   // add row above
   const addRowAbove = (rowIdx) => {
@@ -208,7 +246,9 @@ export default function TableSection({
 
   // delete row
   const deleteRow = (rowIdx) => {
-    const confirmed = window.confirm("Are you sure you want to delete this row?");
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this row?"
+    );
     if (!confirmed) return;
 
     const newRows = rows.filter((_, idx) => idx !== rowIdx);
@@ -248,16 +288,28 @@ export default function TableSection({
           items={[
             { label: "Edit Title", onClick: () => editTitle() },
             { label: "Make a Copy", onClick: () => console.log("Make a Copy") },
-            { label: "Save", onClick: () => console.log("Save") },
-            { label: "Download Scale", onClick: () => console.log("Download Scale") },
-            { label: "Download Declaration", onClick: () => console.log("Download Declaration") },
+            {
+              label: "Save",
+              onClick: () => onSaveTemplate(),
+            },
+            {
+              label: "Download Scale",
+              onClick: () => console.log("Download Scale"),
+            },
+            {
+              label: "Download Declaration",
+              onClick: () => console.log("Download Declaration"),
+            },
           ]}
         />
 
         <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-          <TagInput placeholder="*Subject" />
-          <TagInput placeholder="*Year" />
-          <DropdownTagInput placeholder="*Semester" options={["Sem 1", "Sem 2"]} />
+          <TagInput value={subjectName} />
+          <TagInput value={subjectYear} />
+          <DropdownTagInput
+            placeholder={subjectSemester}
+            options={["Semester 1", "Semester 2"]}
+          />
         </div>
 
         <button className="table-section-export-btn" onClick={handleExport}>
@@ -269,12 +321,18 @@ export default function TableSection({
         <table className="table-section-table">
           <thead>
             <tr>
-              <th className="table-section-th">General Learning or Assessment Tasks</th>
+              <th className="table-section-th">
+                General Learning or Assessment Tasks
+              </th>
               <th className="table-section-th">AI Use Scale Level</th>
               <th className="table-section-th">Instruction to Students</th>
               <th className="table-section-th">Examples</th>
-              <th className="table-section-th">AI Generated Content in Submission</th>
-              <th className="table-section-th">AI Tools Used (version and link if available)</th>
+              <th className="table-section-th">
+                AI Generated Content in Submission
+              </th>
+              <th className="table-section-th">
+                AI Tools Used (version and link if available)
+              </th>
               <th className="table-section-th">Purpose and Usage</th>
               <th className="table-section-th">Key Prompts Used (if any)</th>
             </tr>
@@ -282,6 +340,7 @@ export default function TableSection({
           <tbody>
             {rows.map((data, rowIdx) => {
               const shouldHighlight = toHighlight === rowIdx;
+              const noAI = data?.level === NOAI;
 
               return (
                 <tr
@@ -297,10 +356,22 @@ export default function TableSection({
                     />
                     <MenuButton
                       items={[
-                        { label: "Add Row Above", onClick: () => addRowAbove(rowIdx) },
-                        { label: "Add Row Below", onClick: () => addRowBelow(rowIdx) },
-                        { label: "Delete Row", onClick: () => deleteRow(rowIdx) },
-                        { label: "Duplicate Row", onClick: () => duplicateRow(rowIdx) },
+                        {
+                          label: "Add Row Above",
+                          onClick: () => addRowAbove(rowIdx),
+                        },
+                        {
+                          label: "Add Row Below",
+                          onClick: () => addRowBelow(rowIdx),
+                        },
+                        {
+                          label: "Delete Row",
+                          onClick: () => deleteRow(rowIdx),
+                        },
+                        {
+                          label: "Duplicate Row",
+                          onClick: () => duplicateRow(rowIdx),
+                        },
                       ]}
                     />
                   </td>
@@ -326,9 +397,24 @@ export default function TableSection({
                         newLevel = e.dataTransfer.getData("text/plain");
                       }
                       if (!newLevel) return;
+
+                      const nullify = newLevel === NOAI;  // if the chosen level is NO AI: all columns are stored as null
+
                       const updatedRows = rows.map((row, idx) =>
                         idx === rowIdx
-                          ? { ...row, level: newLevel, label: newLabel }
+                          ? { 
+                              ...row, 
+                              level: newLevel, 
+                              label: newLabel,
+                              ...(nullify && {
+                                instruction: null,
+                                example: null,
+                                declaration: null,
+                                version: null,
+                                purpose: null,
+                                key_prompts: null, 
+                              }),
+                            }
                           : row
                       );
                       setRows(updatedRows);
@@ -350,8 +436,11 @@ export default function TableSection({
                   <td className="table-section-td">
                     <EditableCell
                       value={data.instruction}
-                      onChange={(val) => handleCellChange(rowIdx, "instruction", val)}
+                      onChange={(val) =>
+                        handleCellChange(rowIdx, "instruction", val)
+                      }
                       multiline
+                      grayed={noAI}
                     />
                   </td>
 
@@ -359,8 +448,11 @@ export default function TableSection({
                   <td className="table-section-td">
                     <EditableCell
                       value={data.example}
-                      onChange={(val) => handleCellChange(rowIdx, "example", val)}
+                      onChange={(val) =>
+                        handleCellChange(rowIdx, "example", val)
+                      }
                       multiline
+                      grayed={noAI}
                     />
                   </td>
 
@@ -368,8 +460,11 @@ export default function TableSection({
                   <td className="table-section-td">
                     <EditableCell
                       value={data.declaration}
-                      onChange={(val) => handleCellChange(rowIdx, "declaration", val)}
+                      onChange={(val) =>
+                        handleCellChange(rowIdx, "declaration", val)
+                      }
                       multiline
+                      grayed={noAI}
                     />
                   </td>
 
@@ -377,7 +472,10 @@ export default function TableSection({
                   <td className="table-section-td">
                     <EditableCell
                       value={data.version}
-                      onChange={(val) => handleCellChange(rowIdx, "version", val)}
+                      onChange={(val) =>
+                        handleCellChange(rowIdx, "version", val)
+                      }
+                      grayed={noAI}
                     />
                   </td>
 
@@ -385,8 +483,11 @@ export default function TableSection({
                   <td className="table-section-td">
                     <EditableCell
                       value={data.purpose}
-                      onChange={(val) => handleCellChange(rowIdx, "purpose", val)}
+                      onChange={(val) =>
+                        handleCellChange(rowIdx, "purpose", val)
+                      }
                       multiline
+                      grayed={noAI}
                     />
                   </td>
 
@@ -394,8 +495,11 @@ export default function TableSection({
                   <td className="table-section-td">
                     <EditableCell
                       value={data.key_prompts}
-                      onChange={(val) => handleCellChange(rowIdx, "key_prompts", val)}
+                      onChange={(val) =>
+                        handleCellChange(rowIdx, "key_prompts", val)
+                      }
                       multiline
+                      grayed={noAI}
                     />
                   </td>
                 </tr>

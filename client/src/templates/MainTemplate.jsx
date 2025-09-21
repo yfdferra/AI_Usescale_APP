@@ -21,6 +21,7 @@ export default function MainTemplate({
           data.map((item) => ({
             id: item.usescale_id,
             title: item.title,
+            subject_id: item.subject_id,
           }))
         );
       })
