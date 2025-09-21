@@ -6,52 +6,7 @@ import DropdownTagInput from "./DropdownTagInput";
 import Star from "./Star";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
-
-// Function to handle exporting the table to Excel
-const handleExport = () => {
-  const table = document.querySelector(".table-section-table");
-  if (!table || !table.rows.length) return;
-
-  const title =
-    document.querySelector(".table-section-title")?.textContent || "table";
-
-  // Create worksheet and workbook
-  const ws = XLSX.utils.table_to_sheet(table);
-
-  // Calculate autofit column widths
-  const colCount = table.rows[0]?.cells.length || 8;
-  const rowCount = table.rows.length;
-  const colWidths = [];
-
-  for (let c = 0; c < colCount; ++c) {
-    let maxLen = 10; // minimum width
-    for (let r = 0; r < rowCount; ++r) {
-      const cell = table.rows[r].cells[c];
-      if (cell) {
-        const text = cell.innerText || cell.textContent || "";
-        maxLen = Math.max(maxLen, text.length);
-      }
-    }
-    colWidths.push({ wch: maxLen + 2 }); // padding
-  }
-
-  ws["!cols"] = colWidths;
-
-  // row heights
-  ws["!rows"] = [
-    { hpt: 30 }, // header row
-    ...Array(rowCount - 1).fill({ hpt: 20 }), // body rows
-  ];
-
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
-
-  const wbout = XLSX.write(wb, { bookType: "xlsx", type: "array" });
-  saveAs(
-    new Blob([wbout], { type: "application/octet-stream" }),
-    `${title}.xlsx`
-  );
-};
+import ExportButton from "./ExportButton";
 
 const LEVEL_COLORS = {
   "LEVEL N": "#ffb3b3",
@@ -248,9 +203,7 @@ export default function TableSection({
           <DropdownTagInput placeholder="*Semester" options={["Sem 1", "Sem 2"]} />
         </div>
 
-        <button className="table-section-export-btn" onClick={handleExport}>
-          Export
-        </button>
+        <ExportButton />
       </div>
 
       <div className="table-section-container">
