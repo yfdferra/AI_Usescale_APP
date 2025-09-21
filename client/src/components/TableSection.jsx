@@ -239,8 +239,6 @@ export default function TableSection({
             { label: "Edit Title", onClick: () => editTitle() },
             { label: "Make a Copy", onClick: () => console.log("Make a Copy") },
             { label: "Save", onClick: () => console.log("Save") },
-            { label: "Download Scale", onClick: () => console.log("Download Scale") },
-            { label: "Download Declaration", onClick: () => console.log("Download Declaration") },
           ]}
         />
 
