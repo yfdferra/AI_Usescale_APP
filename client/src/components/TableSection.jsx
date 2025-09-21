@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useLayoutEffect } from "react";
 import "./TableSection.css";
 import MenuButton from "./MenuButton";
 import TagInput from "./TagInput";
@@ -64,10 +64,19 @@ const LEVEL_COLORS = {
 function EditableCell({ value, onChange, multiline = false }) {
   const [editing, setEditing] = useState(false);
   const [tempValue, setTempValue] = useState(value || "");
+  const textareaRef = useRef(null);
 
   useEffect(() => {
     setTempValue(value || "");
   }, [value]);
+
+  useLayoutEffect(() => {
+    if (multiline && textareaRef.current) {
+      const ta = textareaRef.current;
+      ta.style.height = "auto"; // reset
+      ta.style.height = ta.scrollHeight + "px"; // fit content
+    }
+  }, [editing, tempValue, multiline]);
 
   const handleBlur = () => {
     setEditing(false);
@@ -89,6 +98,7 @@ function EditableCell({ value, onChange, multiline = false }) {
   if (multiline) {
     return (
       <textarea
+        ref={textareaRef}
         autoFocus
         value={tempValue}
         onChange={(e) => setTempValue(e.target.value)}

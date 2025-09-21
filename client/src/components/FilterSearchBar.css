@@ -4,8 +4,8 @@
   margin: 1rem;
   background: #fff;
   border-radius: 0.5rem;
-  box-shadow: 0 0.0625rem 0.25rem rgba(0, 0, 0, 0.04);
-  border: 0.0625rem solid #e5e7eb;
+  box-shadow: 0rem 0rem 0.2rem 0.005rem #000f46;
+  border: 0.0625rem solid #c7cace;
   overflow: hidden;
   height: 2.5rem;
   width: 21.25rem;
@@ -13,8 +13,8 @@
 
 .filter-select {
   padding: 0.5rem 1rem;
-  border: none;
   outline: none;
+  border: none;
   height: 100%;
   border-top-left-radius: 0.5rem;
   border-bottom-left-radius: 0.5rem;
@@ -23,8 +23,8 @@
 
 .filter-input {
   padding: 0.5rem 1rem;
-  border: none;
   outline: none;
+  border: none;
   flex: 1;
   height: 100%;
   background: #fff;
