@@ -9,8 +9,9 @@ import HOST from "../GLOBALS/Globals.jsx";
 export default function MainTemplate({
   children,
   onTemplateClick,
-  onWrittenAsseessmentClick,
-  onLogout,
+  onWrittenAssessmentClick,
+  onCreateFromScratchClick,
+  onLogout, 
 }) {
   const [templates, setTemplates] = useState([]);
   useEffect(() => {
@@ -33,7 +34,8 @@ export default function MainTemplate({
       <Sidebar onLogout={onLogout} />
       <Dashboard>
         <BaseTemplatesSection
-          onWrittenAssessmentClick={onWrittenAsseessmentClick}
+          onWrittenAssessmentClick={onWrittenAssessmentClick}
+          onCreateFromScratchClick={onCreateFromScratchClick}
         />
         <CustomTemplatesSection
           templates={templates}
