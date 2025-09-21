@@ -228,6 +228,7 @@ export default function UseScalePage({
           onChangeScale={(rowIdx) => setPendingRowIdx(rowIdx)}
           onRowsChange={(nextRows) => setUsecase(nextRows)}
           onSaveTemplate={handleSaveTemplate}
+          levelsData={levelsData} // <-- pass levelsData for drag-and-drop
         />
       </div>
     </div>

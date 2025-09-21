@@ -47,13 +47,10 @@ function EditableCell({ value, onChange, multiline = false, grayed = false }) {
   // if grayed out, unclickable
   if (grayed) {
     return (
-      <div
-        className="editable-cell grayed"
-        title="Uneditable for NO-AI rows"
-      >
+      <div className="editable-cell grayed" title="Uneditable for NO-AI rows">
         {"Not Applicable"}
       </div>
-    )
+    );
   }
   if (!editing) {
     return (
@@ -110,6 +107,7 @@ export default function TableSection({
   onChangeScale,
   onRowsChange,
   onSaveTemplate,
+  levelsData = [], // <-- pass levelsData from parent (UseScalePage)
 }) {
   const [title, setTitle] = useState(
     initialTitle || "Untitled student declaration"
@@ -252,7 +250,7 @@ export default function TableSection({
           <TagInput value={subjectName} placeholder="*Subject code" />
           <TagInput value={subjectYear} placeholder="*Year" />
           <DropdownTagInput
-            placeholder= "*Semester"
+            placeholder="*Semester"
             options={["Semester 1", "Semester 2"]}
           />
         </div>
@@ -326,7 +324,7 @@ export default function TableSection({
                       backgroundColor: LEVEL_COLORS[data?.level] || undefined,
                     }}
                     onDragOver={(e) => e.preventDefault()}
-                    onDrop={(e) => {
+                    onDrop={async (e) => {
                       e.preventDefault();
                       let newLevel = "";
                       let newLabel = "";
@@ -341,25 +339,57 @@ export default function TableSection({
                       }
                       if (!newLevel) return;
 
-                      const nullify = newLevel === NOAI;  // if the chosen level is NO AI: all columns are stored as null
+                      // Find the entry in levelsData matching the dropped level
+                      let foundEntry = null;
+                      for (const entryType of levelsData) {
+                        foundEntry = entryType.entries.find(
+                          (e) => e.ai_level === newLevel
+                        );
+                        if (foundEntry) break;
+                      }
 
-                      const updatedRows = rows.map((row, idx) =>
-                        idx === rowIdx
-                          ? { 
-                              ...row, 
-                              level: newLevel, 
-                              label: newLabel,
-                              ...(nullify && {
-                                instruction: null,
-                                example: null,
-                                declaration: null,
-                                version: null,
-                                purpose: null,
-                                key_prompts: null, 
-                              }),
-                            }
-                          : row
-                      );
+                      const nullify = newLevel === NOAI;
+
+                      const updatedRows = rows.map((row, idx) => {
+                        if (idx !== rowIdx) return row;
+                        // If foundEntry then update all fields from DB, if not then use old logic
+                        if (foundEntry) {
+                          const keep = row.id ? { id: row.id } : {};
+                          const FLAT = {
+                            level: newLevel,
+                            label: newLabel,
+                            ...foundEntry,
+                          };
+                          if (nullify) {
+                            [
+                              "instruction",
+                              "example",
+                              "declaration",
+                              "version",
+                              "purpose",
+                              "key_prompts",
+                            ].forEach((k) => {
+                              FLAT[k] = null;
+                            });
+                          }
+                          return { ...keep, ...FLAT };
+                        } else {
+                          // old logic below {should be removed after testing}
+                          return {
+                            ...row,
+                            level: newLevel,
+                            label: newLabel,
+                            ...(nullify && {
+                              instruction: null,
+                              example: null,
+                              declaration: null,
+                              version: null,
+                              purpose: null,
+                              key_prompts: null,
+                            }),
+                          };
+                        }
+                      });
                       setRows(updatedRows);
                       onRowsChange(updatedRows);
                     }}
