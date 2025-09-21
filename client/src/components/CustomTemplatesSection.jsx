@@ -1,8 +1,9 @@
-import React, { useState } from "react";
 import Square from "./Square";
 import "./CustomTemplatesSection.css";
 import FilterSearchBar from "./FilterSearchBar";
 import StarToggle from "./Star";
+import React, { useState } from "react";
+import MenuButton from "./MenuButton";
 
 
 // Helper to split array into chunks of 5
@@ -51,7 +52,13 @@ export default function CustomTemplatesSection({ templates, onTemplateClick }) {
       />
       <div className="custom-square-overlay">
         <StarToggle />
-        <span className="dots">⋯</span>
+        <MenuButton
+          items={[
+            { label: "Edit Title", onClick: () => editTitle(id) },
+            { label: "Make a Copy", onClick: () => console.log("Make a Copy") },
+          ]}
+        />
+        
       </div>
     </div>
   ))}
