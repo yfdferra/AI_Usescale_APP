@@ -47,19 +47,20 @@ export default function App() {
       />
 
       {/* Upon Successful Log In: Inner Pages with Sidebar (widget control) */}
-      <Route
-        path="/main"
-        element={
+      <Route 
+        path="/main" 
+        element = {
           loggedIn ? (
-            <MainTemplate
-              onTemplateClick={handleTemplateClick}
-              onWrittenAsseessmentClick={handleTemplateClick}
+            <MainTemplate 
+              onTemplateClick={handleTemplateClick} 
+              onWrittenAssessmentClick={handleTemplateClick}
+              onCreateFromScratchClick={handleTemplateClick} 
               onLogout={() => setLoggedIn(false)}
             />
           ) : (
-            <Navigate to="/login" replace />
-          )
-        }
+            <Navigate to="/login" replace /> 
+          ) 
+        } 
       />
 
       {/* Might want to ADD USESCALE ID AS ROUTES TOO (backtrackable) */}

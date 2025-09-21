@@ -10,6 +10,7 @@ CORS(app)
 def hello_world():
     return render_template("home/index.html")
 
+# returns the user's use scales
 @app.route("/usecase")
 def usecase():
     connection = sqlite3.connect("database/usescale_rows.db")
@@ -164,7 +165,45 @@ def create_template():
     cursor.close()
     return {"status": "success", "message": "Template created successfully"} 
 
-# tesintg react and flask connetion 
+# testing react and flask connetion 
 @app.route("/api/ping")
 def ping():
     return jsonify({"message": "pong"})
+
+
+# get the srep entries from database and send to front end
+@app.route("/entries", methods=["GET"])
+def get_entries():
+    # connect to srep entry types database
+    conn_types = sqlite3.connect("database/srep_entry_type.db")
+    conn_types.row_factory = sqlite3.Row
+    cur_types = conn_types.cursor()
+    
+    cur_types.execute("SELECT entry_type_id, title FROM entry_types ORDER BY entry_type_id")
+    entry_types = cur_types.fetchall()
+    conn_types.close()
+
+    # connect to srep entries database
+    conn_entries = sqlite3.connect("database/srep_entries.db")
+    conn_entries.row_factory = sqlite3.Row
+    cur_entries = conn_entries.cursor()
+
+    result = []
+    for et in entry_types:
+        cur_entries.execute("""
+            SELECT ai_level, ai_title, instruction, example, declaration, version, purpose, key_prompts
+            FROM srep_entries
+            WHERE entry_type_id = ?
+            ORDER BY entry_id
+        """, (et["entry_type_id"],))
+        entries = cur_entries.fetchall()
+        entries_list = [dict(e) for e in entries]
+
+        result.append({
+            "entry_type_id": et["entry_type_id"],
+            "title": et["title"],
+            "entries": entries_list
+        })
+
+    conn_entries.close()
+    return jsonify(result)

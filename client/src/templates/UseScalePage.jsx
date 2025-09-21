@@ -21,6 +21,8 @@ export default function UseScalePage({
 }) {
   const [pendingRowIdx, setPendingRowIdx] = useState(null);
 
+  // old hardcoded levels//
+  /*
   const LEVEL_BASE = {
     "LEVEL N": {
       color: "#ffb3b3",
@@ -70,16 +72,22 @@ export default function UseScalePage({
       },
     },
   };
+  */
 
-  const handleLevelClick = (levelKey, lable) => {
+  // new state to store fetched entry types and entries
+  const [levelsData, setLevelsData] = useState([]);
+
+
+  const handleLevelClick = (levelKey, entries) => {
     if (pendingRowIdx == null) return;
-    const copy = LEVEL_BASE[levelKey];
+
+    // find selected level entry data in db
+    const copy = entries.find((e => e.ai_level == levelKey));
     if (!copy) return;
 
     const FLAT = {
       level: levelKey,
-      label: lable || "",
-      ...copy.data,
+      ...copy,
     };
 
     // save as nulls
@@ -141,17 +149,38 @@ export default function UseScalePage({
   const handleFilterChange = () => {};
   const handleSearch = () => {};
   const [open, setOpen] = useState(false);
+
+  // fetch usecase rows for table
+  console.log("UseScalePage for ID:", usescale_id);
   var [usecase, setUsecase] = React.useState(null);
   useEffect(() => {
     fetch(`${HOST}/usecase?usescale_id=${usescale_id}`)
       .then((res) => res.json())
       .then((data) => {
-        setUsecase(data);
+        // if the usecase has no rows, initialize with one empty row
+        if (!data || data.length === 0) {
+          setUsecase([{ id: null, level: "", instruction: "", example: "", declaration: "", version: "", purpose: "", key_prompts: "" }]);
+        } else {
+          setUsecase(data);
+        }
+        console.log("Fetched data:", data);
       })
       .catch((error) => {
         console.error("Error fetching data:", error);
       });
   }, [usescale_id]);
+
+  // fetch dynamic levels (entry type and entries) from db
+  useEffect(() => {
+    fetch(`${HOST}/entries`)
+      .then((res) => res.json())
+      .then((data) => {
+        setLevelsData(data);
+        console.log("Fetched levels data:", data);
+      })
+      .catch((error) => console.error("Error fetching levels:", error));
+  }, []);
+
   return (
     <div className="use-scale-page">
       <Sidebar onLogout={onLogout} />
@@ -166,117 +195,28 @@ export default function UseScalePage({
             onFilterChange={handleFilterChange}
             onSearch={handleSearch}
           />
-          <VerticalDropdown title="Written Assessments">
-            {/* Any dropdown content here */}
-            <UseScaleBlock
-              level="LEVEL N"
-              label="NO AI"
-              labelBg="#ffb3b3"
-              onClick={() => handleLevelClick("LEVEL N", "NO AI")}
-            />
-            <UseScaleBlock
-              level="LEVEL R-1"
-              label="Some AI"
-              labelBg="#ffcfb3ff"
-              onClick={() => handleLevelClick("LEVEL R-1", "Some AI")}
-            />
-            <UseScaleBlock
-              level="LEVEL R-2"
-              label="More AI"
-              labelBg="#ffffb3ff"
-              onClick={() => handleLevelClick("LEVEL R-2", "More AI")}
-            />
-            <UseScaleBlock
-              level="LEVEL G"
-              label="Generative AI"
-              labelBg="#d9b3ffff"
-              onClick={() => handleLevelClick("LEVEL G", "Generative AI")}
-            />
-          </VerticalDropdown>
-
-          <VerticalDropdown title="Coding Assessments">
-            {/* Any dropdown content here */}
-            <UseScaleBlock
-              level="LEVEL N"
-              label="NO AI"
-              labelBg="#ffb3b3"
-              onClick={() => handleLevelClick("LEVEL N", "NO AI")}
-            />
-            <UseScaleBlock
-              level="LEVEL R-1"
-              label="Some AI"
-              labelBg="#ffcfb3ff"
-              onClick={() => handleLevelClick("LEVEL R-1", "Some AI")}
-            />
-            <UseScaleBlock
-              level="LEVEL R-2"
-              label="More AI"
-              labelBg="#ffffb3ff"
-              onClick={() => handleLevelClick("LEVEL R-2", "More AI")}
-            />
-            <UseScaleBlock
-              level="LEVEL G"
-              label="Generative AI"
-              labelBg="#d9b3ffff"
-              onClick={() => handleLevelClick("LEVEL G", "Generative AI")}
-            />
-          </VerticalDropdown>
-
-          <VerticalDropdown title="Oral Assessments">
-            {/* Any dropdown content here */}
-            <UseScaleBlock
-              level="LEVEL N"
-              label="NO AI"
-              labelBg="#ffb3b3"
-              onClick={() => handleLevelClick("LEVEL N", "NO AI")}
-            />
-            <UseScaleBlock
-              level="LEVEL R-1"
-              label="Some AI"
-              labelBg="#ffcfb3ff"
-              onClick={() => handleLevelClick("LEVEL R-1", "Some AI")}
-            />
-            <UseScaleBlock
-              level="LEVEL R-2"
-              label="More AI"
-              labelBg="#ffffb3ff"
-              onClick={() => handleLevelClick("LEVEL R-2", "More AI")}
-            />
-            <UseScaleBlock
-              level="LEVEL G"
-              label="Generative AI"
-              labelBg="#d9b3ffff"
-              onClick={() => handleLevelClick("LEVEL G", "Generative AI")}
-            />
-          </VerticalDropdown>
-
-          <VerticalDropdown title="Presentation Assessments">
-            {/* Any dropdown content here */}
-            <UseScaleBlock
-              level="LEVEL N"
-              label="NO AI"
-              labelBg="#ffb3b3"
-              onClick={() => handleLevelClick("LEVEL N", "NO AI")}
-            />
-            <UseScaleBlock
-              level="LEVEL R-1"
-              label="Some AI"
-              labelBg="#ffcfb3ff"
-              onClick={() => handleLevelClick("LEVEL R-1", "Some AI")}
-            />
-            <UseScaleBlock
-              level="LEVEL R-2"
-              label="More AI"
-              labelBg="#ffffb3ff"
-              onClick={() => handleLevelClick("LEVEL R-2", "More AI")}
-            />
-            <UseScaleBlock
-              level="LEVEL G"
-              label="Generative AI"
-              labelBg="#d9b3ffff"
-              onClick={() => handleLevelClick("LEVEL G", "Generative AI")}
-            />
-          </VerticalDropdown>
+          {/* Render dropdowns dynamically from db*/}
+          {levelsData.map((entryType) => (
+            <VerticalDropdown key={entryType.entry_type_id} title={entryType.title}>
+              {entryType.entries.map((entry) => (
+                <UseScaleBlock
+                  key={entry.ai_level + entryType.entry_type_id}
+                  level={entry.ai_level}
+                  label={entry.ai_title}
+                  labelBg={
+                    entry.ai_level === "LEVEL N" // chooses the colour based on the level type
+                      ? "#ffb3b3"
+                      : entry.ai_level === "LEVEL R-1"
+                      ? "#ffcfb3ff"
+                      : entry.ai_level === "LEVEL R-2"
+                      ? "#ffffb3ff"
+                      : "#d9b3ffff"
+                  }
+                  onClick={() => handleLevelClick(entry.ai_level, entryType.entries)}
+                />
+              ))}
+            </VerticalDropdown>
+          ))}
         </HorizontalSidebar>
       </div>
       <div className="use-scale-page-content">
