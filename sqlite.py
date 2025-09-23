@@ -15,11 +15,13 @@ cursor.execute("""
 CREATE TABLE users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT,
-    password TEXT
+    password TEXT,
+    user_type TEXT
 )""")
 
 user_list = [
-    ("admin", "admin"),
+    ("admin", "admin", "admin"),
+    ("lulu", "lulu", "coordinator")
 ]
 cursor.executemany("INSERT INTO users (username, password) VALUES (?, ?)", user_list)
 connection.commit()
@@ -79,6 +81,7 @@ CREATE TABLE usescale_entries (
     row_id INTEGER PRIMARY KEY AUTOINCREMENT,
     subject_id INTEGER,
     usescale_id INTEGER,
+    ai_title TEXT,
     instruction TEXT,
     example TEXT,
     declaration TEXT,
@@ -93,6 +96,7 @@ entries = [
     (
         1,
         1, 
+        None,
         "Idea Generation",  
         "'Generate me a list of 10 concerns regarding coral reef sustainability'",
         "Allowed; all prompts must be submitted",
@@ -103,6 +107,7 @@ entries = [
     (
         1,
         1,
+        None,
         "Proofreading",
         "DO NOT SUBMIT PROMPTS FOR PROOFREADING",
         "Not permitted",
@@ -113,6 +118,7 @@ entries = [
     (
         1,
         1,
+        None,
         "Research",
         "'Prompt: summarise the main points of this paper with citations in the format (page number, line number, any figures references)'",
         "Allowed; must cite sources",
@@ -123,6 +129,7 @@ entries = [
     (
         2,
         2,
+        None,
         "Problem Solving",
         "'Solve the equation 2x + 3 = 7 and show all steps'",
         "Allowed; must show work",
@@ -133,6 +140,7 @@ entries = [
     (
         2,
         2,
+        None,
         "Concept Explanation",
         "'Explain the concept of derivatives in calculus with examples'",
         "Allowed; must be clear and concise",
@@ -143,6 +151,7 @@ entries = [
     (
         2,
         2,
+        None,
         "Graph Interpretation",
         "'Interpret the following graph showing the relationship between x and y coordinates'",
         "Allowed; must reference specific graphs",
@@ -155,8 +164,8 @@ entries = [
 cursor.executemany(
     """
     INSERT INTO usescale_entries
-    (subject_id, usescale_id, instruction, example, declaration, version, purpose, key_prompts)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    (subject_id, usescale_id, ai_title, instruction, example, declaration, version, purpose, key_prompts)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     """,
     entries
 )

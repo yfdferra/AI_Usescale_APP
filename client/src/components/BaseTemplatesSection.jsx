@@ -33,8 +33,7 @@ export default function BaseTemplatesSection({ onWrittenAssessmentClick, onCreat
               <Square
                 key={idx}
                 text={title}
-                onClick={() =>
-                  onCreateFromScratchClick(idx, title.startsWith("+ ") ? title.slice(2) : title)
+                onClick={() => onCreateFromScratchClick()
                 }
               />
             );

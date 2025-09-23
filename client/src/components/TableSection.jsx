@@ -10,10 +10,10 @@ import ExportButton from "./ExportButton";
 const NOAI = "LEVEL N";
 
 const LEVEL_COLORS = {
-  "LEVEL N": "#ffb3b3",
-  "LEVEL R-1": "#ffcfb3ff",
-  "LEVEL R-2": "#ffffb3ff",
-  "LEVEL G": "#d9b3ffff",
+  "NO AI": "#ffb3b3",
+  "SOME AI": "#ffcfb3ff",
+  "MORE AI": "#ffffb3ff",
+  "GENERATIVE AI": "#d9b3ffff",
 };
 
 // Editable cell component
@@ -241,7 +241,7 @@ export default function TableSection({
             { label: "Make a Copy", onClick: () => console.log("Make a Copy") },
             {
               label: "Save",
-              onClick: () => onSaveTemplate(),
+              onClick: () => onSaveTemplate(title),
             },
           ]}
         />
@@ -321,19 +321,21 @@ export default function TableSection({
                   <td
                     className="table-section-td cell-with-menu"
                     style={{
-                      backgroundColor: LEVEL_COLORS[data?.level] || undefined,
+                      backgroundColor: LEVEL_COLORS[data?.label] || undefined,
                     }}
                     onDragOver={(e) => e.preventDefault()}
                     onDrop={async (e) => {
                       e.preventDefault();
                       let newLevel = "";
                       let newLabel = "";
+                      let entry_type_id = null;
                       try {
                         const dropData = JSON.parse(
                           e.dataTransfer.getData("application/json")
                         );
                         newLevel = dropData.level;
                         newLabel = dropData.label;
+                        entry_type_id = dropData.entry_type_id;
                       } catch {
                         newLevel = e.dataTransfer.getData("text/plain");
                       }
@@ -342,6 +344,7 @@ export default function TableSection({
                       // Find the entry in levelsData matching the dropped level
                       let foundEntry = null;
                       for (const entryType of levelsData) {
+                        if (entryType.entry_type_id !== entry_type_id) continue;
                         foundEntry = entryType.entries.find(
                           (e) => e.ai_level === newLevel
                         );

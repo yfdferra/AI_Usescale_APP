@@ -5,6 +5,7 @@ export default function UseScaleBlock({
   level = "LEVEL N",
   label = "NO AI",
   labelBg = "#f600f6ff",
+  entry_type_id,
   onClick,
   draggable = true,
   ...rest
@@ -14,7 +15,7 @@ export default function UseScaleBlock({
     // Set both level and label in drag data
     e.dataTransfer.setData(
       "application/json",
-      JSON.stringify({ level, label })
+      JSON.stringify({ level, label, entry_type_id})
     );
     // Create a custom drag image
     const dragImage = document.createElement("div");
