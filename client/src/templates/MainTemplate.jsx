@@ -1,4 +1,4 @@
-import React, { use } from "react";
+import React from "react";
 import Sidebar from "../components/Sidebar";
 import BaseTemplatesSection from "../components/BaseTemplatesSection";
 import CustomTemplatesSection from "../components/CustomTemplatesSection";

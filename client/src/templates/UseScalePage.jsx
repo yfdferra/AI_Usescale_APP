@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import HorizontalSidebar from "../components/HorizontalSidebar";
 import VerticalDropdown from "../components/VerticalDropdown";
@@ -14,68 +15,18 @@ const NOAI = "LEVEL N";
 const TO_NULL = ["instruction", "example", "declaration", "version", "purpose", "key_prompts"];
 
 export default function UseScalePage({
-  usescale_id,
   template_title,
   subject_id,
   onLogout,
 }) {
   const [pendingRowIdx, setPendingRowIdx] = useState(null);
 
-  // old hardcoded levels//
-  /*
-  const LEVEL_BASE = {
-    "LEVEL N": {
-      color: "#ffb3b3",
-      data: {
-        instruction: "Idea Generation",
-        example:
-          "'Generate me a list of 10 concerns regarding coral reef sustainability'",
-        declaration: "Allowed; all prompts must be submitted",
-        version: "	ChatGPT v4.0",
-        purpose: "Brainstorm possible issues for research",
-        key_prompts:
-          "'Generate me a list of 10 concerns regarding coral reef sustainability'",
-      },
-    },
-    "LEVEL R-1": {
-      color: "#ffcfb3ff",
-      data: {
-        instruction: "Research",
-        example:
-          "'Prompt: summarise the main points of this paper with citations in the format (page number, line number, any figures references)'",
-        declaration: "Allowed; must cite sources",
-        version: "ChatGPT v4.0",
-        purpose: "Assist with summarising external sources",
-        key_prompts: "'Summarise the main points of this paper...'",
-      },
-    },
-    "LEVEL R-2": {
-      color: "#ffffb3ff",
-      data: {
-        instruction: "LEVEL R-2 heehee",
-        example: "LEVEL R-2 heehee",
-        declaration: "LEVEL R-2 heehee",
-        version: "LEVEL R-2 heehee",
-        purpose: "LEVEL R-2 heehee",
-        key_prompts: "LEVEL R-2 heehee",
-      },
-    },
-    "LEVEL G": {
-      color: "#d9b3ffff",
-      data: {
-        instruction: "LEVEL G heehee",
-        example: "LEVEL G heehee",
-        declaration: "LEVEL G heehee",
-        version: "LEVEL G heehee",
-        purpose: "LEVEL G heehee",
-        key_prompts: "LEVEL G heehee",
-      },
-    },
-  };
-  */
-
   // new state to store fetched entry types and entries
   const [levelsData, setLevelsData] = useState([]);
+
+  // get usescale id from the url
+  const {id: usescale_id} = useParams();
+  
 
 
   const handleLevelClick = (levelKey, entries) => {
@@ -113,7 +64,7 @@ export default function UseScalePage({
     setPendingRowIdx(null); // empty the row
   };
 
-  const handleSaveTemplate = () => {
+  const handleSaveTemplate = (currentTitle) => {
     if (!usecase || !Array.isArray(usecase)) {
       console.error("No data to save.");
       return;
@@ -122,6 +73,7 @@ export default function UseScalePage({
     const payload = {
       usescale_id,
       subject_id,
+      title: currentTitle, // update function to save the title as well
       rows: usecase,
     };
 
@@ -155,14 +107,31 @@ export default function UseScalePage({
   console.log("UseScalePage for ID:", usescale_id);
   var [usecase, setUsecase] = React.useState(null);
   useEffect(() => {
+    if (!usescale_id) return;
+
     fetch(`${HOST}/usecase?usescale_id=${usescale_id}`)
       .then((res) => res.json())
       .then((data) => {
         // if the usecase has no rows, initialize with one empty row
         if (!data || data.length === 0) {
-          setUsecase([{ id: null, level: "", instruction: "", example: "", declaration: "", version: "", purpose: "", key_prompts: "" }]);
+          setUsecase([{ 
+            id: null, 
+            ai_title: "", 
+            level: "", 
+            instruction: "", 
+            example: "", 
+            declaration: "", 
+            version: "", 
+            purpose: "", 
+            key_prompts: "" 
+          }]);
         } else {
-          setUsecase(data);
+          // map each row to include 'label' initialized from ai_title
+          const mapped = data.map(row => ({
+            ...row,
+            label: row.ai_title || ""
+          }));
+          setUsecase(mapped);
         }
         console.log("Fetched data:", data);
       })
@@ -213,6 +182,7 @@ export default function UseScalePage({
                       ? "#ffffb3ff"
                       : "#d9b3ffff"
                   }
+                  entry_type_id = {entryType.entry_type_id}
                   onClick={() => handleLevelClick(entry.ai_level, entryType.entries)}
                 />
               ))}

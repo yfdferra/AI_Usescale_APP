@@ -2,6 +2,7 @@ import { useState } from "react";
 import Login from "./templates/Login";
 import MainTemplate from "./templates/MainTemplate";
 import UseScalePage from "./templates/UseScalePage";
+import HOST from "./GLOBALS/Globals";
 
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useParams } from "react-router-dom";
@@ -35,6 +36,40 @@ export default function App() {
     navigate(`/usescale/${usescale_id}`);
   };
 
+  const handleCreateFromScratch = () => {
+    const payload = { title: "Untitled Template" };
+  
+    fetch(`${HOST}/create_template`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("Network response was not ok");
+        return res.json();
+      })
+      .then((data) => {
+        console.log("Create template response:", data);
+    
+
+        if (data.success) {
+          setCurrentUseScaleID(data.usescale_id);
+          setTemplateData("Untitled Template")
+          navigate(`/usescale/${data.usescale_id}`);
+
+        } else {
+          console.error("Failed to create template:", data.message);
+          alert("Failed to create template");
+        }
+      })
+      .catch((error) => {
+        console.error("Network error while creating template:", error);
+        alert("Network error while creating template");
+      });
+  };
+
   return (
     <Routes>
       {/* Default Page */}
@@ -54,7 +89,7 @@ export default function App() {
             <MainTemplate 
               onTemplateClick={handleTemplateClick} 
               onWrittenAssessmentClick={handleTemplateClick}
-              onCreateFromScratchClick={handleTemplateClick} 
+              onCreateFromScratchClick={handleCreateFromScratch}
               onLogout={() => setLoggedIn(false)}
             />
           ) : (
