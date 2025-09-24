@@ -12,7 +12,8 @@ export default function DropdownMenu({ items, onClose }) {
             onClose?.();
           }}
         >
-          {item.label}
+          {item.icon && <img src={item.icon} alt="" className="menu-icon" />}
+          <span>{item.label}</span>
         </div>
       ))}
     </div>

@@ -58,7 +58,7 @@ export default function MenuButton({ items, inline = false }) {
               position: "absolute",
               top: pos.top,
               left: pos.left,
-              transform: "translateX(-100%)",
+              transform: "translateX(-100%) translateX(-13px)",
               zIndex: 9999,
             }}
           >

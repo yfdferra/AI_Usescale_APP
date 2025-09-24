@@ -6,6 +6,9 @@ import React, { useState, useEffect } from "react";
 import MenuButton from "./MenuButton";
 import HOST from "../GLOBALS/Globals";
 import { useNavigate } from "react-router-dom";
+import editIcon from "../assets/edit.png";
+import copyIcon from "../assets/copy.png";
+import deleteIcon from "../assets/delete.png";
 
 
 // Helper to split array into chunks of 5
@@ -144,11 +147,12 @@ export default function CustomTemplatesSection({ templates, onTemplateClick }) {
         <StarToggle />
         <MenuButton
           items={[
-            { label: "Edit Title", onClick: () => editTitle(id, title) },
-            { label: "Make a Copy", onClick: () => makeCopy(id) },
-            { label: "Delete Template", onClick: () => deleteTemplate(id)},
+            { label: "Edit Title", icon: editIcon, onClick: () => editTitle(id, title) },
+            { label: "Make a Copy", icon: copyIcon, onClick: () => makeCopy(id) },
+            { label: "Delete Template", icon: deleteIcon, onClick: () => deleteTemplate(id) },
           ]}
         />
+
         
       </div>
     </div>
