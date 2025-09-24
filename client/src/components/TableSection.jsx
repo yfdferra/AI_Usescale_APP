@@ -6,6 +6,11 @@ import DropdownTagInput from "./DropdownTagInput";
 import Star from "./Star";
 import HOST from "../GLOBALS/Globals";
 import ExportButton from "./ExportButton";
+import editIcon from "../assets/edit.png";
+import copyIcon from "../assets/copy.png";
+import deleteIcon from "../assets/delete.png";
+import addIcon from "../assets/add.png";
+import saveIcon from "../assets/save.png";
 
 const NOAI = "LEVEL N";
 
@@ -237,10 +242,10 @@ export default function TableSection({
         <MenuButton
           inline
           items={[
-            { label: "Edit Title", onClick: () => editTitle() },
-            { label: "Make a Copy", onClick: () => console.log("Make a Copy") },
+            { label: "Edit Title", icon: editIcon, onClick: () => editTitle() },
+            { label: "Make a Copy", icon: copyIcon, onClick: () => console.log("Make a Copy") },
             {
-              label: "Save",
+              label: "Save", icon: saveIcon,
               onClick: () => onSaveTemplate(title),
             },
           ]}
@@ -298,19 +303,19 @@ export default function TableSection({
                     <MenuButton
                       items={[
                         {
-                          label: "Add Row Above",
+                          label: "Add Row Above", icon: addIcon,
                           onClick: () => addRowAbove(rowIdx),
                         },
                         {
-                          label: "Add Row Below",
+                          label: "Add Row Below", icon: addIcon,
                           onClick: () => addRowBelow(rowIdx),
                         },
                         {
-                          label: "Delete Row",
+                          label: "Delete Row", icon: deleteIcon,
                           onClick: () => deleteRow(rowIdx),
                         },
                         {
-                          label: "Duplicate Row",
+                          label: "Duplicate Row", icon: copyIcon,
                           onClick: () => duplicateRow(rowIdx),
                         },
                       ]}
@@ -401,7 +406,7 @@ export default function TableSection({
                     <MenuButton
                       items={[
                         {
-                          label: "Change Scale",
+                          label: "Change Scale", icon: editIcon,
                           onClick: () => onChangeScale(rowIdx),
                         },
                       ]}
