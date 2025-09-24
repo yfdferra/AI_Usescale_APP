@@ -1,9 +1,11 @@
 import { useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import Menu from "./Menu";
 
 export default function MenuButton({ items, inline = false }) {
   const [open, setOpen] = useState(false);
   const ref = useRef();
+  const [pos, setPos] = useState({ top: 0, left: 0 });
 
   // Close menu when clicking outside
   useEffect(() => {
@@ -16,6 +18,16 @@ export default function MenuButton({ items, inline = false }) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  useEffect(() => {
+    if (open && ref.current) {
+      const rect = ref.current.getBoundingClientRect();
+      setPos({
+        top: rect.top + window.scrollY,
+        left: rect.left + window.scrollX,
+      });
+    }
+  }, [open]);
+
   const containerStyle = inline
     ? { position: "relative", display: "inline-block" }
     : { position: "absolute", top: "0rem", right: "0.4rem" };
@@ -25,7 +37,20 @@ export default function MenuButton({ items, inline = false }) {
       <button className="menu-button" onClick={() => setOpen(!open)}>
         ⋯
       </button>
-      {open && <Menu items={items} onClose={() => setOpen(false)} />}
+      {open &&
+        createPortal(
+          <div
+            style={{
+              position: "absolute",
+              top: pos.top,
+              left: pos.left,
+              zIndex: 9999,
+            }}
+          >
+            <Menu items={items} onClose={() => setOpen(false)} />
+          </div>,
+          document.body
+        )}
     </div>
   );
 }
