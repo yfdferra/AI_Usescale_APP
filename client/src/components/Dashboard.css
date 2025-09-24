@@ -1,0 +1,10 @@
+.dashboard {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: #ecf2f7ff;
+  min-height: 100vh;
+  width: 100%;
+  padding-left: 5rem;
+  padding-right: 5rem;
+}

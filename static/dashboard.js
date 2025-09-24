@@ -140,27 +140,4 @@ function add_row() {
   usescale.appendChild(row);
 }
 
-function delete_row() {
-  var rows = usescale.querySelectorAll("div");
-  if (rows.length > 0) {
-    usescale.removeChild(rows[rows.length - 1]);
-  }
-}
-
 function fetchUseScaleItems() {}
-
-// function fetchUseScaleItems() {
-//   fetch(HOST + "/get_use_scale_items")
-//     .then((response) => response.json())
-//     .then((data) => {
-//       usescale.innerHTML = "";
-//       data.forEach((element) => {
-//         var div = document.createElement("div");
-//         div.textContent = element.title;
-//         usescale.appendChild(div);
-//       });
-//     })
-//     .catch((error) => {
-//       console.error("Error fetching data:", error);
-//     });
-// }

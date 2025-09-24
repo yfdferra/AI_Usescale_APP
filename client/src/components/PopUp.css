@@ -1,0 +1,63 @@
+.popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.popup-block {
+  background: #fff;
+  border-radius: 1rem;
+  box-shadow: 0 0.5rem 2rem rgba(0, 0, 0, 0.15);
+  padding: 1rem 2rem 2rem 2rem;
+  width: 35rem;
+  height: 15rem;
+  text-align: center;
+  position: relative;
+}
+
+.popup-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #222;
+  margin-bottom: 1rem;
+}
+
+.popup-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: transparent;
+  color: #888;
+  border: none;
+  font-size: 2.2rem;
+  font-weight: bold;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+
+.popup-icon {
+  margin: 0.5rem 0 1rem 0;
+  font-size: 3rem;
+}
+
+.popup-message {
+  font-size: 1.2rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  color: #222;
+}
+
+.popup-subtitle {
+  font-size: 1rem;
+  color: #666;
+  margin-bottom: 1rem;
+}

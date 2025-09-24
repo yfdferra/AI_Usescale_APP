@@ -1,8 +1,33 @@
 import logo from "../assets/logo.png";
-export default function Login({ onNext }) {
-  const handleSubmit = (e) => {
+import HOST from "../GLOBALS/Globals";
+import PopUp from "../components/PopUp";
+import React, { useState } from "react";
+import "../templates/Login.css";
+
+import { useNavigate } from "react-router-dom";
+
+export default function Login({ onLogin }) {
+  // export default function Login({ onNext }) {
+  // pop up for forgot password
+  const [showPopup, setShowPopup] = useState(false);
+  // navigation (to main page on successful login)
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (onNext) onNext();
+    var formData = new FormData(e.target);
+    var res = await fetch(HOST + "/login", {
+      method: "POST",
+      body: formData,
+    });
+    var data = await res.json();
+    if (data.logged_in) {
+      // onNext();
+      onLogin();
+      navigate("/main", { replace: true }); // replace: true -> replaces /login from history stack as /main | wont be able to go back to login page
+    } else {
+      alert("Incorrect Username/Password");
+    }
   };
 
   return (
@@ -17,6 +42,7 @@ export default function Login({ onNext }) {
           </label>
           <input
             id="username"
+            name="username"
             className="login-input"
             type="text"
             placeholder="Enter your username"
@@ -30,6 +56,7 @@ export default function Login({ onNext }) {
           </label>
           <input
             id="password"
+            name="password"
             className="login-input"
             type="password"
             placeholder="Enter your password"
@@ -41,7 +68,37 @@ export default function Login({ onNext }) {
           >
             Next
           </button>
+          <div className="login-links">
+            <a
+              href="#"
+              className="login-link"
+              onClick={(e) => {
+                e.preventDefault();
+                setShowPopup(true);
+              }}
+            >
+              Forgot Password ?
+            </a>
+
+            {/* Not sure if we need to be able to create accounts from here */}
+            {/* <a href="#" className="login-link">
+              Create Account
+            </a> */}
+          </div>
         </form>
+        {showPopup && (
+          <PopUp
+            title="Forgot Password"
+            message="Please contact the admin for this problem."
+            subtitle="For security reasons, password reset is handled by the administrator."
+            icon={
+              <span role="img" aria-label="alert">
+                🚨
+              </span>
+            }
+            onClose={() => setShowPopup(false)}
+          />
+        )}
       </div>
     </div>
   );

@@ -1,0 +1,17 @@
+.star-toggle {
+  cursor: pointer;
+  width: 24px;
+  height: 24px;
+  transition: transform 0.2s ease;
+  max-width: 24px;
+  max-height: 24px;
+  width: "24px";
+  flexShrink: 0;
+  display: "flex";
+  alignItems: "center";
+  justifyContent: "center";
+}
+
+.star-toggle:hover {
+  transform: scale(1.1);
+}
