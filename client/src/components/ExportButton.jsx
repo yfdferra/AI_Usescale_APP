@@ -39,28 +39,27 @@ export default function ExportButton({ tableSelector = ".table-section-table", t
       
       const title = document.querySelector(titleSelector)?.innerText || "Export";
       const headers = ["AI Use Scale Level"];
-      const data = Array.from(table.rows)
+      let values = Array.from(table.rows)
         .slice(1)
-        .map((tr) => {
-          const aiCell = tr.cells[1];
-          return [aiCell ? aiCell.innerText.trim() : ""];
-        });
+        .map(tr => tr.cells[1]?.innerText.trim() || "");
+      const uniqueValues = [...new Set(values.filter(v => v))];
 
-      if (data.length === 0) {
+      if (uniqueValues.length === 0) {
         alert("No AI Use Scale data found");
-        return;
-      }
-
-      const doc = new jsPDF();
-  doc.text(title, 14, 16);
-  autoTable(doc, {
-    head: [headers],
-    body: data,
-    startY: 20,
-    styles: { fontSize: 10 },
-  });
-  doc.save(`${title}_AI_Use_Scale.pdf`);
+      return;
     }
+    const data = uniqueValues.map(v => [v]);
+
+    const doc = new jsPDF();
+    doc.text(title, 14, 16);
+    autoTable(doc, {
+      head: [headers],
+      body: data,
+      startY: 20,
+      styles: { fontSize: 10 },
+    });
+    doc.save(`${title}_AI_Use_Scale.pdf`);
+  }
 
     setShowPopup(false);
   };
