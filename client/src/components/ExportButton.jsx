@@ -1,12 +1,16 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import "./ExportButton.css";
+import exportIcon from "../assets/export.png";
 
 export default function ExportButton({ tableSelector = ".table-section-table", titleSelector = ".table-section-title" }) {
   const [showPopup, setShowPopup] = useState(false);
   const [exportStudentDeclaration, setExportStudentDeclaration] = useState(true);
   const [exportAIUsageScale, setExportAIUsageScale] = useState(false);
+
+  const popupRef = useRef(null);
+  const buttonRef = useRef(null);
 
   const handleExport = () => {
     if (!exportStudentDeclaration) return;
@@ -47,14 +51,38 @@ export default function ExportButton({ tableSelector = ".table-section-table", t
 
   const canExport = exportStudentDeclaration || exportAIUsageScale;
 
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        popupRef.current &&
+        !popupRef.current.contains(event.target) &&
+        buttonRef.current &&
+        !buttonRef.current.contains(event.target)
+      ) {
+        setShowPopup(false);
+      }
+    };
+
+    if (showPopup) {
+      document.addEventListener("mousedown", handleClickOutside);
+    } else {
+      document.removeEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showPopup]);
+  
   return (
     <div className="export-btn-container" style={{ position: "relative" }}>
-      <button className="export-btn" onClick={() => setShowPopup(!showPopup)}>
-        Export
+      <button className="export-btn" ref={buttonRef} onClick={() => setShowPopup(!showPopup)}>
+        <img src={exportIcon} alt="Export" className="export-icon" />
+        <span className="export-text">Export</span>
       </button>
 
       {showPopup && (
-        <div className="export-popup">
+        <div className="export-popup" ref={popupRef}>
           <h4>Select export options:</h4>
           <div className="export-option">
             <input
@@ -81,7 +109,8 @@ export default function ExportButton({ tableSelector = ".table-section-table", t
             disabled={!canExport}
             onClick={handleExport}
           >
-            Download
+            <img src={exportIcon} alt="Export" className="export-icon" />
+            <span className="export-text">Download</span>
           </button>
         </div>
       )}
