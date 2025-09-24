@@ -38,26 +38,56 @@ export default function ExportButton({ tableSelector = ".table-section-table", t
       }
       
       const title = document.querySelector(titleSelector)?.innerText || "Export";
-      const headers = ["AI Use Scale Level"];
+      
+      const scaleConfig = {
+  "NO AI": [255, 179, 179],      
+  "SOME AI": [255, 207, 179],      
+  "MORE AI": [255, 255, 179],     
+  "GENERATIVE AI": [217, 179, 255]
+};
+      
       let values = Array.from(table.rows)
         .slice(1)
-        .map(tr => tr.cells[1]?.innerText.trim() || "");
+        .map(tr => {
+          const aiCell = tr.cells[1];
+          if (!aiCell) return "";
+          const cleanText = aiCell.childNodes[0]?.textContent.trim() || "";
+          return cleanText.replace(/\s+/g, " ").trim();
+        });
       const uniqueValues = [...new Set(values.filter(v => v))];
 
-      if (uniqueValues.length === 0) {
+      const orderedValues = Object.keys(scaleConfig).filter(v =>
+        uniqueValues.includes(v)
+      );
+
+      if (orderedValues.length === 0) {
         alert("No AI Use Scale data found");
       return;
     }
-    const data = uniqueValues.map(v => [v]);
 
     const doc = new jsPDF();
     doc.text(title, 14, 16);
     autoTable(doc, {
-      head: [headers],
-      body: data,
-      startY: 20,
-      styles: { fontSize: 10 },
-    });
+    head: [["AI Use Scale Level"]],
+    body: orderedValues.map(v => [v]),
+    startY: 20,
+    styles: { fontSize: 12, halign: "center", textColor: [0, 0, 0], minCellHeight: 15, valign: "middle"},
+    headStyles: {
+    fillColor: [64, 64, 64], 
+    textColor: [255, 255, 255],
+    fontStyle: "bold",
+    halign: "center",
+    valign: "middle",
+  },
+  didParseCell: function (data) {
+      if (data.section === "body") {
+        const value = data.cell.raw;
+        if (scaleConfig[value]) {
+          data.cell.styles.fillColor = scaleConfig[value];
+        }
+      }
+    },
+  });
     doc.save(`${title}_AI_Use_Scale.pdf`);
   }
 
