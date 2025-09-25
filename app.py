@@ -85,14 +85,15 @@ def save_template():
             cursor.execute(
                 """
                 INSERT INTO usescale_entries (
-                    subject_id, usescale_id, ai_title, instruction, example, declaration,
+                    subject_id, usescale_id, assessment_task, ai_title, instruction, example, declaration,
                     version, purpose, key_prompts
                 )
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     subject_id,
                     usescale_id,
+                    row.get('assessment_task'),
                     row.get('ai_title'),
                     row.get('instruction'),
                     row.get('example'),
@@ -202,16 +203,16 @@ def copy_template():
         entries = cursor_rows.fetchall()
 
         for entry in entries:
-            _, subject_id, _, ai_title, instruction, example, declaration, version, purpose, key_prompts = entry
+            _, subject_id, _, assessment_task, ai_title, instruction, example, declaration, version, purpose, key_prompts = entry
             cursor_rows.execute(
                 """
                 INSERT INTO usescale_entries (
-                    subject_id, usescale_id, ai_title, instruction, example, declaration, 
+                    subject_id, usescale_id, assessment_task, ai_title, instruction, example, declaration, 
                     version, purpose, key_prompts
                 )           
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)   
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)   
                 """,
-                (subject_id, new_usescale_id, ai_title, instruction, example, declaration, version, purpose, key_prompts)
+                (subject_id, new_usescale_id, assessment_task, ai_title, instruction, example, declaration, version, purpose, key_prompts)
                 
             )
         connection_rows.commit()

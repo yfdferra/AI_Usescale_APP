@@ -81,6 +81,7 @@ CREATE TABLE usescale_entries (
     row_id INTEGER PRIMARY KEY AUTOINCREMENT,
     subject_id INTEGER,
     usescale_id INTEGER,
+    assessment_task TEXT,
     ai_title TEXT,
     instruction TEXT,
     example TEXT,
@@ -97,6 +98,7 @@ entries = [
         1,
         1, 
         None,
+        None,
         "Idea Generation",  
         "'Generate me a list of 10 concerns regarding coral reef sustainability'",
         "Allowed; all prompts must be submitted",
@@ -107,6 +109,7 @@ entries = [
     (
         1,
         1,
+        None,
         None,
         "Proofreading",
         "DO NOT SUBMIT PROMPTS FOR PROOFREADING",
@@ -119,6 +122,7 @@ entries = [
         1,
         1,
         None,
+        None,
         "Research",
         "'Prompt: summarise the main points of this paper with citations in the format (page number, line number, any figures references)'",
         "Allowed; must cite sources",
@@ -129,6 +133,7 @@ entries = [
     (
         2,
         2,
+        None,
         None,
         "Problem Solving",
         "'Solve the equation 2x + 3 = 7 and show all steps'",
@@ -141,6 +146,7 @@ entries = [
         2,
         2,
         None,
+        None,
         "Concept Explanation",
         "'Explain the concept of derivatives in calculus with examples'",
         "Allowed; must be clear and concise",
@@ -151,6 +157,7 @@ entries = [
     (
         2,
         2,
+        None,
         None,
         "Graph Interpretation",
         "'Interpret the following graph showing the relationship between x and y coordinates'",
@@ -164,8 +171,8 @@ entries = [
 cursor.executemany(
     """
     INSERT INTO usescale_entries
-    (subject_id, usescale_id, ai_title, instruction, example, declaration, version, purpose, key_prompts)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    (subject_id, usescale_id, assessment_task, ai_title, instruction, example, declaration, version, purpose, key_prompts)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """,
     entries
 )
