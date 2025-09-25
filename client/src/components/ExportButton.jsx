@@ -46,46 +46,93 @@ export default function ExportButton({ tableSelector = ".table-section-table", t
   "GENERATIVE AI": [217, 179, 255]
 };
       
-      let values = Array.from(table.rows)
-        .slice(1)
-        .map(tr => {
-          const aiCell = tr.cells[1];
-          if (!aiCell) return "";
-          const cleanText = aiCell.childNodes[0]?.textContent.trim() || "";
-          return cleanText.replace(/\s+/g, " ").trim();
-        });
-      const uniqueValues = [...new Set(values.filter(v => v))];
+      let rows = Array.from(table.rows)
+    .slice(1)
+    .map(tr => {
+      const aiCell = tr.cells[1];
+    let aiScale = "";
+    if (aiCell) {
+      aiScale = aiCell.childNodes[0]?.textContent.trim() || "";
+      aiScale = aiScale.replace(/\s+/g, " ").trim();
+    }
+      const instructions = tr.cells[2]?.innerText.trim() || "";
+      const acknowledgement = tr.cells[4]?.innerText.trim() || "";
+      return [aiScale, instructions, acknowledgement];
+    })
+    .filter(r => r.some(cell => cell !== ""));
 
-      const orderedValues = Object.keys(scaleConfig).filter(v =>
-        uniqueValues.includes(v)
-      );
+    rows = Array.from(new Set(rows.map(r => JSON.stringify(r)))).map(r =>
+      JSON.parse(r)
+    );
 
-      if (orderedValues.length === 0) {
-        alert("No AI Use Scale data found");
+    const order = ["NO AI", "SOME AI", "MORE AI", "GENERATIVE AI"];
+    rows.sort((a, b) => {
+      const indexA = order.indexOf(a[0]);
+      const indexB = order.indexOf(b[0]);
+      const rankA = indexA === -1 ? Infinity : indexA;
+      const rankB = indexB === -1 ? Infinity : indexB;
+      return rankA - rankB;
+    });
+
+
+
+    if (rows.length === 0) {
+      alert("No AI Use Scale data found");
       return;
     }
 
+    const mergeMap = {};
+    for (let i = 0; i < rows.length; i++) {
+      const value = rows[i][2];
+      let span = 1;
+  for (let j = i + 1; j < rows.length; j++) {
+    if (rows[j][2] === value) {
+      span++;
+    } else break;
+  }
+  if (span > 1) mergeMap[i] = span;
+  i += span - 1;
+}
+
     const doc = new jsPDF();
+    doc.setFont("helvetica", "bold");
     doc.text(title, 14, 16);
+    doc.setFont("helvetica", "normal")
     autoTable(doc, {
-    head: [["AI Use Scale Level"]],
-    body: orderedValues.map(v => [v]),
+    head: [["AI Assessment Scale", "Instructions to Students", "AI Acknowledgement"]],
+    body: rows,
     startY: 20,
-    styles: { fontSize: 12, halign: "center", textColor: [0, 0, 0], minCellHeight: 15, valign: "middle"},
+    styles: { fontSize: 12, halign: "center", textColor: [0, 0, 0], minCellHeight: 15, valign: "middle", lineWidth: 0.01, lineColor: [0, 0, 0], fillColor: [255, 255, 255],},
     headStyles: {
-    fillColor: [64, 64, 64], 
-    textColor: [255, 255, 255],
+    fillColor: [218, 218, 218], 
+    textColor: [0, 0, 0],
     fontStyle: "bold",
     halign: "center",
     valign: "middle",
-  },
+    },
+    alternateRowStyles: {
+      fillColor: [255, 255, 255],
+    },
   didParseCell: function (data) {
-      if (data.section === "body") {
-        const value = data.cell.raw;
-        if (scaleConfig[value]) {
-          data.cell.styles.fillColor = scaleConfig[value];
+    if (data.section === "body" && data.column.index === 0) {
+      const value = data.cell.raw;
+      if (scaleConfig[value]) data.cell.styles.fillColor = scaleConfig[value];
+    }
+
+    if (data.section === "body" && data.column.index === 2) {
+      if (mergeMap[data.row.index]) {
+        data.cell.rowSpan = mergeMap[data.row.index];
+      } else {
+        for (let start in mergeMap) {
+          const span = mergeMap[start];
+          const startIdx = parseInt(start, 10);
+          if (data.row.index > startIdx && data.row.index < startIdx + span) {
+            data.cell.text = "";
+          }
         }
       }
+    }
+
     },
   });
     doc.save(`${title}_AI_Use_Scale.pdf`);
