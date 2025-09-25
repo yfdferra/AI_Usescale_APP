@@ -144,7 +144,14 @@ export default function TableSection({
   }, [initialTitle]);
 
   useEffect(() => {
-    if (tableData) setRows(tableData);
+    if (tableData) {
+      // map tableData to mark NO AI rows as grayed to make sure they render properly
+      const mappedRows = tableData.map(row => ({
+        ...row,
+        grayed: row.ai_title === "NO AI",
+      }));
+      setRows(mappedRows);
+    }
   }, [tableData]);
 
   const editTitle = () => {
@@ -153,6 +160,30 @@ export default function TableSection({
       setTitle(userInput);
     } else {
       alert("You cancelled the input.");
+    }
+  };
+
+  const makeCopy = async () => {
+    try {
+      const res = await fetch(HOST + "/copy_template", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({usescale_id: rows[0].usescale_id}),
+      });
+
+      const data = await res.json()
+
+      if (data.success) {
+        alert(`Template copy created: "${data.new_title}"`);
+        console.log("new template ID:", data.new_usescale_id);
+      } else {
+        alert("Failed to copy template:" + (data.error || "Uknown error"));
+      }
+    } catch (err) {
+      console.error("Error copying template:", err);
+      alert("Error copying template, please try again.");
     }
   };
 
@@ -242,8 +273,8 @@ export default function TableSection({
         <MenuButton
           inline
           items={[
-            { label: "Edit Title", icon: editIcon, onClick: () => editTitle() },
-            { label: "Make a Copy", icon: copyIcon, onClick: () => console.log("Make a Copy") },
+            { label: "Edit Title", onClick: () => editTitle() },
+            { label: "Make a Copy", onClick: () => makeCopy() },
             {
               label: "Save", icon: saveIcon,
               onClick: () => onSaveTemplate(title),
@@ -287,6 +318,7 @@ export default function TableSection({
             {rows.map((data, rowIdx) => {
               const shouldHighlight = toHighlight === rowIdx;
               const noAI = data?.level === NOAI;
+              const isGray = data.grayed;
 
               return (
                 <tr
@@ -370,7 +402,7 @@ export default function TableSection({
                           };
                           if (nullify) {
                             [
-                              "instruction",
+                              //"instruction",
                               "example",
                               "declaration",
                               "version",
@@ -381,21 +413,6 @@ export default function TableSection({
                             });
                           }
                           return { ...keep, ...FLAT };
-                        } else {
-                          // old logic below {should be removed after testing}
-                          return {
-                            ...row,
-                            level: newLevel,
-                            label: newLabel,
-                            ...(nullify && {
-                              instruction: null,
-                              example: null,
-                              declaration: null,
-                              version: null,
-                              purpose: null,
-                              key_prompts: null,
-                            }),
-                          };
                         }
                       });
                       setRows(updatedRows);
@@ -421,7 +438,7 @@ export default function TableSection({
                         handleCellChange(rowIdx, "instruction", val)
                       }
                       multiline
-                      grayed={noAI}
+                      //grayed={noAI}
                     />
                   </td>
 
@@ -433,7 +450,9 @@ export default function TableSection({
                         handleCellChange(rowIdx, "example", val)
                       }
                       multiline
-                      grayed={noAI}
+                      //grayed={noAI}
+                      grayed={noAI || isGray}
+                      
                     />
                   </td>
 
@@ -445,7 +464,7 @@ export default function TableSection({
                         handleCellChange(rowIdx, "declaration", val)
                       }
                       multiline
-                      grayed={noAI}
+                      grayed={noAI || isGray}
                     />
                   </td>
 
@@ -456,7 +475,7 @@ export default function TableSection({
                       onChange={(val) =>
                         handleCellChange(rowIdx, "version", val)
                       }
-                      grayed={noAI}
+                      grayed={noAI || isGray}
                     />
                   </td>
 
@@ -468,7 +487,7 @@ export default function TableSection({
                         handleCellChange(rowIdx, "purpose", val)
                       }
                       multiline
-                      grayed={noAI}
+                      grayed={noAI || isGray}
                     />
                   </td>
 
@@ -480,7 +499,7 @@ export default function TableSection({
                         handleCellChange(rowIdx, "key_prompts", val)
                       }
                       multiline
-                      grayed={noAI}
+                      grayed={noAI || isGray}
                     />
                   </td>
                 </tr>

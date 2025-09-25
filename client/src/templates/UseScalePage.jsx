@@ -45,6 +45,7 @@ export default function UseScalePage({
     // save as nulls
     if (levelKey === NOAI) {
       for (const k of TO_NULL) {
+        if (k === "instruction") continue;
         FLAT[k] = null;
       }
     }
