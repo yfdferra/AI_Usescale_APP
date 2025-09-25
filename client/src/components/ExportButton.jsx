@@ -3,6 +3,8 @@ import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import "./ExportButton.css";
 import exportIcon from "../assets/export.png";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 export default function ExportButton({ tableSelector = ".table-section-table", titleSelector = ".table-section-title" }) {
   const [showPopup, setShowPopup] = useState(false);
@@ -13,38 +15,81 @@ export default function ExportButton({ tableSelector = ".table-section-table", t
   const buttonRef = useRef(null);
 
   const handleExport = () => {
-    if (!exportStudentDeclaration) return;
+  const title = document.querySelector(titleSelector)?.textContent || "table";
 
-    const table = document.querySelector(tableSelector);
-    if (!table || !table.rows.length) return;
-
-    const title = document.querySelector(titleSelector)?.textContent || "table";
-    const ws = XLSX.utils.table_to_sheet(table);
-
-    const colCount = table.rows[0]?.cells.length || 8;
-    const rowCount = table.rows.length;
-    const colWidths = [];
-
-    for (let c = 0; c < colCount; ++c) {
-      let maxLen = 10;
-      for (let r = 0; r < rowCount; ++r) {
-        const cell = table.rows[r].cells[c];
-        if (cell) {
-          const text = cell.innerText || cell.textContent || "";
-          maxLen = Math.max(maxLen, text.length);
-        }
+    // excell
+    if (exportStudentDeclaration) {
+      const table = document.querySelector(tableSelector);
+      if (table && table.rows.length) {
+        const ws = XLSX.utils.table_to_sheet(table);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
+        const wbout = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+        saveAs(new Blob([wbout], { type: "application/octet-stream" }), `${title}.xlsx`);
       }
-      colWidths.push({ wch: maxLen + 2 });
     }
 
-    ws["!cols"] = colWidths;
-    ws["!rows"] = [{ hpt: 30 }, ...Array(rowCount - 1).fill({ hpt: 20 })];
+    // pdf
+    if (exportAIUsageScale) {
+      const table = document.querySelector(tableSelector);
+      if (!table) {
+        alert("No table found for PDF export");
+        return;
+      }
+      
+      const title = document.querySelector(titleSelector)?.innerText || "Export";
+      
+      const scaleConfig = {
+  "NO AI": [255, 179, 179],      
+  "SOME AI": [255, 207, 179],      
+  "MORE AI": [255, 255, 179],     
+  "GENERATIVE AI": [217, 179, 255]
+};
+      
+      let values = Array.from(table.rows)
+        .slice(1)
+        .map(tr => {
+          const aiCell = tr.cells[1];
+          if (!aiCell) return "";
+          const cleanText = aiCell.childNodes[0]?.textContent.trim() || "";
+          return cleanText.replace(/\s+/g, " ").trim();
+        });
+      const uniqueValues = [...new Set(values.filter(v => v))];
 
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
+      const orderedValues = Object.keys(scaleConfig).filter(v =>
+        uniqueValues.includes(v)
+      );
 
-    const wbout = XLSX.write(wb, { bookType: "xlsx", type: "array" });
-    saveAs(new Blob([wbout], { type: "application/octet-stream" }), `${title}.xlsx`);
+      if (orderedValues.length === 0) {
+        alert("No AI Use Scale data found");
+      return;
+    }
+
+    const doc = new jsPDF();
+    doc.text(title, 14, 16);
+    autoTable(doc, {
+    head: [["AI Use Scale Level"]],
+    body: orderedValues.map(v => [v]),
+    startY: 20,
+    styles: { fontSize: 12, halign: "center", textColor: [0, 0, 0], minCellHeight: 15, valign: "middle"},
+    headStyles: {
+    fillColor: [64, 64, 64], 
+    textColor: [255, 255, 255],
+    fontStyle: "bold",
+    halign: "center",
+    valign: "middle",
+  },
+  didParseCell: function (data) {
+      if (data.section === "body") {
+        const value = data.cell.raw;
+        if (scaleConfig[value]) {
+          data.cell.styles.fillColor = scaleConfig[value];
+        }
+      }
+    },
+  });
+    doc.save(`${title}_AI_Use_Scale.pdf`);
+  }
 
     setShowPopup(false);
   };
