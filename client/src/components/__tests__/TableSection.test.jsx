@@ -4,6 +4,8 @@
 // mock heavy child components (MenuButton, TagInput, DropdownTagInput, Star, ExportButton)
 // and the network fetch used to populate subject info
 
+// Version 2: 2025/09/29 Changed task to assessment_task as per latest Dev branch updates (Backend) see commit ca4a1ad81ba88a7ec3c9b7dfde472aecabd4df15 (Dev) -> 93f9cfdf9642d7bbf2d31f30715bb4817396e86a (Backend, where the change took place)
+
 import React from "react";
 import { render, screen, within, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -48,7 +50,7 @@ describe("TableSection (UI + edit flow)", () => {
     // example table data row
     const tableData = [
       {
-        task: "Initial Task",
+        assessment_task: "Initial Task",
         level: "LEVEL N",
         label: "NO AI",
         instruction: "Initial Instruction",
@@ -113,6 +115,6 @@ describe("TableSection (UI + edit flow)", () => {
     expect(onRowsChange).toHaveBeenCalled();
     const latestRows = onRowsChange.mock.calls.at(-1)?.[0];
     expect(Array.isArray(latestRows)).toBe(true);
-    expect(latestRows[0]?.task).toBe("Updated Task");
+    expect(latestRows[0]?.assessment_task).toBe("Updated Task");
   });
 });
