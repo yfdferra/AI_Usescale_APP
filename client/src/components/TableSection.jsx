@@ -189,7 +189,7 @@ export default function TableSection({
 
   // empty row template
   const emptyRow = {
-    task: "",
+    assessment_task: "",
     level: "",
     label: "",
     instruction: "",
@@ -328,8 +328,8 @@ export default function TableSection({
                   {/* Task column */}
                   <td className="table-section-td cell-with-menu">
                     <EditableCell
-                      value={data.task}
-                      onChange={(val) => handleCellChange(rowIdx, "task", val)}
+                      value={data.assessment_task}
+                      onChange={(val) => handleCellChange(rowIdx, "assessment_task", val)}
                       multiline
                     />
                     <MenuButton
@@ -392,13 +392,15 @@ export default function TableSection({
 
                       const updatedRows = rows.map((row, idx) => {
                         if (idx !== rowIdx) return row;
-                        // If foundEntry then update all fields from DB, if not then use old logic
+                        // If foundEntry then update all fields from DB apart from general learning row, if not then use old logic
                         if (foundEntry) {
                           const keep = row.id ? { id: row.id } : {};
                           const FLAT = {
+                            ...row,
+                            ...foundEntry,
                             level: newLevel,
                             label: newLabel,
-                            ...foundEntry,
+                            ...keep,
                           };
                           if (nullify) {
                             [
