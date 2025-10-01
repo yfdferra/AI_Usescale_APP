@@ -5,8 +5,8 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 // mock imports used by Star to strings  
-jest.mock("../../assets/starFilled.png", () => "FILLED", { virtual: true }); // closed state  *toggled*
-jest.mock("../../assets/starEmpty.png", () => "EMPTY", { virtual: true });   // state | initial state  *untoggled*
+jest.mock("../../assets/starFilled.png", () => "FILLED"); // closed state  *toggled*
+jest.mock("../../assets/starEmpty.png", () => "EMPTY");   // state | initial state  *untoggled*
 
 import StarToggle from "../Star";
 
