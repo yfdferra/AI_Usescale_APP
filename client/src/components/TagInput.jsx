@@ -1,7 +1,7 @@
 import { useState } from "react";
 import "./TagInput.css";
 
-export default function TagInput({ placeholder, value }) {
+export default function TagInput({ placeholder, value, onChange }) {
   const [tags, setTags] = useState(null);
   const [inputValue, setInputValue] = useState("");
 
@@ -29,7 +29,10 @@ export default function TagInput({ placeholder, value }) {
           type="text"
           placeholder={placeholder}
           value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
+          onChange={(e) => {
+            setInputValue(e.target.value);
+            onChange(e.target.value);
+          }}
           onKeyDown={handleKeyDown}
         />
       )}
