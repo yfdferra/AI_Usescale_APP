@@ -4,6 +4,6 @@ module.exports = {
     // Target the current Node version for tests
     ["@babel/preset-env", { targets: { node: "current" } }],
     // Enable JSX transform
-    ["@babel/preset-react", { runtime: "automatic" }]
+    ["@babel/preset-react", { runtime: "automatic" }], 
   ],
 };

@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="jest tests" tests="31" failures="0" errors="0" time="10.708">
+  <testsuite name="VerticalDropdown" errors="0" failures="0" skipped="0" timestamp="2025-10-01T04:28:25" time="1.992" tests="1">
+    <testcase classname="VerticalDropdown toggles open/closed and flips icon" name="VerticalDropdown toggles open/closed and flips icon" time="0.096">
+    </testcase>
+  </testsuite>
+  <testsuite name="TextBox" errors="0" failures="0" skipped="0" timestamp="2025-10-01T04:28:27" time="0.433" tests="1">
+    <testcase classname="TextBox renders and emits onChange while typing" name="TextBox renders and emits onChange while typing" time="0.156">
+    </testcase>
+  </testsuite>
+  <testsuite name="UseScaleBlock" errors="0" failures="0" skipped="0" timestamp="2025-10-01T04:28:28" time="0.33" tests="3">
+    <testcase classname="UseScaleBlock renders level &amp; label and is draggable by default" name="UseScaleBlock renders level &amp; label and is draggable by default" time="0.013">
+    </testcase>
+    <testcase classname="UseScaleBlock respects draggable={false}" name="UseScaleBlock respects draggable={false}" time="0.004">
+    </testcase>
+    <testcase classname="UseScaleBlock dragstart sets JSON payload with level, label, entry_type_id" name="UseScaleBlock dragstart sets JSON payload with level, label, entry_type_id" time="0.011">
+    </testcase>
+  </testsuite>
+  <testsuite name="TagInput" errors="0" failures="0" skipped="0" timestamp="2025-10-01T04:28:28" time="0.544" tests="1">
+    <testcase classname="TagInput adds a tag on Enter and removes it via  ×  remove button" name="TagInput adds a tag on Enter and removes it via  ×  remove button" time="0.085">
+    </testcase>
+  </testsuite>
+  <testsuite name="TableSection (UI + edit flow)" errors="0" failures="0" skipped="0" timestamp="2025-10-01T04:28:29" time="0.79" tests="1">
+    <testcase classname="TableSection (UI + edit flow) renders title + ALL headers; editing &apos;task&apos; updates rows via onRowsChange" name="TableSection (UI + edit flow) renders title + ALL headers; editing &apos;task&apos; updates rows via onRowsChange" time="0.147">
+    </testcase>
+  </testsuite>
+  <testsuite name="StarToggle" errors="0" failures="0" skipped="0" timestamp="2025-10-01T04:28:29" time="0.375" tests="1">
+    <testcase classname="StarToggle toggles star on click" name="StarToggle toggles star on click" time="0.1">
+    </testcase>
+  </testsuite>
+  <testsuite name="Square" errors="0" failures="0" skipped="0" timestamp="2025-10-01T04:28:30" time="0.407" tests="4">
+    <testcase classname="Square renders text" name="Square renders text" time="0.006">
+    </testcase>
+    <testcase classname="Square calls onClick when clicked" name="Square calls onClick when clicked" time="0.068">
+    </testcase>
+    <testcase classname="Square adds selected class when selected=true" name="Square adds selected class when selected=true" time="0.004">
+    </testcase>
+    <testcase classname="Square applies &quot;custom-square&quot; when text is &quot;+ Create from scratch&quot;" name="Square applies &quot;custom-square&quot; when text is &quot;+ Create from scratch&quot;" time="0.002">
+    </testcase>
+  </testsuite>
+  <testsuite name="Sidebar" errors="0" failures="0" skipped="0" timestamp="2025-10-01T04:28:30" time="0.508" tests="5">
+    <testcase classname="Sidebar Profile opens the Profile PopUp" name="Sidebar Profile opens the Profile PopUp" time="0.024">
+    </testcase>
+    <testcase classname="Sidebar Notifications opens the Notifications PopUp" name="Sidebar Notifications opens the Notifications PopUp" time="0.029">
+    </testcase>
+    <testcase classname="Sidebar Settings opens the Settings PopUp" name="Sidebar Settings opens the Settings PopUp" time="0.063">
+    </testcase>
+    <testcase classname="Sidebar Folder navigates to /main" name="Sidebar Folder navigates to /main" time="0.021">
+    </testcase>
+    <testcase classname="Sidebar LogOut calls onLogout and navigates to /login (disables backstep without relogin)" name="Sidebar LogOut calls onLogout and navigates to /login (disables backstep without relogin)" time="0.022">
+    </testcase>
+  </testsuite>
+  <testsuite name="PopUp" errors="0" failures="0" skipped="0" timestamp="2025-10-01T04:28:31" time="0.167" tests="1">
+    <testcase classname="PopUp renders content (title, message, subtitle, icon) and closes via onClose" name="PopUp renders content (title, message, subtitle, icon) and closes via onClose" time="0.024">
+    </testcase>
+  </testsuite>
+  <testsuite name="MenuButton" errors="0" failures="0" skipped="0" timestamp="2025-10-01T04:28:31" time="0.296" tests="4">
+    <testcase classname="MenuButton opens menu and triggers actions: Add Row Above" name="MenuButton opens menu and triggers actions: Add Row Above" time="0.037">
+    </testcase>
+    <testcase classname="MenuButton opens menu and triggers actions: Add Row Below" name="MenuButton opens menu and triggers actions: Add Row Below" time="0.036">
+    </testcase>
+    <testcase classname="MenuButton opens menu and triggers actions: Delete Row" name="MenuButton opens menu and triggers actions: Delete Row" time="0.026">
+    </testcase>
+    <testcase classname="MenuButton opens menu and triggers actions: Duplicate Row" name="MenuButton opens menu and triggers actions: Duplicate Row" time="0.029">
+    </testcase>
+  </testsuite>
+  <testsuite name="DropdownMenu" errors="0" failures="0" skipped="0" timestamp="2025-10-01T04:28:31" time="0.142" tests="2">
+    <testcase classname="DropdownMenu clicking an item triggers its handler and onClose" name="DropdownMenu clicking an item triggers its handler and onClose" time="0.015">
+    </testcase>
+    <testcase classname="DropdownMenu renders multiple items" name="DropdownMenu renders multiple items" time="0.003">
+    </testcase>
+  </testsuite>
+  <testsuite name="HorizontalSidebar" errors="0" failures="0" skipped="0" timestamp="2025-10-01T04:28:31" time="0.187" tests="1">
+    <testcase classname="HorizontalSidebar closed -&gt; open toggle | open renders children on top and middle" name="HorizontalSidebar closed -&gt; open toggle | open renders children on top and middle" time="0.036">
+    </testcase>
+  </testsuite>
+  <testsuite name="FilterSearchBar" errors="0" failures="0" skipped="0" timestamp="2025-10-01T04:28:32" time="0.177" tests="1">
+    <testcase classname="FilterSearchBar emits filter changes and search text" name="FilterSearchBar emits filter changes and search text" time="0.047">
+    </testcase>
+  </testsuite>
+  <testsuite name="ExportButton (UI only, actual export not tested *manual*)" errors="0" failures="0" skipped="0" timestamp="2025-10-01T04:28:32" time="0.83" tests="1">
+    <testcase classname="ExportButton (UI only, actual export not tested *manual*) opens popup and toggles Download enabled/disabled based on checkbox selections" name="ExportButton (UI only, actual export not tested *manual*) opens popup and toggles Download enabled/disabled based on checkbox selections" time="0.06">
+    </testcase>
+  </testsuite>
+  <testsuite name="DropdownTagInput" errors="0" failures="0" skipped="0" timestamp="2025-10-01T04:28:33" time="0.298" tests="1">
+    <testcase classname="DropdownTagInput select → tag → clear → back to select" name="DropdownTagInput select → tag → clear → back to select" time="0.042">
+    </testcase>
+  </testsuite>
+  <testsuite name="CustomTemplatesSection" errors="0" failures="0" skipped="0" timestamp="2025-10-01T04:28:33" time="0.467" tests="1">
+    <testcase classname="CustomTemplatesSection renders templates, clicking a square calls onTemplateClick passed by parent, search filters by title" name="CustomTemplatesSection renders templates, clicking a square calls onTemplateClick passed by parent, search filters by title" time="0.165">
+    </testcase>
+  </testsuite>
+  <testsuite name="undefined" errors="0" failures="0" skipped="0" timestamp="2025-10-01T04:28:34" time="0.288" tests="1">
+    <testcase classname=" renders children" name=" renders children" time="0.008">
+    </testcase>
+  </testsuite>
+  <testsuite name="BaseTemplatesSection" errors="0" failures="0" skipped="0" timestamp="2025-10-01T04:28:34" time="0.411" tests="1">
+    <testcase classname="BaseTemplatesSection renders tiles and tiggers first/last clicks" name="BaseTemplatesSection renders tiles and tiggers first/last clicks" time="0.165">
+    </testcase>
+  </testsuite>
+</testsuites>
