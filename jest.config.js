@@ -13,13 +13,15 @@ module.exports = {
     "^react-dom/client$": "<rootDir>/client/node_modules/react-dom/client",
     "^react/jsx-runtime$": "<rootDir>/client/node_modules/react/jsx-runtime",
 
+    // map the two Star images
+    "starEmpty\\.png$": "<rootDir>/test/__mocks__/starEmptyMock.js",
+    "starFilled\\.png$": "<rootDir>/test/__mocks__/starFilledMock.js",
+    
     // existing mappers
     "\\.(css|less|scss|sass)$": "identity-obj-proxy",
     "\\.(png|jpg|jpeg|gif|svg|webp|avif)$": "<rootDir>/test/__mocks__/fileMock.js",
 
-    // map the two Star images
-    "starEmpty\\.png$": "<rootDir>/test/__mocks__/starEmptyMock.js",
-    "starFilled\\.png$": "<rootDir>/test/__mocks__/starFilledMock.js",
+
   },
 
   transform: {
