@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: "**"
+    branches: '**'
   pull_request:
-    branches: "**"
+    branches: '**'
 
 jobs:
   test:
@@ -25,14 +25,13 @@ jobs:
           cache: "npm"
 
       # Install root deps
+      - name: Install root deps
+        run: npm ci
+
+      # Install client deps
       - name: Install client deps
         working-directory: client
         run: npm ci
-
-
-      # Install client deps as well (since we have nested structure)
-      - name: Install client dependencies
-        run: npm ci --prefix client
 
       # Lint 
       - name: Lint
