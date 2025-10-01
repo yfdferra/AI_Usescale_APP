@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [ dev, Dev ]
+    branches: "**"
   pull_request:
-    branches: [ dev, Dev ]
+    branches: "**"
 
 jobs:
   test:
@@ -12,7 +12,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [20] # add 18 if you want multi-version: [18, 20]
+        node-version: [20] 
 
     steps:
       - name: Checkout
@@ -30,11 +30,11 @@ jobs:
         run: npm ci
 
 
-      # Install client deps as well (since you have a nested package.json there)
+      # Install client deps as well (since we have nested structure)
       - name: Install client dependencies
         run: npm ci --prefix client
 
-      # Lint (optional)
+      # Lint 
       - name: Lint
         run: npm run lint
         continue-on-error: true
@@ -51,7 +51,7 @@ jobs:
           name: coverage
           path: coverage
 
-      # Upload JUnit report (if using jest-junit)
+      # Upload JUnit report
       - name: Upload JUnit report
         if: always()
         uses: actions/upload-artifact@v4
