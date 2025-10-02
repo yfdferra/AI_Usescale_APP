@@ -6,14 +6,19 @@ import DropdownTagInput from "./DropdownTagInput";
 import Star from "./Star";
 import HOST from "../GLOBALS/Globals";
 import ExportButton from "./ExportButton";
+import editIcon from "../assets/edit.png";
+import copyIcon from "../assets/copy.png";
+import deleteIcon from "../assets/delete.png";
+import addIcon from "../assets/add.png";
+import saveIcon from "../assets/save.png";
 
 const NOAI = "LEVEL N";
 
 const LEVEL_COLORS = {
-  "LEVEL N": "#ffb3b3",
-  "LEVEL R-1": "#ffcfb3ff",
-  "LEVEL R-2": "#ffffb3ff",
-  "LEVEL G": "#d9b3ffff",
+  "NO AI": "#ffb3b3",
+  "SOME AI": "#ffcfb3ff",
+  "MORE AI": "#ffffb3ff",
+  "GENERATIVE AI": "#d9b3ffff",
 };
 
 // Editable cell component
@@ -118,23 +123,6 @@ export default function TableSection({
   const [subjectName, setSubjectName] = useState("");
   const [subjectYear, setSubjectYear] = useState("");
   const [subjectSemester, setSubjectSemester] = useState("");
-  const [version, setVersion] = useState(""); // Add version state
-
-  useEffect(() => {
-    fetch(`${HOST}/get_usescale_rows?usescale_id=${subjectId}`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (!data.error) {
-          setSubjectName(data.subject_name || "");
-          setSubjectYear(data.subject_year || "");
-          setSubjectSemester(data.subject_semester || "");
-          setVersion(data.version || "");
-        } else {
-          console.error("Error fetching use scale:", data.error);
-        }
-      })
-      .catch((err) => console.error("Fetch error:", err));
-  }, [subjectId]);
 
   useEffect(() => {
     fetch(HOST + `/get_subject_info?subject_id=${subjectId}`)
@@ -156,7 +144,14 @@ export default function TableSection({
   }, [initialTitle]);
 
   useEffect(() => {
-    if (tableData) setRows(tableData);
+    if (tableData) {
+      // map tableData to mark NO AI rows as grayed to make sure they render properly
+      const mappedRows = tableData.map(row => ({
+        ...row,
+        grayed: row.ai_title === "NO AI",
+      }));
+      setRows(mappedRows);
+    }
   }, [tableData]);
 
   const editTitle = () => {
@@ -168,9 +163,33 @@ export default function TableSection({
     }
   };
 
+  const makeCopy = async () => {
+    try {
+      const res = await fetch(HOST + "/copy_template", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({usescale_id: rows[0].usescale_id}),
+      });
+
+      const data = await res.json()
+
+      if (data.success) {
+        alert(`Template copy created: "${data.new_title}"`);
+        console.log("new template ID:", data.new_usescale_id);
+      } else {
+        alert("Failed to copy template:" + (data.error || "Uknown error"));
+      }
+    } catch (err) {
+      console.error("Error copying template:", err);
+      alert("Error copying template, please try again.");
+    }
+  };
+
   // empty row template
   const emptyRow = {
-    task: "",
+    assessment_task: "",
     level: "",
     label: "",
     instruction: "",
@@ -255,25 +274,20 @@ export default function TableSection({
           inline
           items={[
             { label: "Edit Title", onClick: () => editTitle() },
-            { label: "Make a Copy", onClick: () => console.log("Make a Copy") },
+            { label: "Make a Copy", onClick: () => makeCopy() },
             {
-              label: "Save",
-              onClick: () => onSaveTemplate(version),
+              label: "Save", icon: saveIcon,
+              onClick: () => onSaveTemplate(title),
             },
           ]}
         />
 
         <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-          <TagInput value={subjectName} placeholder={subjectName} />
-          <TagInput value={subjectYear} placeholder={subjectYear} />
+          <TagInput value={subjectName} placeholder="*Subject code" />
+          <TagInput value={subjectYear} placeholder="*Year" />
           <DropdownTagInput
             placeholder="*Semester"
             options={["Semester 1", "Semester 2"]}
-          />
-          <TagInput
-            value={version}
-            placeholder={version}
-            onChange={setVersion}
           />
         </div>
 
@@ -304,6 +318,7 @@ export default function TableSection({
             {rows.map((data, rowIdx) => {
               const shouldHighlight = toHighlight === rowIdx;
               const noAI = data?.level === NOAI;
+              const isGray = data.grayed;
 
               return (
                 <tr
@@ -313,26 +328,26 @@ export default function TableSection({
                   {/* Task column */}
                   <td className="table-section-td cell-with-menu">
                     <EditableCell
-                      value={data.task}
-                      onChange={(val) => handleCellChange(rowIdx, "task", val)}
+                      value={data.assessment_task}
+                      onChange={(val) => handleCellChange(rowIdx, "assessment_task", val)}
                       multiline
                     />
                     <MenuButton
                       items={[
                         {
-                          label: "Add Row Above",
+                          label: "Add Row Above", icon: addIcon,
                           onClick: () => addRowAbove(rowIdx),
                         },
                         {
-                          label: "Add Row Below",
+                          label: "Add Row Below", icon: addIcon,
                           onClick: () => addRowBelow(rowIdx),
                         },
                         {
-                          label: "Delete Row",
+                          label: "Delete Row", icon: deleteIcon,
                           onClick: () => deleteRow(rowIdx),
                         },
                         {
-                          label: "Duplicate Row",
+                          label: "Duplicate Row", icon: copyIcon,
                           onClick: () => duplicateRow(rowIdx),
                         },
                       ]}
@@ -343,19 +358,21 @@ export default function TableSection({
                   <td
                     className="table-section-td cell-with-menu"
                     style={{
-                      backgroundColor: LEVEL_COLORS[data?.level] || undefined,
+                      backgroundColor: LEVEL_COLORS[data?.label] || undefined,
                     }}
                     onDragOver={(e) => e.preventDefault()}
                     onDrop={async (e) => {
                       e.preventDefault();
                       let newLevel = "";
                       let newLabel = "";
+                      let entry_type_id = null;
                       try {
                         const dropData = JSON.parse(
                           e.dataTransfer.getData("application/json")
                         );
                         newLevel = dropData.level;
                         newLabel = dropData.label;
+                        entry_type_id = dropData.entry_type_id;
                       } catch {
                         newLevel = e.dataTransfer.getData("text/plain");
                       }
@@ -364,6 +381,7 @@ export default function TableSection({
                       // Find the entry in levelsData matching the dropped level
                       let foundEntry = null;
                       for (const entryType of levelsData) {
+                        if (entryType.entry_type_id !== entry_type_id) continue;
                         foundEntry = entryType.entries.find(
                           (e) => e.ai_level === newLevel
                         );
@@ -374,17 +392,19 @@ export default function TableSection({
 
                       const updatedRows = rows.map((row, idx) => {
                         if (idx !== rowIdx) return row;
-                        // If foundEntry then update all fields from DB, if not then use old logic
+                        // If foundEntry then update all fields from DB apart from general learning row, if not then use old logic
                         if (foundEntry) {
                           const keep = row.id ? { id: row.id } : {};
                           const FLAT = {
+                            ...row,
+                            ...foundEntry,
                             level: newLevel,
                             label: newLabel,
-                            ...foundEntry,
+                            ...keep,
                           };
                           if (nullify) {
                             [
-                              "instruction",
+                              //"instruction",
                               "example",
                               "declaration",
                               "version",
@@ -395,21 +415,6 @@ export default function TableSection({
                             });
                           }
                           return { ...keep, ...FLAT };
-                        } else {
-                          // old logic below {should be removed after testing}
-                          return {
-                            ...row,
-                            level: newLevel,
-                            label: newLabel,
-                            ...(nullify && {
-                              instruction: null,
-                              example: null,
-                              declaration: null,
-                              version: null,
-                              purpose: null,
-                              key_prompts: null,
-                            }),
-                          };
                         }
                       });
                       setRows(updatedRows);
@@ -420,7 +425,7 @@ export default function TableSection({
                     <MenuButton
                       items={[
                         {
-                          label: "Change Scale",
+                          label: "Change Scale", icon: editIcon,
                           onClick: () => onChangeScale(rowIdx),
                         },
                       ]}
@@ -435,7 +440,7 @@ export default function TableSection({
                         handleCellChange(rowIdx, "instruction", val)
                       }
                       multiline
-                      grayed={noAI}
+                      //grayed={noAI}
                     />
                   </td>
 
@@ -447,7 +452,9 @@ export default function TableSection({
                         handleCellChange(rowIdx, "example", val)
                       }
                       multiline
-                      grayed={noAI}
+                      //grayed={noAI}
+                      grayed={noAI || isGray}
+                      
                     />
                   </td>
 
@@ -459,7 +466,7 @@ export default function TableSection({
                         handleCellChange(rowIdx, "declaration", val)
                       }
                       multiline
-                      grayed={noAI}
+                      grayed={noAI || isGray}
                     />
                   </td>
 
@@ -470,7 +477,7 @@ export default function TableSection({
                       onChange={(val) =>
                         handleCellChange(rowIdx, "version", val)
                       }
-                      grayed={noAI}
+                      grayed={noAI || isGray}
                     />
                   </td>
 
@@ -482,7 +489,7 @@ export default function TableSection({
                         handleCellChange(rowIdx, "purpose", val)
                       }
                       multiline
-                      grayed={noAI}
+                      grayed={noAI || isGray}
                     />
                   </td>
 
@@ -494,7 +501,7 @@ export default function TableSection({
                         handleCellChange(rowIdx, "key_prompts", val)
                       }
                       multiline
-                      grayed={noAI}
+                      grayed={noAI || isGray}
                     />
                   </td>
                 </tr>
