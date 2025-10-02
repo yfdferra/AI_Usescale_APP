@@ -19,6 +19,10 @@ client/node_modules/
 client/dist/
 client/.vite/
 
+# testing stuff: ignore components folder and reports from tests
+coverage/
+reports/
+
 # --- Env & secrets ---
 .env
 .env.*
