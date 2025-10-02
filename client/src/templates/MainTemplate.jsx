@@ -5,6 +5,7 @@ import CustomTemplatesSection from "../components/CustomTemplatesSection";
 import Dashboard from "../components/Dashboard";
 import { useState, useEffect } from "react";
 import HOST from "../GLOBALS/Globals.jsx";
+import "./MainTemplate.css"
 
 export default function MainTemplate({
   children,
