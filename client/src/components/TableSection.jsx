@@ -18,11 +18,12 @@ const LEVEL_COLORS = {
   "NO AI": "#ffb3b3",
   "SOME AI": "#ffcfb3ff",
   "MORE AI": "#ffffb3ff",
-  "GENERATIVE AI": "#d9b3ffff",
+  "AI FOR LEARNING": "#d9b3ffff",
 };
 
 // Editable cell component
-function EditableCell({ value, onChange, multiline = false, grayed = false }) {
+// add a readonly mode for coordinators viewing base templates
+function EditableCell({ value, onChange, multiline = false, grayed = false, readOnly = false }) {
   const [editing, setEditing] = useState(false);
   const [tempValue, setTempValue] = useState(value || "");
   const textareaRef = useRef(null);
@@ -48,6 +49,16 @@ function EditableCell({ value, onChange, multiline = false, grayed = false }) {
     setEditing(false);
     onChange(tempValue);
   };
+
+  // handle read only
+  if (readOnly) {
+    return (
+      <div className="editable-cell readonly" style={{ cursor: "not-allowed", opacity: 0.7}}>
+        {value || <span className="editable-placeholder">Empty</span>}
+      </div>
+    );
+  }
+
 
   // if grayed out, unclickable
   if (grayed) {
@@ -105,6 +116,9 @@ function EditableCell({ value, onChange, multiline = false, grayed = false }) {
 
 export default function TableSection({
   open,
+  isBaseTemplate,
+  userId,
+  userType,
   tableData,
   subjectId,
   initialTitle,
@@ -117,6 +131,14 @@ export default function TableSection({
   const [title, setTitle] = useState(
     initialTitle || "Untitled student declaration"
   );
+
+  // constant for determining if user is admin
+  const isAdmin = userType?.toLowerCase() === "admin";
+  // constant for determining if user can modify rows
+  const canModifyRows = !(isBaseTemplate && !isAdmin);
+
+  console.log("Tablesection userTtype:", userType);
+  console.log("Tablesection userid:", userId);
 
   // local state for table rows
   const [rows, setRows] = useState(tableData || []);
@@ -170,7 +192,7 @@ export default function TableSection({
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({usescale_id: rows[0].usescale_id}),
+        body: JSON.stringify({usescale_id: rows[0].usescale_id, user_id: userId}),
       });
 
       const data = await res.json()
@@ -184,6 +206,62 @@ export default function TableSection({
     } catch (err) {
       console.error("Error copying template:", err);
       alert("Error copying template, please try again.");
+    }
+  };
+
+  // function for saving as base template for admin
+  const saveAsBaseTemplate = async () => {
+    if (!window.confirm("Are you sure you want to save as a global base template?")) {
+      return;
+    }
+  
+    const templateId = rows?.[0]?.usescale_id || usescale_id; // fallback to prop
+    if (!templateId) {
+      alert("Cannot determine template ID to save as base template");
+      return;
+    }
+  
+    try {
+      const res = await fetch(HOST + "/save_as_base_template", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ usescale_id: templateId }),
+      });
+  
+      const data = await res.json();
+      if (data.success) {
+        alert("Template has been successfully saved as a base template");
+      } else {
+        alert("Error saving as base template: " + (data.error || ""));
+      }
+    } catch (err) {
+      console.error("Network error:", err);
+      alert("Network error while saving as base template");
+    }
+  };
+
+  // function for copying a base template as a coordinator
+  const copyBaseTemplate = async () => {
+    try {
+      const res = await fetch(HOST + "/copy_base_template", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({usescale_id: rows[0].usescale_id, user_id: userId}),
+      });
+
+      const data = await res.json()
+
+      if (data.success) {
+        alert(`Base template copy created: "${data.new_title}"`);
+        console.log("new template ID:", data.new_usescale_id);
+      } else {
+        alert("Failed to copy base template:" + (data.error || "Uknown error"));
+      }
+    } catch (err) {
+      console.error("Error copying base template:", err);
+      alert("Error copying base template, please try again.");
     }
   };
 
@@ -263,6 +341,27 @@ export default function TableSection({
     onRowsChange(updatedRows);
   };
 
+  // define the menu items outside the jsx based on user type
+  // render extra button if admin is logged in 
+  let menuItems = [];
+
+  if (canModifyRows) {
+    menuItems = [
+      { label: "Edit Title", icon: editIcon, onClick: () => editTitle() },
+      { label: "Make a Copy", icon: copyIcon, onClick: () => makeCopy() },
+      { label: "Save", icon: saveIcon, onClick: () => onSaveTemplate(title)},
+      ...(isAdmin ? [{
+        label: "Save as Base Template",
+        icon: saveIcon,
+        onClick: () => saveAsBaseTemplate(),
+      }] : []),
+    ];
+  } else {
+    menuItems = [
+      { label: "Copy Base Template", icon: copyIcon, onClick: () => copyBaseTemplate() },
+    ];
+  }
+
   return (
     <div className="table-section">
       <div className="table-section-header">
@@ -272,14 +371,7 @@ export default function TableSection({
 
         <MenuButton
           inline
-          items={[
-            { label: "Edit Title", icon: editIcon, onClick: () => editTitle() },
-            { label: "Make a Copy", icon: copyIcon, onClick: () => makeCopy() },
-            {
-              label: "Save", icon: saveIcon,
-              onClick: () => onSaveTemplate(title),
-            },
-          ]}
+          items={menuItems}
         />
 
         <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
@@ -331,24 +423,26 @@ export default function TableSection({
                       value={data.assessment_task}
                       onChange={(val) => handleCellChange(rowIdx, "assessment_task", val)}
                       multiline
+                      // set new read only variable, if base template and coordinator
+                      readOnly = {isBaseTemplate && !isAdmin}
                     />
                     <MenuButton
                       items={[
                         {
                           label: "Add Row Above", icon: addIcon,
-                          onClick: () => addRowAbove(rowIdx),
+                          onClick: canModifyRows ? () => addRowAbove(rowIdx) : undefined,
                         },
                         {
                           label: "Add Row Below", icon: addIcon,
-                          onClick: () => addRowBelow(rowIdx),
+                          onClick: canModifyRows ? () => addRowBelow(rowIdx) : undefined,
                         },
                         {
                           label: "Delete Row", icon: deleteIcon,
-                          onClick: () => deleteRow(rowIdx),
+                          onClick: canModifyRows ? () => deleteRow(rowIdx) : undefined,
                         },
                         {
                           label: "Duplicate Row", icon: copyIcon,
-                          onClick: () => duplicateRow(rowIdx),
+                          onClick: canModifyRows ? () => duplicateRow(rowIdx) : undefined,
                         },
                       ]}
                     />
@@ -386,7 +480,7 @@ export default function TableSection({
                           (e) => e.ai_level === newLevel
                         );
                         if (foundEntry) break;
-                      }
+                      } 
 
                       const nullify = newLevel === NOAI;
 
@@ -417,8 +511,11 @@ export default function TableSection({
                           return { ...keep, ...FLAT };
                         }
                       });
-                      setRows(updatedRows);
-                      onRowsChange(updatedRows);
+                      
+                      if (!(isBaseTemplate && !isAdmin)) {
+                        setRows(updatedRows);
+                        onRowsChange(updatedRows);
+                      }
                     }}
                   >
                     <span>{data.label || "AI Scale Placeholder"}</span>
@@ -440,6 +537,8 @@ export default function TableSection({
                         handleCellChange(rowIdx, "instruction", val)
                       }
                       multiline
+                      // set new read only variable, if base template and coordinator
+                      readOnly = {isBaseTemplate && !isAdmin}
                       //grayed={noAI}
                     />
                   </td>
@@ -452,6 +551,8 @@ export default function TableSection({
                         handleCellChange(rowIdx, "example", val)
                       }
                       multiline
+                      // set new read only variable, if base template and coordinator
+                      readOnly = {isBaseTemplate && !isAdmin}
                       //grayed={noAI}
                       grayed={noAI || isGray}
                       
@@ -466,6 +567,8 @@ export default function TableSection({
                         handleCellChange(rowIdx, "declaration", val)
                       }
                       multiline
+                      // set new read only variable, if base template and coordinator
+                      readOnly = {isBaseTemplate && !isAdmin}
                       grayed={noAI || isGray}
                     />
                   </td>
@@ -477,6 +580,8 @@ export default function TableSection({
                       onChange={(val) =>
                         handleCellChange(rowIdx, "version", val)
                       }
+                      // set new read only variable, if base template and coordinator
+                      readOnly = {isBaseTemplate && !isAdmin}
                       grayed={noAI || isGray}
                     />
                   </td>
@@ -489,6 +594,8 @@ export default function TableSection({
                         handleCellChange(rowIdx, "purpose", val)
                       }
                       multiline
+                      // set new read only variable, if base template and coordinator
+                      readOnly = {isBaseTemplate && !isAdmin}
                       grayed={noAI || isGray}
                     />
                   </td>
@@ -501,6 +608,8 @@ export default function TableSection({
                         handleCellChange(rowIdx, "key_prompts", val)
                       }
                       multiline
+                      // set new read only variable, if base template and coordinator
+                      readOnly = {isBaseTemplate && !isAdmin}
                       grayed={noAI || isGray}
                     />
                   </td>

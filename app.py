@@ -10,19 +10,21 @@ CORS(app)
 def hello_world():
     return render_template("home/index.html")
 
-# returns the user's use scales
+
 @app.route("/usecase")
 def usecase():
     connection = sqlite3.connect("database/usescale_rows.db")
     connection.row_factory = sqlite3.Row
     cursor = connection.cursor()
-    subject_id = request.args.get("usescale_id")
-    cursor.execute("SELECT * FROM usescale_entries WHERE usescale_id = (?)", (subject_id,))
+    # changed this variable name to usescale id for clarity 
+    usescale_id = request.args.get("usescale_id")
+    cursor.execute("SELECT * FROM usescale_entries WHERE usescale_id = (?)", (usescale_id,))
     rows = cursor.fetchall()
     data = [dict(row) for row in rows]
 
     connection.close()
     return jsonify(data)
+
 
 
 
@@ -172,6 +174,7 @@ def delete_template():
 def copy_template():
     data = request.get_json()
     usescale_id = data.get('usescale_id')
+    user_id = data.get('user_id')
 
     if not usescale_id:
         return jsonify({"success": False, "error": "missing usescale id"})
@@ -189,8 +192,8 @@ def copy_template():
         new_title = f"{old_title} (Copy)"
 
         cursor.execute(
-            "INSERT INTO usescales (title) VALUES (?)",
-            (new_title,)
+            "INSERT INTO usescales (user_id, title) VALUES (?, ?)",
+            (user_id, new_title,)
         )
         new_usescale_id = cursor.lastrowid
         connection.commit()
@@ -222,9 +225,81 @@ def copy_template():
     except Exception as e:
         return jsonify({"success": False, "error": str(e)})
     
-    
-    
 
+# function for copying a base template
+@app.route('/copy_base_template', methods=["POST"])
+def copy_base_template():
+    data = request.get_json()
+    usescale_id = data.get('usescale_id')
+    user_id = data.get('user_id')
+
+    if not usescale_id:
+        return jsonify({"success": False, "error": "missing usescale id"})
+    
+    try:
+        connection = sqlite3.connect("database/usescales.db")
+        cursor = connection.cursor()
+
+        # Get original template info (title + type)
+        cursor.execute("SELECT title, template_type FROM usescales WHERE usescale_id=?", (usescale_id,))
+        row = cursor.fetchone()
+        if not row:
+            return jsonify({"success": False, "error": "template not found"})
+        
+        old_title, old_type = row
+
+        if old_type.lower() != "base":
+            return jsonify({"success": False, "error": "Template is not a base template"})
+
+        new_title = f"{old_title} (Copy)"
+        
+        # Insert new usescale with template_type forced to "custom"
+        cursor.execute(
+            "INSERT INTO usescales (user_id, title, template_type) VALUES (?, ?, ?)",
+            (user_id, new_title, "custom")
+        )
+        new_usescale_id = cursor.lastrowid
+        connection.commit()
+        connection.close()
+
+        # Copy associated entries
+        connection_rows = sqlite3.connect("database/usescale_rows.db")
+        cursor_rows = connection_rows.cursor()
+        cursor_rows.execute("SELECT * FROM usescale_entries WHERE usescale_id=?", (usescale_id,))
+        entries = cursor_rows.fetchall()
+
+        for entry in entries:
+            (
+                entry_id, subject_id, old_usescale_id, assessment_task, ai_title,
+                instruction, example, declaration, version, purpose, key_prompts
+            ) = entry
+
+            cursor_rows.execute(
+                """
+                INSERT INTO usescale_entries (
+                    subject_id, usescale_id, assessment_task, ai_title, instruction, example, declaration,
+                    version, purpose, key_prompts
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (subject_id, new_usescale_id, assessment_task, ai_title, instruction, example, declaration, version, purpose, key_prompts)
+            )
+        
+        connection_rows.commit()
+        connection_rows.close()
+
+        return jsonify({
+            "success": True,
+            "new_usescale_id": new_usescale_id,
+            "new_title": new_title
+        })
+
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)})
+
+
+    
+# when we log in we need to return some data, the user id and the user type
 @app.route("/login", methods=["POST"])
 def login():
     username = request.form.get("username")
@@ -233,16 +308,24 @@ def login():
     connection = sqlite3.connect("database/users.db")
     cursor = connection.cursor()
 
-    cursor.execute("SELECT password FROM users WHERE username = ?", (username,))
+    cursor.execute("SELECT user_id, user_type, password FROM users WHERE username = ?", (username,))
     account = cursor.fetchone()
     cursor.close()
 
     if account is None:
         return jsonify({"logged_in": False})
-    dbPassword = account[0]
+    #dbPassword = account[0]
+
+    user_id, user_type, dbPassword = account
 
     if (password == dbPassword):
-        return jsonify({"logged_in": True})
+        return jsonify({
+            # return the relevant data if log in successful
+            "logged_in": True,
+            "user_id": user_id,
+            "user_type": user_type
+        })
+
     else:
         return jsonify({"logged_in": False})
     
@@ -258,16 +341,37 @@ def getdata():
     connection.close()
     return jsonify(data)
 
-@app.route("/get_use_scales", methods=["GET"])
+
+# returns the user's use scales, need to only get custom scales
+# need to mofidy this to check for user id as well 
+@app.route("/get_custom_scales", methods=["GET"])
 def get_usescales():
+    user_id = request.args.get("user_id")
+    user_id = int(user_id)
+
     connection = sqlite3.connect("database/usescales.db")
     connection.row_factory = sqlite3.Row
     cursor = connection.cursor()
-    cursor.execute("SELECT * FROM usescales")
+    cursor.execute("SELECT * FROM usescales WHERE user_id = ? AND template_type = ?", (user_id, "custom"))
     rows = cursor.fetchall()
     data = [dict(row) for row in rows]
     connection.close()
     return jsonify(data)
+
+
+# will need a new function that retrieves the base templates
+@app.route("/get_base_scales", methods=["GET"])
+def get_base_scales():
+    connection = sqlite3.connect("database/usescales.db")
+    connection.row_factory = sqlite3.Row
+    cursor = connection.cursor()
+    cursor.execute("SELECT * FROM usescales WHERE template_type = ?", ("base",))
+    rows = cursor.fetchall()
+    data = [dict(row) for row in rows]
+    connection.close()
+    return jsonify(data)
+
+
 
 @app.route("/get_usescale_rows", methods=["GET"])
 def get_usescale_rows():
@@ -281,12 +385,15 @@ def get_usescale_rows():
     connection.close()
     return jsonify(data)
 
+
 # update this function to create a new entry in usescales db
 @app.route("/create_template", methods=["POST"])
 def create_template():
     info = request.get_json()
     title = info.get("title", "Untitled Template")  # default title
     subject_id = info.get("subject_id")  # optional
+    # add this in
+    user_id = info.get("user_id")
 
     new_id = None  # will store the new usescale id
 
@@ -296,8 +403,9 @@ def create_template():
         cursor_usescales = connection_usescales.cursor()
 
         cursor_usescales.execute(
-            "INSERT INTO usescales (subject_id, title) VALUES (?, ?)",
-            (subject_id, title)
+            "INSERT INTO usescales (subject_id, user_id, title, template_type) VALUES (?, ?, ?, ?)",
+            # edit this to take in the four variables, and always create templates as custom
+            (subject_id, user_id, title, "custom")
         )
         connection_usescales.commit()
         new_id = cursor_usescales.lastrowid
@@ -318,7 +426,39 @@ def create_template():
         "title": title
     })
 
+# will need a new function for specifically when the admin selects save as base template where the type will be edited
+# to be base template
+@app.route("/save_as_base_template", methods=["POST"])
+def save_as_base_template():
+    try:
+        data = request.get_json()
+        usescale_id = data.get("usescale_id")
 
+        if not usescale_id:
+            return jsonify({"success": False, "error": "no usescale id"})
+
+        connection = sqlite3.connect("database/usescales.db")
+        cursor = connection.cursor()
+
+        cursor.execute("""
+            UPDATE usescales
+            SET template_type = "base"
+            WHERE usescale_id = ? AND template_type = "custom"
+            """, (usescale_id,))
+        
+        if cursor.rowcount == 0:
+            connection.close()
+            return jsonify({"success": False, "error": "No matching template found or template already base template"})
+        
+        connection.commit()
+        connection.close()
+        return jsonify({"success": True, "message": "Template set to base"})
+    
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)})
+    
+
+            
 
 # testing react and flask connetion 
 @app.route("/api/ping")

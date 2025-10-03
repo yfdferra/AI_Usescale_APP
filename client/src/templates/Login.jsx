@@ -23,8 +23,14 @@ export default function Login({ onLogin }) {
     var data = await res.json();
     if (data.logged_in) {
       // onNext();
-      onLogin();
-      navigate("/main", { replace: true }); // replace: true -> replaces /login from history stack as /main | wont be able to go back to login page
+      onLogin(
+        // modified this to pass user info to app.jsx
+        data.user_id,
+        data.user_type,
+      );
+      navigate("/main", { 
+        replace: true
+      }); // replace: true -> replaces /login from history stack as /main | wont be able to go back to login page
     } else {
       alert("Incorrect Username/Password");
     }

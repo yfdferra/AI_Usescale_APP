@@ -17,3 +17,35 @@
   gap: 2rem;
   justify-content: flex-start;
 }
+
+.base-square-overlay {
+  position: absolute;
+  top: 1.4rem;
+  right: 1.4rem;
+  background: white;
+  border-radius: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.25rem;
+  padding: 0.2rem 0.4rem;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  z-index: 2;
+  min-width: 60px;
+  gap: 0.25rem;
+}
+
+
+.base-square-overlay .star {
+  cursor: pointer;
+}
+
+.base-square-overlay .dots {
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.base-square-wrapper {
+  position: relative;
+  display: inline-block;
+}
