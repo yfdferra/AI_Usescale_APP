@@ -14,9 +14,14 @@ instance/
 database/*.db
 
 # --- Node / Vite ---
+node_modules/
 client/node_modules/
 client/dist/
 client/.vite/
+
+# testing stuff: ignore components folder and reports from tests
+coverage/
+reports/
 
 # --- Env & secrets ---
 .env
