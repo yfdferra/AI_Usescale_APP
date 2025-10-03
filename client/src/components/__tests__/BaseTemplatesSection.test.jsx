@@ -1,57 +1,90 @@
-// Verifies BaseTemplatesSection renders the 5 square components and responds correctly with onClicks
-// first square calls onWrittenAssessmentClick | last square calls onCreateFromScratchClick
-
-// ASSUMPTION: This test assumes Square.jsx renders as a <button> with the visible text as the accessible name (current version does so)
+// Verifies BaseTemplatesSection renders squares correctly and responds to user clicks depending on userType (admin vs subject coordinator)
+//
+// coordinator: sees "+ " prefix on template names, create button = "+ Create from scratch"
+// admin:  sees raw template names, create button = "+ Create new base template draft"
 
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import BaseTemplatesSection from "../BaseTemplatesSection";
 
 describe("BaseTemplatesSection", () => {
-  test("renders tiles and tiggers first/last clicks", async () => {
-    const user = userEvent.setup();
+  // mock templates for testing
+  const mockTemplates = [
+    { id: "t1", title: "Written Assessment", subject_id: "s1" },
+    { id: "t2", title: "Coding Assessment", subject_id: "s2" },
+  ];
 
-    // mock functions for the clicks
-    const onWrittenAssessmentClick = jest.fn();
+  test("renders coordinator tiles with + prefix and triggers clicks", async () => {
+    const user = userEvent.setup();
+    const onBaseTemplateClick = jest.fn();
     const onCreateFromScratchClick = jest.fn();
 
     render(
       <BaseTemplatesSection
-        onWrittenAssessmentClick={onWrittenAssessmentClick}
+        userId="u1"
+        userType="coordinator"
+        templates={mockTemplates}
+        onBaseTemplateClick={onBaseTemplateClick}
         onCreateFromScratchClick={onCreateFromScratchClick}
       />
     );
 
-    // Render check
-    const written = screen.getByRole("button", { name: /\+\s*written assessment/i });
-    const coding = screen.getByRole("button", { name: /\+\s*coding assessment/i });
-    const oral = screen.getByRole("button", { name: /\+\s*oral assessment/i });
-    const presentation = screen.getByRole("button", { name: /\+\s*presentation assessment/i });
-    const scratch = screen.getByRole("button", { name: /\+\s*create from scratch/i });
+    // heading text for coordinator user
+    expect(screen.getByRole("heading", { name: /Base Templates/i })).toBeInTheDocument();
+
+    // coordinator should see "+ " prefix on template names
+    const written = screen.getByRole("button", { name: /\+\s*Written Assessment/i });
+    const coding = screen.getByRole("button", { name: /\+\s*Coding Assessment/i });
+    const scratch = screen.getByRole("button", { name: /\+\s*Create from scratch/i });
 
     expect(written).toBeInTheDocument();
     expect(coding).toBeInTheDocument();
-    expect(oral).toBeInTheDocument();
-    expect(presentation).toBeInTheDocument();
     expect(scratch).toBeInTheDocument();
 
-    // Click Behavior
-    // square 1:  (index=0, "Written Assessment")
+    // click on a template square: should call onBaseTemplateClick with correct args
     await user.click(written);
-    expect(onWrittenAssessmentClick).toHaveBeenCalledTimes(1);
-    const [idxArg, titleArg] = onWrittenAssessmentClick.mock.calls[0];
-    expect(idxArg).toBe(0);
-    expect(titleArg).toBe("Written Assessment"); // "+ " removed
+    expect(onBaseTemplateClick).toHaveBeenCalledWith("t1", "Written Assessment", "s1");
 
-    // square -1: Create from scratch
+    // click on the "create from scratch" square: should call onCreateFromScratchClick
     await user.click(scratch);
     expect(onCreateFromScratchClick).toHaveBeenCalledTimes(1);
+  });
 
-    // middle squares aren't ready
+  test("renders admin tiles without + prefix and correct create label", async () => {
+    const user = userEvent.setup();
+    const onBaseTemplateClick = jest.fn();
+    const onCreateFromScratchClick = jest.fn();
+
+    render(
+      <BaseTemplatesSection
+        userId="admin1"
+        userType="admin"
+        templates={mockTemplates}
+        onBaseTemplateClick={onBaseTemplateClick}
+        onCreateFromScratchClick={onCreateFromScratchClick}
+      />
+    );
+
+    // heading text should change for admin user
+    expect(screen.getByRole("heading", { name: /Global Base Templates/i })).toBeInTheDocument();
+
+    // admin should see titles without "+" prefix
+    const written = screen.getByRole("button", { name: "Written Assessment" });
+    const coding = screen.getByRole("button", { name: "Coding Assessment" });
+
+    // admin create from scratch label is different
+    const scratch = screen.getByRole("button", { name: /\+ Create new base template draft/i });
+
+    expect(written).toBeInTheDocument();
+    expect(coding).toBeInTheDocument();
+    expect(scratch).toBeInTheDocument();
+
+    // clicking a template triggers onBaseTemplateClick
     await user.click(coding);
-    await user.click(oral);
-    await user.click(presentation);
-    expect(onWrittenAssessmentClick).toHaveBeenCalledTimes(1);
+    expect(onBaseTemplateClick).toHaveBeenCalledWith("t2", "Coding Assessment", "s2");
+
+    // clicking create triggers onCreateFromScratchClick
+    await user.click(scratch);
     expect(onCreateFromScratchClick).toHaveBeenCalledTimes(1);
   });
 });
