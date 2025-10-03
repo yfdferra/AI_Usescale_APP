@@ -167,18 +167,32 @@ export default function UseScalePage({
             onFilterChange={handleFilterChange}
             onSearch={handleSearch}
           />
-          {levelsData.map((entryType) => {
-            const filteredEntries = entryType.entries.filter((entry) =>
-              entry.ai_title.toLowerCase().includes(searchTerm)
-            );
+          
+          {(() => {
+            const filteredLevels = levelsData.map((entryType) => {
+      const filteredEntries = entryType.entries.filter((entry) =>
+        entry.ai_title.toLowerCase().includes(searchTerm)
+      );
+      return { ...entryType, filteredEntries };
+    });
 
-            if (filteredEntries.length === 0) return null;
+          const hasResults = filteredLevels.some(
+      (level) => level.filteredEntries.length > 0
+    );
+
+    if (!hasResults) {
+      return <div className="no-results">No results found</div>;
+    }
+
+    return filteredLevels.map((entryType) => {
+      if (entryType.filteredEntries.length === 0) return null;
+
           return(
             <VerticalDropdown 
             key={entryType.entry_type_id} 
             title={entryType.title}
             expanded={searchTerm.length > 0}>
-              {filteredEntries.map((entry) => (
+              {entryType.filteredEntries.map((entry) => (
                 <UseScaleBlock
                   key={entry.ai_level + entryType.entry_type_id}
                   level={entry.ai_level}
@@ -198,7 +212,8 @@ export default function UseScalePage({
               ))}
             </VerticalDropdown>
           );
-          })}
+          });
+        })()}
         </HorizontalSidebar>
       </div>
       <div className="use-scale-page-content">
