@@ -20,7 +20,12 @@ import deleteIcon from "../assets/delete.png";
 //  return result;
 //}
 
-export default function CustomTemplatesSection({ templates, onTemplateClick }) {
+export default function CustomTemplatesSection({ 
+  userId,
+  userType,
+  templates, 
+  onTemplateClick 
+}) {
   // Example usage: pass templates as a prop or fetch from state/api
   // const templates = ["Template 1", "Template 2", ...];
 
@@ -124,7 +129,9 @@ export default function CustomTemplatesSection({ templates, onTemplateClick }) {
   return (
     <section className="custom-templates-section">
       <div className="custom-templates-header">
-        <h2 className="custom-templates-title">Custom Templates</h2>
+        <h2 className="custom-templates-title">
+          {userType?.toLowerCase() === "admin" ? "Draft Base Templates" : "Custom Templates"}
+        </h2>
         <FilterSearchBar
           filterOptions={["Default", "Recent", "Favorites"]}
           onFilterChange={() => {}}

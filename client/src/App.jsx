@@ -8,11 +8,14 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import { useParams } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 
-function UseScaleRoute({ onLogout, template_title, subject_id }) {
+function UseScaleRoute({ onLogout, template_title, subject_id, userId, userType, isBaseTemplate }) {
   // extract usescale_id from the route path (i.e.: /usescale/1)
   const { id } = useParams();
   return (
     <UseScalePage
+      isBaseTemplate={isBaseTemplate}
+      userId={userId}
+      userType={userType}
       usescale_id={id}
       template_title={template_title}
       subject_id={subject_id}
@@ -21,23 +24,41 @@ function UseScaleRoute({ onLogout, template_title, subject_id }) {
   );
 }
 
+
 export default function App() {
   const [loggedIn, setLoggedIn] = useState(false);
   const [currentUseScaleID, setCurrentUseScaleID] = useState(null);
   const [templateData, setTemplateData] = useState(null);
   const [subjectID, setSubjectID] = useState(null);
+  // new states for userId and userType
+  const [userId, setUserId] = useState(null);
+  const [userType, setUserType] = useState(null);
 
   const navigate = useNavigate();
+  // create a new variable so systems knowns if it is editing a base template or not
+  const [isBaseTemplate, setIsBaseTemplate] = useState(false);
 
   const handleTemplateClick = (usescale_id, template_data, subject_id) => {
     setCurrentUseScaleID(usescale_id);
     setTemplateData(template_data || null);
     setSubjectID(subject_id || null);
+    setIsBaseTemplate(false);
+    navigate(`/usescale/${usescale_id}`);
+  };
+
+  const handleBaseTemplateClick = (usescale_id, template_data, subject_id) => {
+    setCurrentUseScaleID(usescale_id);
+    setTemplateData(template_data || null);
+    setSubjectID(subject_id || null);
+    setIsBaseTemplate(true);
     navigate(`/usescale/${usescale_id}`);
   };
 
   const handleCreateFromScratch = () => {
-    const payload = { title: "Untitled Template" };
+    const payload = { 
+      title: "Untitled Template",
+      user_id: userId 
+    };
   
     fetch(`${HOST}/create_template`, {
       method: "POST",
@@ -78,7 +99,15 @@ export default function App() {
       {/* Login Page */}
       <Route
         path="/login"
-        element={<Login onLogin={() => setLoggedIn(true)} />}
+        element={
+          <Login 
+            onLogin={(id, type) => {
+            setLoggedIn(true);
+            setUserId(id);
+            setUserType(type);
+            }} 
+          />
+        }
       />
 
       {/* Upon Successful Log In: Inner Pages with Sidebar (widget control) */}
@@ -87,10 +116,17 @@ export default function App() {
         element = {
           loggedIn ? (
             <MainTemplate 
+              userId={userId}
+              userType={userType}
               onTemplateClick={handleTemplateClick} 
-              onWrittenAssessmentClick={handleTemplateClick}
+              onBaseTemplateClick={handleBaseTemplateClick}
               onCreateFromScratchClick={handleCreateFromScratch}
-              onLogout={() => setLoggedIn(false)}
+              onLogout={() => {
+                setLoggedIn(false);
+                // make sure to nullify user id and type upon log out
+                setUserId(null);
+                setUserType(null);
+              }}
             />
           ) : (
             <Navigate to="/login" replace /> 
@@ -104,6 +140,9 @@ export default function App() {
         element={
           loggedIn ? (
             <UseScaleRoute
+              isBaseTemplate={isBaseTemplate}
+              userId={userId}
+              userType={userType}
               onLogout={() => setLoggedIn(false)}
               template_title={templateData}
               subject_id={subjectID}

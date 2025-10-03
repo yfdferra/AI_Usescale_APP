@@ -15,10 +15,15 @@ const NOAI = "LEVEL N";
 const TO_NULL = ["instruction", "example", "declaration", "version", "purpose", "key_prompts"];
 
 export default function UseScalePage({
+  isBaseTemplate,
+  userId,
+  userType,
   template_title,
   subject_id,
   onLogout,
 }) {
+  console.log("Tablesection userTtype:", userType);
+  console.log("Tablesection userid:", userId);
   const [pendingRowIdx, setPendingRowIdx] = useState(null);
 
   // new state to store fetched entry types and entries
@@ -193,6 +198,9 @@ export default function UseScalePage({
       </div>
       <div className="use-scale-page-content">
         <TableSection
+          isBaseTemplate={isBaseTemplate}
+          userId={userId}
+          userType={userType}
           tableData={usecase}
           subjectId={subject_id}
           initialTitle={template_title}
