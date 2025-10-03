@@ -273,8 +273,8 @@ export default function TableSection({
         <MenuButton
           inline
           items={[
-            { label: "Edit Title", onClick: () => editTitle() },
-            { label: "Make a Copy", onClick: () => makeCopy() },
+            { label: "Edit Title", icon: editIcon, onClick: () => editTitle() },
+            { label: "Make a Copy", icon: copyIcon, onClick: () => makeCopy() },
             {
               label: "Save", icon: saveIcon,
               onClick: () => onSaveTemplate(title),
