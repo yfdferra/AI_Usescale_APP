@@ -11,15 +11,6 @@ import copyIcon from "../assets/copy.png";
 import deleteIcon from "../assets/delete.png";
 
 
-// Helper to split array into chunks of 5
-//function chunkArray(array, size = 5) {
-//  const result = [];
-//  for (let i = 0; i < array.length; i += size) {
-//    result.push(array.slice(i, i + size));
-//  }
-//  return result;
-//}
-
 export default function CustomTemplatesSection({ templates, onTemplateClick }) {
   // Example usage: pass templates as a prop or fetch from state/api
   // const templates = ["Template 1", "Template 2", ...];
@@ -134,8 +125,11 @@ export default function CustomTemplatesSection({ templates, onTemplateClick }) {
         />
       </div>
       <div className="custom-templates-row">
-  {filteredTemplates.map(({ id, title, subject_id }) => (
-    <div key={id} className="custom-square-wrapper">
+        {filteredTemplates.length === 0 ? (
+        <div className="no-results">No results found</div>
+      ) : (
+        filteredTemplates.map(({ id, title, subject_id }) => (
+          <div key={id} className="custom-square-wrapper">
       <Square
         text={title}
         usescale_id={id}
@@ -156,7 +150,7 @@ export default function CustomTemplatesSection({ templates, onTemplateClick }) {
         
       </div>
     </div>
-  ))}
+  )))}
 </div>
     </section>
   );
