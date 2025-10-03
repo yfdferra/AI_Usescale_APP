@@ -1,8 +1,12 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./VerticalDropdown.css";
 
-export default function VerticalDropdown({ title, children }) {
-  const [open, setOpen] = useState(false);
+export default function VerticalDropdown({ title, children, expanded = false }) {
+  const [open, setOpen] = useState(expanded);
+
+ useEffect(() => {
+  setOpen(expanded);
+}, [expanded]);
 
   return (
     <div className="vertical-dropdown">

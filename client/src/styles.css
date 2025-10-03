@@ -3,28 +3,32 @@
   --text: #0f172a;
 }
 
+/*applies to all elements*/
 * {
   box-sizing: border-box;
 }
+
+/*html, body and root stretch full hieght*/
 html,
 body,
 #root {
   height: 100%;
 }
+
 body {
   margin: 0;
   font-family: ui-sans-serif, system-ui, Segoe UI, Roboto, Helvetica, Arial;
   color: var(--text);
 }
 
-/* --- layout --- */
+/*main page wrapper*/
 .layout {
   display: flex;
   height: 100vh;
   width: 100%;
 }
 
-/* simple top bar + content padding (no cards or extra components) */
+/* header at the top of the page */
 .topbar {
   height: 4rem;
   background: #fff;
@@ -33,6 +37,8 @@ body {
   align-items: center;
   padding: 0 1.5rem;
 }
+
+/*content in the main area*/
 .content {
   padding: 24px;
 }

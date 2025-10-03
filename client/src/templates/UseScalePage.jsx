@@ -32,7 +32,9 @@ export default function UseScalePage({
   // get usescale id from the url
   const {id: usescale_id} = useParams();
   
+  const [searchTerm, setSearchTerm] = useState("");
 
+  const [usecase, setUsecase] = useState(null);
 
   const handleLevelClick = (levelKey, entries) => {
     if (pendingRowIdx == null) return;
@@ -105,13 +107,10 @@ export default function UseScalePage({
       });
   };
 
-  const handleFilterChange = () => {};
-  const handleSearch = () => {};
   const [open, setOpen] = useState(false);
 
   // fetch usecase rows for table
   console.log("UseScalePage for ID:", usescale_id);
-  var [usecase, setUsecase] = React.useState(null);
   useEffect(() => {
     if (!usescale_id) return;
 
@@ -157,6 +156,8 @@ export default function UseScalePage({
       .catch((error) => console.error("Error fetching levels:", error));
   }, []);
 
+  const handleFilterChange = () => {};
+  const handleSearch = (value) => setSearchTerm(value.toLowerCase());
   return (
     <div className="use-scale-page">
       <Sidebar onLogout={onLogout} />
@@ -167,14 +168,36 @@ export default function UseScalePage({
       >
         <HorizontalSidebar open={open} setOpen={setOpen}>
           <FilterSearchBar
-            filterOptions={["All", "No AI", "Some AI"]}
+            filterOptions={["All"]}
             onFilterChange={handleFilterChange}
             onSearch={handleSearch}
           />
-          {/* Render dropdowns dynamically from db*/}
-          {levelsData.map((entryType) => (
-            <VerticalDropdown key={entryType.entry_type_id} title={entryType.title}>
-              {entryType.entries.map((entry) => (
+          
+          {(() => {
+            const filteredLevels = levelsData.map((entryType) => {
+      const filteredEntries = entryType.entries.filter((entry) =>
+        entry.ai_title.toLowerCase().includes(searchTerm)
+      );
+      return { ...entryType, filteredEntries };
+    });
+
+          const hasResults = filteredLevels.some(
+      (level) => level.filteredEntries.length > 0
+    );
+
+    if (!hasResults) {
+      return <div className="no-results">No results found</div>;
+    }
+
+    return filteredLevels.map((entryType) => {
+      if (entryType.filteredEntries.length === 0) return null;
+
+          return(
+            <VerticalDropdown 
+            key={entryType.entry_type_id} 
+            title={entryType.title}
+            expanded={searchTerm.length > 0}>
+              {entryType.filteredEntries.map((entry) => (
                 <UseScaleBlock
                   key={entry.ai_level + entryType.entry_type_id}
                   level={entry.ai_level}
@@ -189,11 +212,13 @@ export default function UseScalePage({
                       : "#d9b3ffff"
                   }
                   entry_type_id = {entryType.entry_type_id}
-                  onClick={() => handleLevelClick(entry.ai_level, entryType.entries)}
+                  onClick={() => handleLevelClick(entry.ai_level, filteredEntries)}
                 />
               ))}
             </VerticalDropdown>
-          ))}
+          );
+          });
+        })()}
         </HorizontalSidebar>
       </div>
       <div className="use-scale-page-content">

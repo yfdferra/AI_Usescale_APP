@@ -141,8 +141,11 @@ export default function CustomTemplatesSection({
         />
       </div>
       <div className="custom-templates-row">
-  {filteredTemplates.map(({ id, title, subject_id }) => (
-    <div key={id} className="custom-square-wrapper">
+        {filteredTemplates.length === 0 ? (
+        <div className="no-results">No results found</div>
+      ) : (
+        filteredTemplates.map(({ id, title, subject_id }) => (
+          <div key={id} className="custom-square-wrapper">
       <Square
         text={title}
         usescale_id={id}
@@ -163,7 +166,7 @@ export default function CustomTemplatesSection({
         
       </div>
     </div>
-  ))}
+  )))}
 </div>
     </section>
   );
