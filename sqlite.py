@@ -13,7 +13,7 @@ cursor = connection.cursor()
 # Accounts
 cursor.execute("""
 CREATE TABLE users (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT,
     password TEXT,
     user_type TEXT
@@ -58,18 +58,21 @@ connection.close()
 connection = sqlite3.connect("database/usescales.db")
 cursor = connection.cursor()
 
+# update this db to store user_id
 cursor.execute("""
 CREATE TABLE usescales (
     usescale_id INTEGER PRIMARY KEY AUTOINCREMENT,
     subject_id INTEGER,
+    user_id INTEGER,
     title TEXT,
+    template_type TEXT,
     FOREIGN KEY (subject_id) REFERENCES subjects(subject_id)
 )""")
 usescale_list = [
-    (1, "Essay Template"),
-    (2, "Mathematics Template"),
+    (1, 1, "Essay Template", "custom"),
+    (2, 1, "Mathematics Template", "custom"),
 ]
-cursor.executemany("INSERT INTO usescales (subject_id, title) VALUES (?, ?)", usescale_list)
+cursor.executemany("INSERT INTO usescales (subject_id, user_id, title, template_type) VALUES (?, ?, ?, ?)", usescale_list)
 connection.commit()
 
 
@@ -234,7 +237,7 @@ srep_entries = [
     (1, 'LEVEL R-2', 'MORE AI', 'For this written task, you may use AI tools only for: e.g. understanding the broad context, rewording',
      'Scenario 1 (AI appropriate)\nScenario 2 (AI inappropriate)',
      'Students MUST acknowledge the use of AI by adding a declaration at the end of their submission', 'https://students.unimelb.edu.au/academic-skills/resources/reading,-writing-and-referencing/referencing-and-research/paraphrasing', None, None),
-    (1, 'LEVEL R-3', 'GENERATIVE AI', 'For this written task, you may use AI for general learning: e.g. explaining concepts, creating revision quizzes',
+    (1, 'LEVEL R-3', 'AI FOR LEARNING', 'For this written task, you may use AI for general learning: e.g. explaining concepts, creating revision quizzes',
      'Scenario 1 (AI appropriate)', None, 'https://students.unimelb.edu.au/academic-skills/resources/reading,-writing-and-referencing/referencing-and-research/paraphrasing', None, None),
 
     # Coding
@@ -245,7 +248,7 @@ srep_entries = [
     (2, 'LEVEL R-2', 'MORE AI', 'For this coding task, you may use AI tools only for: e.g. debugging code',
      'Scenario 1 (AI appropriate)\nScenario 2 (AI inappropriate)',
      'Students MUST acknowledge the use of AI by adding a declaration at the end of their submission', 'https://students.unimelb.edu.au/academic-skills/resources/reading,-writing-and-referencing/referencing-and-research/paraphrasing', None, None),
-    (2, 'LEVEL R-3', 'GENERATIVE AI', 'For this coding task, you may use AI for general learning: e.g. finding common coding techniques and processes',
+    (2, 'LEVEL R-3', 'AI FOR LEARNING', 'For this coding task, you may use AI for general learning: e.g. finding common coding techniques and processes',
      'Scenario 1 (AI appropriate)', None, 'https://students.unimelb.edu.au/academic-skills/resources/reading,-writing-and-referencing/referencing-and-research/paraphrasing', None, None),
 
     # Oral
@@ -256,7 +259,7 @@ srep_entries = [
     (3, 'LEVEL R-2', 'MORE AI', 'For this oral task, you may use AI tools only for: e.g. brainstorming, rewording speech',
      'Scenario 1 (AI appropriate)\nScenario 2 (AI inappropriate)',
      'Students MUST acknowledge the use of AI by adding a declaration at the end of their submission', 'https://students.unimelb.edu.au/academic-skills/resources/reading,-writing-and-referencing/referencing-and-research/paraphrasing', None, None),
-    (3, 'LEVEL R-3', 'GENERATIVE AI', 'For this oral task, you may use AI for general learning: e.g. researching topic, speech planning steps',
+    (3, 'LEVEL R-3', 'AI FOR LEARNING', 'For this oral task, you may use AI for general learning: e.g. researching topic, speech planning steps',
      'Scenario 1 (AI appropriate)', None, 'https://students.unimelb.edu.au/academic-skills/resources/reading,-writing-and-referencing/referencing-and-research/paraphrasing', None, None),
 
     # Presentation
@@ -267,7 +270,7 @@ srep_entries = [
     (4, 'LEVEL R-2', 'MORE AI', 'For this presentation task, you may use AI tools only for: e.g. brainstorming, layout ideas',
      'Scenario 1 (AI appropriate)\nScenario 2 (AI inappropriate)',
      'Students MUST acknowledge the use of AI by adding a declaration at the end of their submission', 'https://students.unimelb.edu.au/academic-skills/resources/reading,-writing-and-referencing/referencing-and-research/paraphrasing', None, None),
-    (4, 'LEVEL R-3', 'GENERATIVE AI', 'For this presentation task, you may use AI for general learning: e.g. researching topic, presentation tips, presentation design',
+    (4, 'LEVEL R-3', 'AI FOR LEARNING', 'For this presentation task, you may use AI for general learning: e.g. researching topic, presentation tips, presentation design',
      'Scenario 1 (AI appropriate)', None, 'https://students.unimelb.edu.au/academic-skills/resources/reading,-writing-and-referencing/referencing-and-research/paraphrasing', None, None),
 ]
 
@@ -282,3 +285,4 @@ connection.commit()
 connection.close()
 
 
+# need to create a new database for base templates

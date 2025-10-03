@@ -54,3 +54,11 @@
   position: relative;
   display: inline-block;
 }
+
+.no-results {
+  width: 100%;
+  text-align: center;
+  padding: 1rem;
+  font-style: italic;
+  color: #888;
+}
