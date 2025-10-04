@@ -104,7 +104,8 @@
   text-align: center;
 }
 
-.modal input {
+.modal input[type="text"],
+.modal input[type="password"] {
   display: block;
   width: 100%;
   margin-bottom: 0.75rem;
@@ -124,6 +125,30 @@
   padding: 0.5rem;
   border-radius: 8px;
   background: #fafafa;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem; 
+}
+
+.template-list label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;    
+  flex-wrap: nowrap;
+}
+
+.template-list label input[type="checkbox"] {
+  flex: 0 0 auto;         
+}
+
+.template-list label span {
+  display: inline-block;   
+  white-space: nowrap;  
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #000;
 }
 
 .template-option {
@@ -149,7 +174,7 @@
 }
 
 button.confirm {
-  background: #0d6efd;
+  background: #6abdf5;
   color: white;
 }
 

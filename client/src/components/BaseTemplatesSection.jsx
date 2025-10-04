@@ -186,7 +186,7 @@ export default function BaseTemplatesSection({
                       checked={selectedTemplates.includes(t.id)}
                       onChange={() => toggleTemplateSelection(t.id)}
                     />
-                    {t.title}
+                    <span>{t.title}</span>
                   </label>
                 ))}
               </div>
