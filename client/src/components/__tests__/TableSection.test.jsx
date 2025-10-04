@@ -11,11 +11,19 @@ import { render, screen, within, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 // mock child components in this TableSection test
-jest.mock("../MenuButton", () => (props) => <div data-testid="menu-button" />);
+// Oct 4: wrap MenuButton mock with jest.fn to be grabbed later in second test
+jest.mock("../MenuButton", () => jest.fn( (props) => <div data-testid="menu-button" /> ));
+// jest.mock("../MenuButton", () => (props) => <div data-testid="menu-button" />);
 jest.mock("../TagInput", () => (props) => <input data-testid="tag-input" />);
 jest.mock("../DropdownTagInput", () => (props) => <select data-testid="dropdown-tag-input" />);
 jest.mock("../Star", () => (props) => <div data-testid="star" />);
 jest.mock("../ExportButton", () => (props) => <div data-testid="export-button" />);
+
+// Oct 4: Mock the icons to check for match when we check the props brought in by MenuButton
+jest.mock("../../assets/edit.png", () => "EDIT_ICON", { virtual: true });
+jest.mock("../../assets/copy.png", () => "COPY_ICON", { virtual: true });
+jest.mock("../../assets/save.png", () => "SAVE_ICON", { virtual: true });
+
 
 // mock the fetch in TableSection
 const originalFetch = global.fetch;
@@ -117,4 +125,35 @@ describe("TableSection (UI + edit flow)", () => {
     expect(Array.isArray(latestRows)).toBe(true);
     expect(latestRows[0]?.assessment_task).toBe("Updated Task");
   });
+
+  test("header MenuButton has correct items with label and *icon*", async () => {
+    render(
+      <TableSection
+        open
+        initialTitle="Initial Title"
+        subjectId={123}
+        tableData={[]}
+        toHighlight={-1}
+        onChangeScale={() => {}}  // pass in empty jest.fn()s to act as placeholders
+        onRowsChange={() => {}}
+        onSaveTemplate={() => {}}
+        levelsData={[]}
+      />
+    );
+
+    // grab the mock (to check the props passed in)
+    const MenuButtonMock = require("../MenuButton");
+
+    // get the latest call (current) of MenuButtonMock
+    const headerProps = MenuButtonMock.mock.calls.at(-1)[0];  // get this time's call
+    const items = headerProps.items;  // and get the props passed in
+
+    // check that all labels are named correctly, AND (IMPORTANT) that the icons match
+    expect(items).toEqual([
+      { label: "Edit Title", icon: "EDIT_ICON", onClick: expect.any(Function) },  // just check that the onClick handler exists for this test
+      { label: "Make a Copy", icon: "COPY_ICON", onClick: expect.any(Function) },
+      { label: "Save", icon: "SAVE_ICON", onClick: expect.any(Function) },
+    ]);
+  });
+
 });
