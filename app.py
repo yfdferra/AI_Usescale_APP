@@ -51,6 +51,45 @@ def get_subject_info():
         return jsonify({"error": "Subject not found"}), 404
 
 
+@app.route('/find_templates', methods=["GET"])
+def find_template_matches():
+    search_term = request.args.get("subject_name")
+    print("Search Term:", search_term)
+    search = search_term.lower()
+    
+    try:
+        connection = sqlite3.connect("database/usescales.db")
+        connection.row_factory = sqlite3.Row
+        cursor = connection.cursor()
+
+        # Attach the second DB
+        cursor.execute("ATTACH DATABASE 'database/subjects.db' AS subjects_db")
+
+        query = """
+        SELECT u.title AS usescale_title
+        FROM usescales u
+        JOIN subjects_db.subjects s ON u.subject_id = s.subject_id
+        WHERE 
+            LOWER(u.title) LIKE ?
+            OR LOWER(s.subject_name) LIKE ?
+            OR LOWER(s.subject_year) LIKE ?
+            OR LOWER(s.subject_semester) LIKE ?
+        """
+        like_param = f"%{search}%"
+        cursor.execute(query, (like_param, like_param, like_param, like_param))
+        results = cursor.fetchall()
+        templates = [row['usescale_title'] for row in results]
+
+        return jsonify(success=True, templates=templates)
+
+    except Exception as e:
+        print("Error:", e)
+        return jsonify(success=False, error=str(e))
+
+    finally:
+        connection.close()
+
+
 
 # modified this function to save the title
 @app.route('/save_template', methods=['POST'])
@@ -78,8 +117,8 @@ def save_template():
         connection = sqlite3.connect("database/usescale_rows.db")
         cursor = connection.cursor()
         cursor.execute(
-            "DELETE FROM usescale_entries WHERE usescale_id = ? AND subject_id = ?",
-            (usescale_id, subject_id)
+            "DELETE FROM usescale_entries WHERE usescale_id = ?",
+            (usescale_id)
         )
 
         # Insert new rows
@@ -384,6 +423,97 @@ def get_usescale_rows():
     data = [dict(row) for row in rows]
     connection.close()
     return jsonify(data)
+
+@app.route("/check_in_subjects", methods=["POST"])
+def check_in_subjects():
+    data = request.get_json()
+    subject_name = data.get("subjectName")
+    subject_year = data.get("subjectYear")
+    subject_semester = data.get("subjectSemester")
+
+    if not subject_name or not subject_year or not subject_semester:
+        return jsonify({"success": False, "error": "Missing parameters"}), 400
+
+    try:
+        connection = sqlite3.connect("database/subjects.db")
+        connection.row_factory = sqlite3.Row
+        cursor = connection.cursor()
+
+        cursor.execute(
+            """
+            SELECT subject_id FROM subjects
+            WHERE subject_name = ? AND subject_year = ? AND subject_semester = ?
+            """,
+            (subject_name, subject_year, subject_semester)
+        )
+        row = cursor.fetchone()
+        connection.close()
+
+        if row:
+            # Subject exists
+            return jsonify({"exists": True, "subject_id": row["subject_id"]})
+        else:
+            # Subject does not exist
+            return jsonify({"exists": False})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+
+@app.route("/create_subject", methods=["POST"])
+def create_subject():
+    # Parse the JSON data from the request
+    info = request.get_json()
+    subject_name = info.get("subjectName")
+    subject_year = info.get("subjectYear")
+    subject_semester = info.get("subjectSemester")
+    usescale_id = info.get("usescale_id")
+
+    # Validate the input data
+    if not subject_name or not subject_year or not subject_semester or not usescale_id:
+        return jsonify({"success": False, "error": "Missing subject details or usescale_id"}), 400
+
+    try:
+        # Connect to the database
+        connection = sqlite3.connect("database/subjects.db")
+        cursor = connection.cursor()
+
+        # Insert the new subject into the database
+        cursor.execute(
+            """
+            INSERT INTO subjects (subject_name, subject_year, subject_semester)
+            VALUES (?, ?, ?)
+            """,
+            (subject_name, subject_year, subject_semester),
+        )
+        connection.commit()
+
+        # Get the ID of the newly created subject
+        new_subject_id = cursor.lastrowid
+
+        # Close the connection to the subjects database
+        connection.close()
+
+        # Update the usescales.subject_id mapping
+        connection_usescales = sqlite3.connect("database/usescales.db")
+        cursor_usescales = connection_usescales.cursor()
+        print("updating usescale_id:", usescale_id, "to new subject_id:", new_subject_id)
+
+        cursor_usescales.execute(
+            """
+            UPDATE usescales
+            SET subject_id = ?
+            WHERE usescale_id = ?
+            """,
+            (new_subject_id, usescale_id),
+        )
+        connection_usescales.commit()
+        connection_usescales.close()
+
+        # Return a success response
+        return jsonify({"success": True, "message": "Subject created and mapping updated successfully!"})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
 
 
 # update this function to create a new entry in usescales db
