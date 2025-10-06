@@ -168,6 +168,12 @@ export default function TableSection({
   }, [subjectId]);
 
   useEffect(() => {
+    if (typeof onUpdateSubjectDetails === "function") {
+      onUpdateSubjectDetails(subjectName, subjectYear, subjectSemester);
+    }
+  }, [subjectName, subjectYear, subjectSemester, onUpdateSubjectDetails]);
+
+  useEffect(() => {
     if (initialTitle) setTitle(initialTitle);
   }, [initialTitle]);
 
@@ -390,7 +396,7 @@ export default function TableSection({
       },
     ];
   }
-  onUpdateSubjectDetails(subjectName, subjectYear, subjectSemester);
+  //onUpdateSubjectDetails(subjectName, subjectYear, subjectSemester);
 
   return (
     <div className="table-section">

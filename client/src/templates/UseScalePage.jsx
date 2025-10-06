@@ -216,15 +216,15 @@ export default function UseScalePage({
   }, [usescale_id]);
 
   // fetch dynamic levels (entry type and entries) from db
-  // useEffect(() => {
-  //   fetch(`${HOST}/entries`)
-  //     .then((res) => res.json())
-  //     .then((data) => {
-  //       setLevelsData(data);
-  //       console.log("Fetched levels data:", data);
-  //     })
-  //     .catch((error) => console.error("Error fetching levels:", error));
-  // }, []);
+  useEffect(() => {
+    fetch(`${HOST}/entries`)
+      .then((res) => res.json())
+      .then((data) => {
+        setLevelsData(data);
+        console.log("Fetched levels data:", data);
+      })
+      .catch((error) => console.error("Error fetching levels:", error));
+  }, []);
 
   const handleFilterChange = () => {};
   const handleSearch = (value) => setSearchTerm(value.toLowerCase());
@@ -242,6 +242,55 @@ export default function UseScalePage({
             onFilterChange={handleFilterChange}
             onSearch={handleSearch}
           />
+          {(() => {
+            // filter the levels based on search term
+            const filteredLevels = levelsData.map((entryType) => {
+        const filteredEntries = entryType.entries.filter((entry) =>
+          entry.ai_title.toLowerCase().includes(searchTerm)
+        );
+        return { ...entryType, filteredEntries };
+      });
+
+          // check if any results exist
+          const hasResults = filteredLevels.some(
+        (level) => level.filteredEntries.length > 0
+      );
+
+      if (!hasResults) {
+        return <div className="no-results">No results found</div>;
+      }
+
+      // render the filtered levels
+      return filteredLevels.map((entryType) => {
+        if (entryType.filteredEntries.length === 0) return null;
+
+        return (
+          <VerticalDropdown
+            key={entryType.entry_type_id}
+            title={entryType.title}
+            expanded={searchTerm.length > 0}>
+              {entryType.filteredEntries.map((entry) => (
+                <UseScaleBlock
+                    key={`${entry.ai_level}-${entryType.entry_type_id}`}
+                    level={entry.ai_level}
+                    label={entry.ai_title}
+                    labelBg={
+                      entry.ai_level === "LEVEL N"
+                        ? "#ffb3b3"
+                        : entry.ai_level === "LEVEL R-1"
+                        ? "#ffcfb3ff"
+                        : entry.ai_level === "LEVEL R-2"
+                        ? "#ffffb3ff"
+                        : "#d9b3ffff"
+                    }
+                    entry_type_id={entryType.entry_type_id}
+                    onClick={() => handleLevelClick(entry.ai_level, entryType.filteredEntries)}
+                  />
+                ))}
+              </VerticalDropdown>
+            );
+            });
+          })()}
         </HorizontalSidebar>
       </div>
       <div className="use-scale-page-content">
