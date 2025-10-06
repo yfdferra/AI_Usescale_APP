@@ -176,6 +176,9 @@ export default function BaseTemplatesSection({
               onChange={(e) => setNewPassword(e.target.value)}
             />
 
+            {/* I've just commented this part out for now, but can be added back in 
+            
+            
             <div className="template-selector">
               <p>Select base templates accessible to this coordinator:</p>
               <div className="template-list">
@@ -190,7 +193,7 @@ export default function BaseTemplatesSection({
                   </label>
                 ))}
               </div>
-            </div>
+            </div>*/}
 
             <div className="modal-buttons">
               <button className="confirm" onClick={handleCreateSubject}>

@@ -23,7 +23,7 @@ user_list = [
     ("admin", "admin", "admin"),
     ("lulu", "lulu", "coordinator")
 ]
-cursor.executemany("INSERT INTO users (username, password) VALUES (?, ?)", user_list)
+cursor.executemany("INSERT INTO users (username, password, user_type) VALUES (?, ?, ?)", user_list)
 connection.commit()
 
 #Subjects

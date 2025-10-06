@@ -23,7 +23,13 @@ const LEVEL_COLORS = {
 
 // Editable cell component
 // add a readonly mode for coordinators viewing base templates
-function EditableCell({ value, onChange, multiline = false, grayed = false, readOnly = false }) {
+function EditableCell({
+  value,
+  onChange,
+  multiline = false,
+  grayed = false,
+  readOnly = false,
+}) {
   const [editing, setEditing] = useState(false);
   const [tempValue, setTempValue] = useState(value || "");
   const textareaRef = useRef(null);
@@ -53,12 +59,14 @@ function EditableCell({ value, onChange, multiline = false, grayed = false, read
   // handle read only
   if (readOnly) {
     return (
-      <div className="editable-cell readonly" style={{ cursor: "not-allowed", opacity: 0.7}}>
+      <div
+        className="editable-cell readonly"
+        style={{ cursor: "not-allowed", opacity: 0.7 }}
+      >
         {value || <span className="editable-placeholder">Empty</span>}
       </div>
     );
   }
-
 
   // if grayed out, unclickable
   if (grayed) {
@@ -127,6 +135,7 @@ export default function TableSection({
   onRowsChange,
   onSaveTemplate,
   levelsData = [], // <-- pass levelsData from parent (UseScalePage)
+  onUpdateSubjectDetails,
 }) {
   const [title, setTitle] = useState(
     initialTitle || "Untitled student declaration"
@@ -136,9 +145,6 @@ export default function TableSection({
   const isAdmin = userType?.toLowerCase() === "admin";
   // constant for determining if user can modify rows
   const canModifyRows = !(isBaseTemplate && !isAdmin);
-
-  console.log("Tablesection userTtype:", userType);
-  console.log("Tablesection userid:", userId);
 
   // local state for table rows
   const [rows, setRows] = useState(tableData || []);
@@ -162,13 +168,19 @@ export default function TableSection({
   }, [subjectId]);
 
   useEffect(() => {
+    if (typeof onUpdateSubjectDetails === "function") {
+      onUpdateSubjectDetails(subjectName, subjectYear, subjectSemester);
+    }
+  }, [subjectName, subjectYear, subjectSemester, onUpdateSubjectDetails]);
+
+  useEffect(() => {
     if (initialTitle) setTitle(initialTitle);
   }, [initialTitle]);
 
   useEffect(() => {
     if (tableData) {
       // map tableData to mark NO AI rows as grayed to make sure they render properly
-      const mappedRows = tableData.map(row => ({
+      const mappedRows = tableData.map((row) => ({
         ...row,
         grayed: row.ai_title === "NO AI",
       }));
@@ -192,10 +204,13 @@ export default function TableSection({
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({usescale_id: rows[0].usescale_id, user_id: userId}),
+        body: JSON.stringify({
+          usescale_id: rows[0].usescale_id,
+          user_id: userId,
+        }),
       });
 
-      const data = await res.json()
+      const data = await res.json();
 
       if (data.success) {
         alert(`Template copy created: "${data.new_title}"`);
@@ -211,23 +226,27 @@ export default function TableSection({
 
   // function for saving as base template for admin
   const saveAsBaseTemplate = async () => {
-    if (!window.confirm("Are you sure you want to save as a global base template?")) {
+    if (
+      !window.confirm(
+        "Are you sure you want to save as a global base template?"
+      )
+    ) {
       return;
     }
-  
+
     const templateId = rows?.[0]?.usescale_id || usescale_id; // fallback to prop
     if (!templateId) {
       alert("Cannot determine template ID to save as base template");
       return;
     }
-  
+
     try {
       const res = await fetch(HOST + "/save_as_base_template", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ usescale_id: templateId }),
       });
-  
+
       const data = await res.json();
       if (data.success) {
         alert("Template has been successfully saved as a base template");
@@ -248,10 +267,13 @@ export default function TableSection({
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({usescale_id: rows[0].usescale_id, user_id: userId}),
+        body: JSON.stringify({
+          usescale_id: rows[0].usescale_id,
+          user_id: userId,
+        }),
       });
 
-      const data = await res.json()
+      const data = await res.json();
 
       if (data.success) {
         alert(`Base template copy created: "${data.new_title}"`);
@@ -342,25 +364,39 @@ export default function TableSection({
   };
 
   // define the menu items outside the jsx based on user type
-  // render extra button if admin is logged in 
+  // render extra button if admin is logged in
   let menuItems = [];
 
   if (canModifyRows) {
     menuItems = [
       { label: "Edit Title", icon: editIcon, onClick: () => editTitle() },
       { label: "Make a Copy", icon: copyIcon, onClick: () => makeCopy() },
-      { label: "Save", icon: saveIcon, onClick: () => onSaveTemplate(title)},
-      ...(isAdmin ? [{
-        label: "Save as Base Template",
+      {
+        label: "Save",
         icon: saveIcon,
-        onClick: () => saveAsBaseTemplate(),
-      }] : []),
+        onClick: () =>
+          onSaveTemplate(title, subjectName, subjectYear, subjectSemester),
+      },
+      ...(isAdmin
+        ? [
+            {
+              label: "Save as Base Template",
+              icon: saveIcon,
+              onClick: () => saveAsBaseTemplate(),
+            },
+          ]
+        : []),
     ];
   } else {
     menuItems = [
-      { label: "Copy Base Template", icon: copyIcon, onClick: () => copyBaseTemplate() },
+      {
+        label: "Copy Base Template",
+        icon: copyIcon,
+        onClick: () => copyBaseTemplate(),
+      },
     ];
   }
+  //onUpdateSubjectDetails(subjectName, subjectYear, subjectSemester);
 
   return (
     <div className="table-section">
@@ -369,17 +405,32 @@ export default function TableSection({
 
         <Star onClick={() => console.log("Favourite clicked")} />
 
-        <MenuButton
-          inline
-          items={menuItems}
-        />
+        <MenuButton inline items={menuItems} />
 
         <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-          <TagInput value={subjectName} placeholder="*Subject code" />
-          <TagInput value={subjectYear} placeholder="*Year" />
+          <TagInput
+            value={subjectName}
+            placeholder={subjectName}
+            onChange={(val) => {
+              setSubjectName(val);
+              onUpdateSubjectDetails(val, subjectYear, subjectSemester);
+            }}
+          />
+          <TagInput
+            value={subjectYear}
+            placeholder={subjectYear}
+            onChange={(val) => {
+              setSubjectYear(val);
+              onUpdateSubjectDetails(subjectName, val, subjectSemester);
+            }}
+          />
           <DropdownTagInput
-            placeholder="*Semester"
+            placeholder={subjectSemester}
             options={["Semester 1", "Semester 2"]}
+            onChange={(val) => {
+              setSubjectSemester(val);
+              onUpdateSubjectDetails(subjectName, subjectYear, val);
+            }}
           />
         </div>
 
@@ -421,28 +472,42 @@ export default function TableSection({
                   <td className="table-section-td cell-with-menu">
                     <EditableCell
                       value={data.assessment_task}
-                      onChange={(val) => handleCellChange(rowIdx, "assessment_task", val)}
+                      onChange={(val) =>
+                        handleCellChange(rowIdx, "assessment_task", val)
+                      }
                       multiline
                       // set new read only variable, if base template and coordinator
-                      readOnly = {isBaseTemplate && !isAdmin}
+                      readOnly={isBaseTemplate && !isAdmin}
                     />
                     <MenuButton
                       items={[
                         {
-                          label: "Add Row Above", icon: addIcon,
-                          onClick: canModifyRows ? () => addRowAbove(rowIdx) : undefined,
+                          label: "Add Row Above",
+                          icon: addIcon,
+                          onClick: canModifyRows
+                            ? () => addRowAbove(rowIdx)
+                            : undefined,
                         },
                         {
-                          label: "Add Row Below", icon: addIcon,
-                          onClick: canModifyRows ? () => addRowBelow(rowIdx) : undefined,
+                          label: "Add Row Below",
+                          icon: addIcon,
+                          onClick: canModifyRows
+                            ? () => addRowBelow(rowIdx)
+                            : undefined,
                         },
                         {
-                          label: "Delete Row", icon: deleteIcon,
-                          onClick: canModifyRows ? () => deleteRow(rowIdx) : undefined,
+                          label: "Delete Row",
+                          icon: deleteIcon,
+                          onClick: canModifyRows
+                            ? () => deleteRow(rowIdx)
+                            : undefined,
                         },
                         {
-                          label: "Duplicate Row", icon: copyIcon,
-                          onClick: canModifyRows ? () => duplicateRow(rowIdx) : undefined,
+                          label: "Duplicate Row",
+                          icon: copyIcon,
+                          onClick: canModifyRows
+                            ? () => duplicateRow(rowIdx)
+                            : undefined,
                         },
                       ]}
                     />
@@ -480,7 +545,7 @@ export default function TableSection({
                           (e) => e.ai_level === newLevel
                         );
                         if (foundEntry) break;
-                      } 
+                      }
 
                       const nullify = newLevel === NOAI;
 
@@ -511,7 +576,7 @@ export default function TableSection({
                           return { ...keep, ...FLAT };
                         }
                       });
-                      
+
                       if (!(isBaseTemplate && !isAdmin)) {
                         setRows(updatedRows);
                         onRowsChange(updatedRows);
@@ -522,7 +587,8 @@ export default function TableSection({
                     <MenuButton
                       items={[
                         {
-                          label: "Change Scale", icon: editIcon,
+                          label: "Change Scale",
+                          icon: editIcon,
                           onClick: () => onChangeScale(rowIdx),
                         },
                       ]}
@@ -538,7 +604,7 @@ export default function TableSection({
                       }
                       multiline
                       // set new read only variable, if base template and coordinator
-                      readOnly = {isBaseTemplate && !isAdmin}
+                      readOnly={isBaseTemplate && !isAdmin}
                       //grayed={noAI}
                     />
                   </td>
@@ -552,10 +618,9 @@ export default function TableSection({
                       }
                       multiline
                       // set new read only variable, if base template and coordinator
-                      readOnly = {isBaseTemplate && !isAdmin}
+                      readOnly={isBaseTemplate && !isAdmin}
                       //grayed={noAI}
                       grayed={noAI || isGray}
-                      
                     />
                   </td>
 
@@ -568,7 +633,7 @@ export default function TableSection({
                       }
                       multiline
                       // set new read only variable, if base template and coordinator
-                      readOnly = {isBaseTemplate && !isAdmin}
+                      readOnly={isBaseTemplate && !isAdmin}
                       grayed={noAI || isGray}
                     />
                   </td>
@@ -581,7 +646,7 @@ export default function TableSection({
                         handleCellChange(rowIdx, "version", val)
                       }
                       // set new read only variable, if base template and coordinator
-                      readOnly = {isBaseTemplate && !isAdmin}
+                      readOnly={isBaseTemplate && !isAdmin}
                       grayed={noAI || isGray}
                     />
                   </td>
@@ -595,7 +660,7 @@ export default function TableSection({
                       }
                       multiline
                       // set new read only variable, if base template and coordinator
-                      readOnly = {isBaseTemplate && !isAdmin}
+                      readOnly={isBaseTemplate && !isAdmin}
                       grayed={noAI || isGray}
                     />
                   </td>
@@ -609,7 +674,7 @@ export default function TableSection({
                       }
                       multiline
                       // set new read only variable, if base template and coordinator
-                      readOnly = {isBaseTemplate && !isAdmin}
+                      readOnly={isBaseTemplate && !isAdmin}
                       grayed={noAI || isGray}
                     />
                   </td>

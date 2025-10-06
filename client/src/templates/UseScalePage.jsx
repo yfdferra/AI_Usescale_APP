@@ -12,7 +12,14 @@ import TableSection from "../components/TableSection";
 import "./UseScalePage.css";
 
 const NOAI = "LEVEL N";
-const TO_NULL = ["instruction", "example", "declaration", "version", "purpose", "key_prompts"];
+const TO_NULL = [
+  "instruction",
+  "example",
+  "declaration",
+  "version",
+  "purpose",
+  "key_prompts",
+];
 
 export default function UseScalePage({
   isBaseTemplate,
@@ -22,16 +29,14 @@ export default function UseScalePage({
   subject_id,
   onLogout,
 }) {
-  console.log("Tablesection userTtype:", userType);
-  console.log("Tablesection userid:", userId);
   const [pendingRowIdx, setPendingRowIdx] = useState(null);
 
   // new state to store fetched entry types and entries
   const [levelsData, setLevelsData] = useState([]);
 
   // get usescale id from the url
-  const {id: usescale_id} = useParams();
-  
+  const { id: usescale_id } = useParams();
+
   const [searchTerm, setSearchTerm] = useState("");
 
   const [usecase, setUsecase] = useState(null);
@@ -40,7 +45,7 @@ export default function UseScalePage({
     if (pendingRowIdx == null) return;
 
     // find selected level entry data in db
-    const copy = entries.find((e => e.ai_level == levelKey));
+    const copy = entries.find((e) => e.ai_level == levelKey);
     if (!copy) return;
 
     const FLAT = {
@@ -72,45 +77,108 @@ export default function UseScalePage({
     setPendingRowIdx(null); // empty the row
   };
 
-  const handleSaveTemplate = (currentTitle) => {
+  const [subjectName, setSubjectName] = useState("");
+  const [subjectYear, setSubjectYear] = useState("");
+  const [subjectSemester, setSubjectSemester] = useState("");
+
+  const updateSubjectDetails = (name, year, semester) => {
+    // console.log("Updating subject details:", { name, year, semester });
+    setSubjectName(name);
+    setSubjectYear(year);
+    setSubjectSemester(semester);
+  };
+
+  const [subjectNameFromDB, setSubjectNameFromDB] = useState("");
+  const [subjectYearFromDB, setSubjectYearFromDB] = useState("");
+  const [subjectSemesterFromDB, setsubjectSemesterFromDB] = useState("");
+  useEffect(() => {
+    fetch(HOST + `/get_subject_info?subject_id=${subject_id}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (!data.error) {
+          setSubjectNameFromDB(data.subject_name || "");
+          setSubjectYearFromDB(data.subject_year || "");
+          setsubjectSemesterFromDB(data.subject_semester || "");
+        } else {
+          console.error("Error fetching subject info:", data.error);
+        }
+      })
+      .catch((err) => console.error("Fetch error:", err));
+  }, [subject_id]);
+
+  const handleSaveTemplate = async (currentTitle) => {
     if (!usecase || !Array.isArray(usecase)) {
       console.error("No data to save.");
       return;
     }
 
-    const payload = {
-      usescale_id,
-      subject_id,
-      title: currentTitle, // update function to save the title as well
-      rows: usecase,
-    };
-
-    fetch(`${HOST}/save_template`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(payload),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success) {
-          alert("Template saved successfully!");
-        } else {
-          console.error("Error saving template:", data.error);
-          alert("Failed to save template.");
-        }
-      })
-      .catch((error) => {
-        console.error("Network error:", error);
-        alert("Failed to save template due to a network error.");
+    try {
+      // 1. Check if subject exists
+      const checkResponse = await fetch(`${HOST}/check_in_subjects`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ subjectName, subjectYear, subjectSemester }),
       });
+      const checkData = await checkResponse.json();
+      console.log("Check subject response:", checkData);
+
+      let finalSubjectId = subject_id;
+
+      if (!checkData.exists) {
+        // Ask user if they want to create a new subject
+        const confirmCreate = window.confirm(
+          "Subject does not exist. Create a new subject?"
+        );
+        if (!confirmCreate) return;
+
+        const createResponse = await fetch(`${HOST}/create_subject`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            subjectName,
+            subjectYear,
+            subjectSemester,
+            userId,
+            usescale_id,
+          }),
+        });
+        const createData = await createResponse.json();
+        finalSubjectId = createData.subject_id;
+      }
+      if (!finalSubjectId) {
+        finalSubjectId = subject_id;
+      }
+      // 2. Build payload **after finalSubjectId is set**
+      const savePayload = {
+        usescale_id,
+        subject_id: finalSubjectId,
+        title: currentTitle,
+        rows: usecase,
+      };
+
+      // 3. Save template
+      const saveResponse = await fetch(`${HOST}/save_template`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(savePayload),
+      });
+      const saveData = await saveResponse.json();
+
+      if (saveData.success) {
+        alert("Template saved successfully!");
+      } else {
+        console.error("Error saving template:", saveData.error);
+        alert("Failed to save template.");
+      }
+    } catch (error) {
+      console.error("Error in saving process:", error);
+      alert("An error occurred. Check console for details.");
+    }
   };
 
   const [open, setOpen] = useState(false);
 
   // fetch usecase rows for table
-  console.log("UseScalePage for ID:", usescale_id);
   useEffect(() => {
     if (!usescale_id) return;
 
@@ -119,22 +187,24 @@ export default function UseScalePage({
       .then((data) => {
         // if the usecase has no rows, initialize with one empty row
         if (!data || data.length === 0) {
-          setUsecase([{ 
-            id: null, 
-            ai_title: "", 
-            level: "", 
-            instruction: "", 
-            example: "", 
-            declaration: "", 
-            version: "", 
-            purpose: "", 
-            key_prompts: "" 
-          }]);
+          setUsecase([
+            {
+              id: null,
+              ai_title: "",
+              level: "",
+              instruction: "",
+              example: "",
+              declaration: "",
+              version: "",
+              purpose: "",
+              key_prompts: "",
+            },
+          ]);
         } else {
           // map each row to include 'label' initialized from ai_title
-          const mapped = data.map(row => ({
+          const mapped = data.map((row) => ({
             ...row,
-            label: row.ai_title || ""
+            label: row.ai_title || "",
           }));
           setUsecase(mapped);
         }
@@ -172,53 +242,55 @@ export default function UseScalePage({
             onFilterChange={handleFilterChange}
             onSearch={handleSearch}
           />
-          
           {(() => {
+            // filter the levels based on search term
             const filteredLevels = levelsData.map((entryType) => {
-      const filteredEntries = entryType.entries.filter((entry) =>
-        entry.ai_title.toLowerCase().includes(searchTerm)
-      );
-      return { ...entryType, filteredEntries };
-    });
+        const filteredEntries = entryType.entries.filter((entry) =>
+          entry.ai_title.toLowerCase().includes(searchTerm)
+        );
+        return { ...entryType, filteredEntries };
+      });
 
+          // check if any results exist
           const hasResults = filteredLevels.some(
-      (level) => level.filteredEntries.length > 0
-    );
+        (level) => level.filteredEntries.length > 0
+      );
 
-    if (!hasResults) {
-      return <div className="no-results">No results found</div>;
-    }
+      if (!hasResults) {
+        return <div className="no-results">No results found</div>;
+      }
 
-    return filteredLevels.map((entryType) => {
-      if (entryType.filteredEntries.length === 0) return null;
+      // render the filtered levels
+      return filteredLevels.map((entryType) => {
+        if (entryType.filteredEntries.length === 0) return null;
 
-          return(
-            <VerticalDropdown 
-            key={entryType.entry_type_id} 
+        return (
+          <VerticalDropdown
+            key={entryType.entry_type_id}
             title={entryType.title}
             expanded={searchTerm.length > 0}>
               {entryType.filteredEntries.map((entry) => (
                 <UseScaleBlock
-                  key={entry.ai_level + entryType.entry_type_id}
-                  level={entry.ai_level}
-                  label={entry.ai_title}
-                  labelBg={
-                    entry.ai_level === "LEVEL N" // chooses the colour based on the level type
-                      ? "#ffb3b3"
-                      : entry.ai_level === "LEVEL R-1"
-                      ? "#ffcfb3ff"
-                      : entry.ai_level === "LEVEL R-2"
-                      ? "#ffffb3ff"
-                      : "#d9b3ffff"
-                  }
-                  entry_type_id = {entryType.entry_type_id}
-                  onClick={() => handleLevelClick(entry.ai_level, filteredEntries)}
-                />
-              ))}
-            </VerticalDropdown>
-          );
-          });
-        })()}
+                    key={`${entry.ai_level}-${entryType.entry_type_id}`}
+                    level={entry.ai_level}
+                    label={entry.ai_title}
+                    labelBg={
+                      entry.ai_level === "LEVEL N"
+                        ? "#ffb3b3"
+                        : entry.ai_level === "LEVEL R-1"
+                        ? "#ffcfb3ff"
+                        : entry.ai_level === "LEVEL R-2"
+                        ? "#ffffb3ff"
+                        : "#d9b3ffff"
+                    }
+                    entry_type_id={entryType.entry_type_id}
+                    onClick={() => handleLevelClick(entry.ai_level, entryType.filteredEntries)}
+                  />
+                ))}
+              </VerticalDropdown>
+            );
+            });
+          })()}
         </HorizontalSidebar>
       </div>
       <div className="use-scale-page-content">
@@ -234,6 +306,7 @@ export default function UseScalePage({
           onRowsChange={(nextRows) => setUsecase(nextRows)}
           onSaveTemplate={handleSaveTemplate}
           levelsData={levelsData} // <-- pass levelsData for drag-and-drop
+          onUpdateSubjectDetails={updateSubjectDetails}
         />
       </div>
     </div>
