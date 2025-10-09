@@ -122,6 +122,7 @@ export default function UseScalePage({
       const checkData = await checkResponse.json();
       console.log("Check subject response:", checkData);
 
+      // Create new subject if it does not exist and assign
       let finalSubjectId = subject_id;
 
       if (!checkData.exists) {
@@ -144,10 +145,26 @@ export default function UseScalePage({
         });
         const createData = await createResponse.json();
         finalSubjectId = createData.subject_id;
+      } else {
+        const subject_id = checkData.subject_id;
+        console.log("subject and usescale:", subject_id, usescale_id);
+        // If subject exists, reassign. Do not create new subject.
+        const reassignSubject = await fetch(`${HOST}/reassign_subject`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            usescale_id,
+            subject_id,
+          }),
+        });
+        const reassignData = await reassignSubject.json();
+        console.log("Reassign subject response:", reassignData);
       }
+
       if (!finalSubjectId) {
         finalSubjectId = subject_id;
       }
+
       // 2. Build payload **after finalSubjectId is set**
       const savePayload = {
         usescale_id,

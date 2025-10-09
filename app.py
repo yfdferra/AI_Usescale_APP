@@ -28,6 +28,8 @@ def usecase():
 
 
 
+    
+
 
 @app.route("/get_subject_info", methods=["GET"])
 def get_subject_info():
@@ -38,6 +40,7 @@ def get_subject_info():
     connection = sqlite3.connect("database/subjects.db")
     connection.row_factory = sqlite3.Row
     cursor = connection.cursor()
+
 
     cursor.execute(
         "SELECT * FROM subjects WHERE subject_id = ?", (subject_id,)
@@ -423,6 +426,34 @@ def get_usescale_rows():
     data = [dict(row) for row in rows]
     connection.close()
     return jsonify(data)
+
+#reassign_subject
+@app.route("/reassign_subject", methods=["POST"])
+def reassign_subject():
+    data = request.get_json()
+    subject_id = data.get("subject_id")
+    usescale_id = data.get("usescale_id")
+    print("Reassigning subject_id:", subject_id, "to usescale_id:", usescale_id)
+
+    try:
+        connection_usescales = sqlite3.connect("database/usescales.db")
+        cursor_usescales = connection_usescales.cursor()
+
+        cursor_usescales.execute(
+            """
+            UPDATE usescales
+            SET subject_id = ?
+            WHERE usescale_id = ?
+            """,
+            (subject_id, usescale_id),
+        )
+        connection_usescales.commit()
+        cursor_usescales.close()
+        connection_usescales.close()
+
+        return jsonify({"success": True, "message": "Subject reassigned successfully!"})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
 
 @app.route("/check_in_subjects", methods=["POST"])
 def check_in_subjects():
