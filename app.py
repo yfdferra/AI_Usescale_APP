@@ -635,7 +635,7 @@ def get_entries():
     conn_types.row_factory = sqlite3.Row
     cur_types = conn_types.cursor()
     
-    cur_types.execute("SELECT entry_type_id, title FROM entry_types ORDER BY entry_type_id")
+    cur_types.execute("SELECT entry_type_id, entry_type_name FROM srep_entry_type ORDER BY entry_type_id")
     entry_types = cur_types.fetchall()
     conn_types.close()
 
@@ -657,9 +657,47 @@ def get_entries():
 
         result.append({
             "entry_type_id": et["entry_type_id"],
-            "title": et["title"],
+            "title": et["entry_type_name"],
             "entries": entries_list
         })
 
     conn_entries.close()
     return jsonify(result)
+
+
+@app.route("/create_subject_space", methods=["POST"])
+def create_subject_space():
+    try:
+        data = request.get_json()
+        username = data.get("username")
+        password = data.get("password")
+        
+        if not username or not password:
+            return jsonify({"success": False, "error": "username and password are required"})
+        
+        connection = sqlite3.connect("database/users.db")
+        connection.row_factory = sqlite3.Row
+        cursor = connection.cursor()
+
+        # first check is username already exists
+        cursor.execute("SELECT user_id FROM users WHERE username = ?", (username,))
+        if cursor.fetchone():
+            connection.close()
+            return jsonify({"success": False, "error": "Username already exists"})
+        
+        # insert new user (plaintext password for now)
+        cursor.execute(
+            "INSERT INTO users (username, password, user_type) VALUES (?, ?, ?)",
+            (username, password, "coordinator")
+        )
+        user_id = cursor.lastrowid
+        
+        connection.commit()
+        connection.close()
+
+        return jsonify({"success": True, "message": "Subject space created successfully!"})
+    
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)})
+        
+
