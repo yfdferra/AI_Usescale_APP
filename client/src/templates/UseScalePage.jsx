@@ -289,11 +289,7 @@ export default function UseScalePage({
                     entry_type_id={entryType.entry_type_id}
                     isAdmin={userType === "admin"}
                     onClick={() => handleLevelClick(entry.ai_level, entryType.filteredEntries)}
-                    onEditClick={() => {
-                      setEditingScale(entry);
-                      setEditedLevel(entry.ai_level);
-                      setEditedLabel(entry.ai_title);
-                    }}
+                    onEditClick={() => setEditingScale(entry)}
                   />
                 ))}
               </VerticalDropdown>
@@ -323,55 +319,70 @@ export default function UseScalePage({
   <div className="modal-overlay">
     <div className="modal">
       <h3>Edit Scale</h3>
-      <p>Entry Type: {editingScale.entry_type_id}</p>
 
-      <input
-        type="text"
-        value={editedLevel}
-        onChange={(e) => setEditedLevel(e.target.value)}
-        placeholder="Level"
-      />
-      <input
-        type="text"
-        value={editedLabel}
-        onChange={(e) => setEditedLabel(e.target.value)}
-        placeholder="Label"
-      />
+      <div className="modal-field">
+        <label>General Learning or Assessment Tasks</label>
+        <input
+          type="text"
+          value={editingScale.general_learning || ""}
+          onChange={(e) =>
+            setEditingScale((prev) => ({ ...prev, general_learning: e.target.value }))
+          }
+        />
+      </div>
+
+      <div className="modal-field">
+        <label>AI Use Scale Level</label>
+        <input
+          type="text"
+          value={editingScale.ai_level || ""}
+          onChange={(e) =>
+            setEditingScale((prev) => ({ ...prev, ai_level: e.target.value }))
+          }
+        />
+      </div>
+
+      <div className="modal-field">
+        <label>Instruction to Students</label>
+        <input
+          type="text"
+          value={editingScale.instruction || ""}
+          onChange={(e) =>
+            setEditingScale((prev) => ({ ...prev, instruction: e.target.value }))
+          }
+        />
+      </div>
+
+      <div className="modal-field">
+        <label>Examples</label>
+        <input
+          type="text"
+          value={editingScale.example || ""}
+          onChange={(e) =>
+            setEditingScale((prev) => ({ ...prev, example: e.target.value }))
+          }
+        />
+      </div>
+
+      <div className="modal-field">
+        <label>AI Generated Content in Submission</label>
+        <input
+          type="text"
+          value={editingScale.declaration || ""}
+          onChange={(e) =>
+            setEditingScale((prev) => ({ ...prev, declaration: e.target.value }))
+          }
+        />
+      </div>
 
       <div className="modal-buttons">
         <button
-          onClick={async () => {
-            try {
-              const res = await fetch(`${HOST}/update_scale`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  entry_type_id: editingScale.entry_type_id,
-                  level: editedLevel,
-                  label: editedLabel,
-                }),
-              });
-              const data = await res.json();
-              if (data.success) {
-                setLevelsData((prev) =>
-                  prev.map((et) => ({
-                    ...et,
-                    entries: et.entries.map((e) =>
-                      e.entry_type_id === editingScale.entry_type_id &&
-                      e.ai_level === editingScale.ai_level
-                        ? { ...e, ai_level: editedLevel, ai_title: editedLabel }
-                        : e
-                    ),
-                  }))
-                );
-                setEditingScale(null);
-              } else {
-                alert("Failed to update scale: " + data.error);
-              }
-            } catch (err) {
-              console.error(err);
-              alert("Error updating scale");
-            }
+          onClick={() => {
+            // save changes back to usecase array
+            setUsecase((prev) =>
+              prev.map((row) => (row.id === editingScale.id ? editingScale : row))
+            );
+            setEditingScale(null);
           }}
         >
           Save
