@@ -40,6 +40,9 @@ export default function UseScalePage({
   const [searchTerm, setSearchTerm] = useState("");
 
   const [usecase, setUsecase] = useState(null);
+  const [editingScale, setEditingScale] = useState(null);
+  const [editedLevel, setEditedLevel] = useState("");
+  const [editedLabel, setEditedLabel] = useState("");
 
   const handleLevelClick = (levelKey, entries) => {
     if (pendingRowIdx == null) return;
@@ -284,7 +287,13 @@ export default function UseScalePage({
                         : "#d9b3ffff"
                     }
                     entry_type_id={entryType.entry_type_id}
+                    isAdmin={userType === "admin"}
                     onClick={() => handleLevelClick(entry.ai_level, entryType.filteredEntries)}
+                    onEditClick={() => {
+                      setEditingScale(entry);
+                      setEditedLevel(entry.ai_level);
+                      setEditedLabel(entry.ai_title);
+                    }}
                   />
                 ))}
               </VerticalDropdown>

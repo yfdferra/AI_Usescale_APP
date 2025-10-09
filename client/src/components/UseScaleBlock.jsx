@@ -8,6 +8,8 @@ export default function UseScaleBlock({
   entry_type_id,
   onClick,
   draggable = true,
+  isAdmin = false,
+  onEditClick,
   ...rest
 }) {
   // Handler for drag start
@@ -17,6 +19,7 @@ export default function UseScaleBlock({
       "application/json",
       JSON.stringify({ level, label, entry_type_id})
     );
+
     // Create a custom drag image
     const dragImage = document.createElement("div");
     dragImage.style.position = "absolute";
@@ -45,18 +48,16 @@ export default function UseScaleBlock({
     }, 0);
   };
   return (
-    <div
-      className="use-scale-block"
-      onClick={onClick}
-      role="button"
-      draggable={draggable}
-      onDragStart={handleDragStart}
-      {...rest}
-    >
+    <div className="use-scale-block" onClick={onClick} draggable={draggable} onDragStart={handleDragStart} {...rest}>
       <div className="use-scale-block-level">{level}</div>
       <div className="use-scale-block-label" style={{ background: labelBg }}>
         {label}
       </div>
+      {isAdmin && (
+        <button className="use-scale-block-edit-btn" onClick={(e) => { e.stopPropagation(); onEditClick(); }}>
+          ⋮
+        </button>
+      )}
     </div>
   );
 }
