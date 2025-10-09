@@ -72,7 +72,7 @@ export default function Login({ onLogin }) {
     className="login-input"
     type={showPassword ? "text" : "password"}
     placeholder="Enter your password"
-    style={{ paddingRight: "3rem" }} // space for button
+    style={{ paddingRight: "3rem" }}
   />
   <button
     type="button"
