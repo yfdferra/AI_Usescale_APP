@@ -1,5 +1,6 @@
 import React from "react";
 import "./UseScaleBlock.css";
+import editIcon from "../assets/edit.png";
 
 export default function UseScaleBlock({
   level = "LEVEL N",
@@ -48,16 +49,22 @@ export default function UseScaleBlock({
     }, 0);
   };
   return (
-    <div className="use-scale-block" onClick={onClick} draggable={draggable} onDragStart={handleDragStart} {...rest}>
+    <div className="use-scale-block" onClick={onClick} draggable={draggable} onDragStart={handleDragStart} {...rest} style={{ position: "relative" }}>
       <div className="use-scale-block-level">{level}</div>
       <div className="use-scale-block-label" style={{ background: labelBg }}>
         {label}
       </div>
       {isAdmin && (
-        <button className="use-scale-block-edit-btn" onClick={(e) => { e.stopPropagation(); onEditClick(); }}>
-          EDIT
-        </button>
-      )}
+    <img
+      src={editIcon}
+      alt="Edit"
+      className="use-scale-block-edit-img"
+      onClick={(e) => {
+        e.stopPropagation(); // prevent parent click
+        onEditClick();
+      }}
+    />
+  )}
     </div>
   );
 }
