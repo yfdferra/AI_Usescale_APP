@@ -318,6 +318,72 @@ export default function UseScalePage({
           onUpdateSubjectDetails={updateSubjectDetails}
         />
       </div>
+
+      {editingScale && (
+  <div className="modal-overlay">
+    <div className="modal">
+      <h3>Edit Scale</h3>
+      <p>Entry Type: {editingScale.entry_type_id}</p>
+
+      <input
+        type="text"
+        value={editedLevel}
+        onChange={(e) => setEditedLevel(e.target.value)}
+        placeholder="Level"
+      />
+      <input
+        type="text"
+        value={editedLabel}
+        onChange={(e) => setEditedLabel(e.target.value)}
+        placeholder="Label"
+      />
+
+      <div className="modal-buttons">
+        <button
+          onClick={async () => {
+            try {
+              const res = await fetch(`${HOST}/update_scale`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  entry_type_id: editingScale.entry_type_id,
+                  level: editedLevel,
+                  label: editedLabel,
+                }),
+              });
+              const data = await res.json();
+              if (data.success) {
+                setLevelsData((prev) =>
+                  prev.map((et) => ({
+                    ...et,
+                    entries: et.entries.map((e) =>
+                      e.entry_type_id === editingScale.entry_type_id &&
+                      e.ai_level === editingScale.ai_level
+                        ? { ...e, ai_level: editedLevel, ai_title: editedLabel }
+                        : e
+                    ),
+                  }))
+                );
+                setEditingScale(null);
+              } else {
+                alert("Failed to update scale: " + data.error);
+              }
+            } catch (err) {
+              console.error(err);
+              alert("Error updating scale");
+            }
+          }}
+        >
+          Save
+        </button>
+        <button onClick={() => setEditingScale(null)}>Cancel</button>
+      </div>
+    </div>
+  </div>
+)}
+
     </div>
   );
+
+  
 }

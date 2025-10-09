@@ -55,7 +55,7 @@ export default function UseScaleBlock({
       </div>
       {isAdmin && (
         <button className="use-scale-block-edit-btn" onClick={(e) => { e.stopPropagation(); onEditClick(); }}>
-          ⋮
+          EDIT
         </button>
       )}
     </div>
