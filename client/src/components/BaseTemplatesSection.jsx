@@ -176,6 +176,7 @@ export default function BaseTemplatesSection({
               onChange={(e) => setNewPassword(e.target.value)}
             />
 
+            {/*Function to show and hide a password */}
             {/* I've just commented this part out for now, but can be added back in 
             
             
