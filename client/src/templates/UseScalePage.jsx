@@ -40,6 +40,9 @@ export default function UseScalePage({
   const [searchTerm, setSearchTerm] = useState("");
 
   const [usecase, setUsecase] = useState(null);
+  const [editingScale, setEditingScale] = useState(null);
+  const [editedLevel, setEditedLevel] = useState("");
+  const [editedLabel, setEditedLabel] = useState("");
 
   const handleLevelClick = (levelKey, entries) => {
     if (pendingRowIdx == null) return;
@@ -284,7 +287,9 @@ export default function UseScalePage({
                         : "#d9b3ffff"
                     }
                     entry_type_id={entryType.entry_type_id}
+                    isAdmin={userType === "admin"}
                     onClick={() => handleLevelClick(entry.ai_level, entryType.filteredEntries)}
+                    onEditClick={() => setEditingScale(entry)}
                   />
                 ))}
               </VerticalDropdown>
@@ -309,6 +314,87 @@ export default function UseScalePage({
           onUpdateSubjectDetails={updateSubjectDetails}
         />
       </div>
+
+      {editingScale && (
+  <div className="modal-overlay">
+    <div className="modal">
+      <h3>Edit Scale</h3>
+
+      <div className="modal-field">
+        <label>General Learning or Assessment Tasks</label>
+        <input
+          type="text"
+          value={editingScale.general_learning || ""}
+          onChange={(e) =>
+            setEditingScale((prev) => ({ ...prev, general_learning: e.target.value }))
+          }
+        />
+      </div>
+
+      <div className="modal-field">
+        <label>AI Use Scale Level</label>
+        <input
+          type="text"
+          value={editingScale.ai_level || ""}
+          onChange={(e) =>
+            setEditingScale((prev) => ({ ...prev, ai_level: e.target.value }))
+          }
+        />
+      </div>
+
+      <div className="modal-field">
+        <label>Instruction to Students</label>
+        <input
+          type="text"
+          value={editingScale.instruction || ""}
+          onChange={(e) =>
+            setEditingScale((prev) => ({ ...prev, instruction: e.target.value }))
+          }
+        />
+      </div>
+
+      <div className="modal-field">
+        <label>Examples</label>
+        <input
+          type="text"
+          value={editingScale.example || ""}
+          onChange={(e) =>
+            setEditingScale((prev) => ({ ...prev, example: e.target.value }))
+          }
+        />
+      </div>
+
+      <div className="modal-field">
+        <label>AI Generated Content in Submission</label>
+        <input
+          type="text"
+          value={editingScale.declaration || ""}
+          onChange={(e) =>
+            setEditingScale((prev) => ({ ...prev, declaration: e.target.value }))
+          }
+        />
+      </div>
+
+      <div className="modal-buttons">
+        <button
+          onClick={() => {
+            // save changes back to usecase array
+            setUsecase((prev) =>
+              prev.map((row) => (row.id === editingScale.id ? editingScale : row))
+            );
+            setEditingScale(null);
+          }}
+        >
+          Save
+        </button>
+        <button onClick={() => setEditingScale(null)}>Cancel</button>
+      </div>
+    </div>
+  </div>
+)}
+
     </div>
   );
+
+  
 }

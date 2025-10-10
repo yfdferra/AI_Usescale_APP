@@ -1,5 +1,6 @@
 .use-scale-block {
   display: flex;
+  
   border: 0.125rem solid #cfd0d1ff;
   overflow: hidden;
   width: 20rem;
@@ -16,6 +17,8 @@
   color: #222;
   font-size: 1rem;
   background: #ecf2f7ff;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
 }
 
 .use-scale-block-label {
@@ -30,9 +33,14 @@
   font-size: 1rem;
 }
 
-.no-results {
-  padding: 1rem;
-  text-align: center;
-  color: #888;
-  font-style: italic;
+.use-scale-block-edit-img {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.6rem;
+  width: 1.2rem;
+  height: 1.2rem;
+  background: transparent;
+  z-index: 10;
+  cursor: pointer;
+
 }

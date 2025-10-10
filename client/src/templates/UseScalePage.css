@@ -17,3 +17,48 @@
   padding: 1rem;
   overflow: auto;
 }
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0,0,0,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: white;
+  padding: 1rem;
+  border-radius: 8px;
+  width: 40rem;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-field {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 0.5rem;
+}
+
+.modal-field label {
+  font-weight: bold;
+  margin-bottom: 0.25rem;
+}
+
+.modal-field input {
+  padding: 0.25rem 0.5rem;
+  font-size: 1rem;
+}
+
+.modal-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}

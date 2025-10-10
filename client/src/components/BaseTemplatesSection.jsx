@@ -23,6 +23,8 @@ export default function BaseTemplatesSection({
   const [newPassword, setNewPassword] = useState("");
   const [selectedTemplates, setSelectedTemplates] = useState([]);
 
+  const [showPassword, setShowPassword] = useState(false);
+
   useEffect(() => {
       setLocalTemplates(templates || []);
   }, [templates]);
@@ -168,14 +170,36 @@ export default function BaseTemplatesSection({
               value={newUsername}
               onChange={(e) => setNewUsername(e.target.value)}
             />
+            <div style={{ position: "relative" }}>
+  <input
+    type={showPassword ? "text" : "password"} // section to make it that you can show a password
+    placeholder="Enter password"
+    value={newPassword}
+    onChange={(e) => setNewPassword(e.target.value)}
+    style={{ paddingRight: "3rem" }}
+  />
+  <button
+    type="button"
+    onClick={() => setShowPassword(!showPassword)}
+    style={{
+      position: "absolute",
+      right: "0.5rem",
+      top: "50%",
+      transform: "translateY(-50%)",
+      background: "none",
+      border: "none",
+      cursor: "pointer",
+      color: "#666",
+      fontSize: "0.9rem",
+    }}
+  >
+    {showPassword ? "Hide" : "Show"}
+  </button>
+</div>
 
-            <input
-              type="password"
-              placeholder="Enter password"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-            />
-
+            
+            
+            {/*Function to show and hide a password */}
             {/* I've just commented this part out for now, but can be added back in 
             
             
