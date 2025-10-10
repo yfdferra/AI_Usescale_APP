@@ -18,6 +18,16 @@ export default function BaseTemplatesSection({
     useEffect(() => {
       setLocalTemplates(templates || []);
     }, [templates]);
+  const [showModal, setShowModal] = useState(false);
+  const [newUsername, setNewUsername] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [selectedTemplates, setSelectedTemplates] = useState([]);
+
+  const [showPassword, setShowPassword] = useState(false);
+
+  useEffect(() => {
+      setLocalTemplates(templates || []);
+  }, [templates]);
 
   // change label based on user type
   const createButtonLabel = 
@@ -61,8 +71,57 @@ export default function BaseTemplatesSection({
     }
   };
 
+  const handleCreateSubject = async () => {
+    if (!newUsername || !newPassword) {
+      alert("Please fill out username and password");
+      return;
+    }
+
+    try {
+      const res = await fetch(`${HOST}/create_subject_space`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          username: newUsername,
+          password: newPassword,
+          allowed_templates: selectedTemplates,
+        }),
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        alert("Subject space created successfully!");
+        setNewUsername("");
+        setNewPassword("");
+        setSelectedTemplates([]);
+        setShowModal(false);
+      } else {
+        alert("Failed to create subject space: " + data.error);
+      }
+    } catch (err) {
+      console.error("Error creating subject space:", err);
+      alert("Error creating subject space");
+    }
+  };
+
+  const toggleTemplateSelection = (id) => {
+    setSelectedTemplates((prev) =>
+      prev.includes(id) ? prev.filter((tid) => tid !== id) : [...prev, id]
+    );
+  };
+
   return (
     <section className="base-templates-section">
+      {isAdmin && (
+        <div className="create-subject-space-header">
+          <button
+            className="create-subject-button"
+            onClick={() => setShowModal(true)}
+          >
+            + Create New Subject Space
+          </button>
+        </div>
+      )}
       <h2 className="base-templates-title">
       {isAdmin ? "Global Base Templates" : "Base Templates"}
       </h2>
@@ -95,6 +154,83 @@ export default function BaseTemplatesSection({
           onClick={() => onCreateFromScratchClick()}
         />
       </div>
+
+      {showModal && (
+        <div className="modal-overlay">
+          <div className="modal">
+            <h3>Create New Subject Space</h3>
+              <p className="popup-description">
+  You’re creating a login for a subject coordinator. 
+  The username and password you set below will be their credentials 
+  to access and manage this subject’s workspace.
+</p>
+            <input
+              type="text"
+              placeholder="Enter username"
+              value={newUsername}
+              onChange={(e) => setNewUsername(e.target.value)}
+            />
+            <div style={{ position: "relative" }}>
+  <input
+    type={showPassword ? "text" : "password"} // section to make it that you can show a password
+    placeholder="Enter password"
+    value={newPassword}
+    onChange={(e) => setNewPassword(e.target.value)}
+    style={{ paddingRight: "3rem" }}
+  />
+  <button
+    type="button"
+    onClick={() => setShowPassword(!showPassword)}
+    style={{
+      position: "absolute",
+      right: "0.5rem",
+      top: "50%",
+      transform: "translateY(-50%)",
+      background: "none",
+      border: "none",
+      cursor: "pointer",
+      color: "#666",
+      fontSize: "0.9rem",
+    }}
+  >
+    {showPassword ? "Hide" : "Show"}
+  </button>
+</div>
+
+            
+            
+            {/*Function to show and hide a password */}
+            {/* I've just commented this part out for now, but can be added back in 
+            
+            
+            <div className="template-selector">
+              <p>Select base templates accessible to this coordinator:</p>
+              <div className="template-list">
+                {localTemplates.map((t) => (
+                  <label key={t.id} className="template-option">
+                    <input
+                      type="checkbox"
+                      checked={selectedTemplates.includes(t.id)}
+                      onChange={() => toggleTemplateSelection(t.id)}
+                    />
+                    <span>{t.title}</span>
+                  </label>
+                ))}
+              </div>
+            </div>*/}
+
+            <div className="modal-buttons">
+              <button className="confirm" onClick={handleCreateSubject}>
+                Create
+              </button>
+              <button className="cancel" onClick={() => setShowModal(false)}>
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </section>
   );
 }

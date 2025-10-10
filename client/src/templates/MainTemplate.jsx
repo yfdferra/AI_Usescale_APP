@@ -5,7 +5,7 @@ import CustomTemplatesSection from "../components/CustomTemplatesSection";
 import Dashboard from "../components/Dashboard";
 import { useState, useEffect } from "react";
 import HOST from "../GLOBALS/Globals.jsx";
-import "./MainTemplate.css"
+import "./MainTemplate.css";
 
 export default function MainTemplate({
   children,
@@ -14,11 +14,8 @@ export default function MainTemplate({
   onTemplateClick,
   onBaseTemplateClick,
   onCreateFromScratchClick,
-  onLogout, 
+  onLogout,
 }) {
-
-  console.log("Tablesection userTtype:", userType);
-  console.log("Tablesection userid:", userId);
   // retrieves the users use scales from db
   const [templates, setTemplates] = useState([]);
   useEffect(() => {
@@ -36,7 +33,7 @@ export default function MainTemplate({
       .catch((error) => console.log("Error usescales not found"));
   }, [userId]);
 
-  // retrieves the current base templates from db 
+  // retrieves the current base templates from db
   const [baseTemplates, setBaseTemplates] = useState([]);
   useEffect(() => {
     fetch(`${HOST}/get_base_scales`)
@@ -44,7 +41,7 @@ export default function MainTemplate({
       .then((data) => {
         setBaseTemplates(
           data.map((item) => ({
-            id: item.usescale_id, 
+            id: item.usescale_id,
             title: item.title,
             subject_id: item.subject_id,
           }))

@@ -37,4 +37,27 @@ describe("VerticalDropdown", () => {
     const headerClosedAgain = screen.getByText(/advanced options/i);
     expect(within(headerClosedAgain.parentElement ?? headerClosedAgain).getByText("▼")).toBeInTheDocument();
   });
+  
+  test("respects expanded prop and updates on prop change", () => {
+    const { rerender } = render(
+      <VerticalDropdown title="Advanced Options" expanded={true}>
+        <div>Inner content</div>
+      </VerticalDropdown>
+    );
+
+    // starts open if expanded=true
+    expect(screen.getByText(/inner content/i)).toBeInTheDocument();
+    expect(screen.getByText("▲")).toBeInTheDocument();
+
+    // now flip expanded to false
+    rerender(
+      <VerticalDropdown title="Advanced Options" expanded={false}>
+        <div>Inner content</div>
+      </VerticalDropdown>
+    );
+
+    expect(screen.queryByText(/inner content/i)).not.toBeInTheDocument();
+    expect(screen.getByText("▼")).toBeInTheDocument();
+  });
+
 });

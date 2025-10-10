@@ -1,6 +1,10 @@
 /** @type {import('jest').Config} */
 module.exports = {
   testEnvironment: "jest-environment-jsdom",
+
+  // for integration test text encoder / decoder
+  setupFiles: ["<rootDir>/jest.setup.js"],
+
   setupFilesAfterEnv: ["<rootDir>/test/setupTests.js"],
 
   // look for tests under client/

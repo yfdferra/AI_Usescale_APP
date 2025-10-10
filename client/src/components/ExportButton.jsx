@@ -43,7 +43,7 @@ export default function ExportButton({ tableSelector = ".table-section-table", t
   "NO AI": [255, 179, 179],      
   "SOME AI": [255, 207, 179],      
   "MORE AI": [255, 255, 179],     
-  "GENERATIVE AI": [217, 179, 255]
+  "AI FOR LEARNING": [217, 179, 255]
 };
       
       let rows = Array.from(table.rows)
@@ -65,7 +65,7 @@ export default function ExportButton({ tableSelector = ".table-section-table", t
       JSON.parse(r)
     );
 
-    const order = ["NO AI", "SOME AI", "MORE AI", "GENERATIVE AI"];
+    const order = ["NO AI", "SOME AI", "MORE AI", "AI FOR LEARNING"];
     rows.sort((a, b) => {
       const indexA = order.indexOf(a[0]);
       const indexB = order.indexOf(b[0]);

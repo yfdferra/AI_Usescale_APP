@@ -2,11 +2,16 @@ import { useState } from "react";
 import "./TagInput.css";
 import "./DropdownTagInput.css";
 
-export default function DropdownTagInput({ placeholder, options = [] }) {
+export default function DropdownTagInput({
+  placeholder,
+  options = [],
+  onChange,
+}) {
   const [selected, setSelected] = useState("");
 
   const handleChange = (e) => {
     setSelected(e.target.value);
+    onChange(e.target.value);
   };
 
   const clearSelection = () => {
