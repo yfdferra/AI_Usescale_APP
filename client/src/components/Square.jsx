@@ -1,7 +1,7 @@
 import "./Sqaure.css";
 
 export default function Square({ text, onClick, selected }) {
-  const isCustom = text === "+ Create from scratch";
+  const isCustom = text === "+ Create from scratch" || text === "+ Create new base template draft";
   return (
     <button
       className={`square${selected ? " square--selected" : ""}${

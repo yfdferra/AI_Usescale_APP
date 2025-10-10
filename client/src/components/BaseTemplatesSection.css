@@ -17,3 +17,178 @@
   gap: 2rem;
   justify-content: flex-start;
 }
+
+.base-square-overlay {
+  position: absolute;
+  top: 1.4rem;
+  right: 1.4rem;
+  background: white;
+  border-radius: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.25rem;
+  padding: 0.2rem 0.4rem;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  z-index: 2;
+  min-width: 60px;
+  gap: 0.25rem;
+}
+
+
+.base-square-overlay .star {
+  cursor: pointer;
+}
+
+.base-square-overlay .dots {
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.base-square-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+
+.create-subject-space-header {
+  width: 100%;
+  display: block;
+  text-align: left;
+  margin-bottom: 0.5rem;
+  margin-top: 3.5rem;
+  padding-left: 0.5rem;
+}
+
+.create-subject-button {
+  background-color: #000f46;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  padding: 0.6rem 1.2rem;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.1s ease-in-out;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.create-subject-button:hover {
+  background-color: #6abdf5;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+.modal {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  width: 500px;
+  max-width: 90vw;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+}
+
+.modal h3 {
+  margin-bottom: 1rem;
+  margin-top: 0rem;
+  text-align: center;
+}
+
+.modal input[type="text"],
+.modal input[type="password"] {
+  display: block;
+  width: 100%;
+  margin-bottom: 0.75rem;
+  padding: 0.5rem;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}
+
+.template-selector {
+  margin-top: 1rem;
+}
+
+.template-list {
+  max-height: 120px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  padding: 0.5rem;
+  border-radius: 8px;
+  background: #fafafa;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem; 
+}
+
+.template-list label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;    
+  flex-wrap: nowrap;
+}
+
+.template-list label input[type="checkbox"] {
+  flex: 0 0 auto;         
+}
+
+.template-list label span {
+  display: inline-block;   
+  white-space: nowrap;  
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #000;
+}
+
+.template-option {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.3rem;
+}
+
+.modal-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1rem;
+}
+
+.modal-buttons button {
+  flex: 1;
+  margin: 0 0.25rem;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+}
+
+button.confirm {
+  background: #6abdf5;
+  color: white;
+}
+
+button.cancel {
+  background: #ccc;
+}
+
+button.cancel:hover {
+  background: #bbb;
+}
+
+.popup-description {
+  font-size: 0.9rem;
+  color: #555;
+  margin-bottom: 1rem;
+  line-height: 1.4;
+}

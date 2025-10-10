@@ -12,6 +12,9 @@ export default function Login({ onLogin }) {
   const [showPopup, setShowPopup] = useState(false);
   // navigation (to main page on successful login)
   const navigate = useNavigate();
+  //state to show and hide visibility
+  const [showPassword, setShowPassword] = useState(false);
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -23,8 +26,14 @@ export default function Login({ onLogin }) {
     var data = await res.json();
     if (data.logged_in) {
       // onNext();
-      onLogin();
-      navigate("/main", { replace: true }); // replace: true -> replaces /login from history stack as /main | wont be able to go back to login page
+      onLogin(
+        // modified this to pass user info to app.jsx
+        data.user_id,
+        data.user_type,
+      );
+      navigate("/main", { 
+        replace: true
+      }); // replace: true -> replaces /login from history stack as /main | wont be able to go back to login page
     } else {
       alert("Incorrect Username/Password");
     }
@@ -54,13 +63,36 @@ export default function Login({ onLogin }) {
           >
             Password
           </label>
-          <input
-            id="password"
-            name="password"
-            className="login-input"
-            type="password"
-            placeholder="Enter your password"
-          />
+          
+          <div style={{ position: "relative" }}>
+            <div className="password-wrapper">
+  <input
+    id="password"
+    name="password"
+    className="login-input"
+    type={showPassword ? "text" : "password"}
+    placeholder="Enter your password"
+    style={{ paddingRight: "3rem" }}
+  />
+  <button
+    type="button"
+    onClick={() => setShowPassword(!showPassword)}
+    style={{
+      position: "absolute",
+      right: "0.75rem",
+      top: "50%",
+      transform: "translateY(-50%)",
+      background: "none",
+      border: "none",
+      cursor: "pointer",
+      fontSize: "0.9rem",
+      color: "#666",
+    }}
+  >
+    {showPassword ? "Hide" : "Show"}
+  </button>
+</div>
+</div>
           <button
             className="login-button"
             type="submit"

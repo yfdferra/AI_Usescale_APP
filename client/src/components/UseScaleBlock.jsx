@@ -1,12 +1,16 @@
 import React from "react";
 import "./UseScaleBlock.css";
+import editIcon from "../assets/edit.png";
 
 export default function UseScaleBlock({
   level = "LEVEL N",
   label = "NO AI",
   labelBg = "#f600f6ff",
+  entry_type_id,
   onClick,
   draggable = true,
+  isAdmin = false,
+  onEditClick,
   ...rest
 }) {
   // Handler for drag start
@@ -14,8 +18,9 @@ export default function UseScaleBlock({
     // Set both level and label in drag data
     e.dataTransfer.setData(
       "application/json",
-      JSON.stringify({ level, label })
+      JSON.stringify({ level, label, entry_type_id})
     );
+
     // Create a custom drag image
     const dragImage = document.createElement("div");
     dragImage.style.position = "absolute";
@@ -44,18 +49,22 @@ export default function UseScaleBlock({
     }, 0);
   };
   return (
-    <div
-      className="use-scale-block"
-      onClick={onClick}
-      role="button"
-      draggable={draggable}
-      onDragStart={handleDragStart}
-      {...rest}
-    >
+    <div className="use-scale-block" onClick={onClick} draggable={draggable} onDragStart={handleDragStart} {...rest} style={{ position: "relative" }}>
       <div className="use-scale-block-level">{level}</div>
       <div className="use-scale-block-label" style={{ background: labelBg }}>
         {label}
       </div>
+      {isAdmin && (
+    <img
+      src={editIcon}
+      alt="Edit"
+      className="use-scale-block-edit-img"
+      onClick={(e) => {
+        e.stopPropagation(); // prevent parent click
+        onEditClick();
+      }}
+    />
+  )}
     </div>
   );
 }
