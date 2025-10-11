@@ -626,6 +626,55 @@ def save_as_base_template():
 def ping():
     return jsonify({"message": "pong"})
 
+@app.route("/update_usescale", methods=["POST"])
+def update_usescale():
+    data = request.get_json()
+
+    entry_id = data.get("entry_id")
+    if not entry_id:
+        return jsonify({"error": "Missing entry_id"}), 400
+
+    fields = [
+        "ai_level",
+        "ai_title",
+        "instruction",
+        "example",
+        "declaration",
+        "version",
+        "purpose",
+        "key_prompts",
+    ]
+
+    updates = []
+    values = []
+    for f in fields:
+        if f in data:
+            updates.append(f"{f} = ?")
+            values.append(data[f])
+
+    if not updates:
+        return jsonify({"error": "No valid fields to update"}), 400
+
+    values.append(entry_id)
+
+    try:
+        conn = sqlite3.connect("database/srep_entries.db")
+        cur = conn.cursor()
+        cur.execute(
+            f"UPDATE srep_entries SET {', '.join(updates)} WHERE entry_id = ?",
+            values,
+        )
+        conn.commit()
+        conn.close()
+
+        if cur.rowcount == 0:
+            return jsonify({"error": "Entry not found"}), 404
+
+        return jsonify({"success": True, "message": "Entry updated successfully"})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 
 # get the srep entries from database and send to front end
 @app.route("/entries", methods=["GET"])
@@ -647,7 +696,7 @@ def get_entries():
     result = []
     for et in entry_types:
         cur_entries.execute("""
-            SELECT ai_level, ai_title, instruction, example, declaration, version, purpose, key_prompts
+            SELECT entry_id, ai_level, ai_title, instruction, example, declaration, version, purpose, key_prompts
             FROM srep_entries
             WHERE entry_type_id = ?
             ORDER BY entry_id
