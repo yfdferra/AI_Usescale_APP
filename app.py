@@ -117,7 +117,7 @@ def save_template():
         cursor = connection.cursor()
         cursor.execute(
             "DELETE FROM usescale_entries WHERE usescale_id = ?",
-            (usescale_id)
+            (usescale_id, )
         )
 
         # Insert new rows

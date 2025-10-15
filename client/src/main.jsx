@@ -13,6 +13,6 @@ ReactDOM.createRoot(document.getElementById("root")).render(
   <StrictMode>
     <BrowserRouter> 
       <App />
-    </BrowserRouter>
+    </BrowserRouter>w
   </StrictMode>
 );

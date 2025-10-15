@@ -95,7 +95,7 @@ CREATE TABLE usescale_entries (
     key_prompts TEXT,
     FOREIGN KEY (subject_id) REFERENCES subjects(subject_id),
     FOREIGN KEY (usescale_id) REFERENCES usescales(usescale_id),
-    FOREGIN KEY (entry_id) REFERENCES srep_entries(entry_id)
+    FOREIGN KEY (entry_id) REFERENCES srep_entries(entry_id)
 )""")
 
 entries = [
