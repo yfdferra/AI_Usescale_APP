@@ -311,7 +311,7 @@ def copy_base_template():
 
         for entry in entries:
             (
-                subject_id, old_usescale_id, entry_id, assessment_task, ai_title,
+                row_id, subject_id, old_usescale_id, entry_id, assessment_task, ai_title,
                 instruction, example, declaration, version, purpose, key_prompts
             ) = entry
 
