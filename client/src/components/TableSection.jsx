@@ -155,29 +155,29 @@ export default function TableSection({
   const [subjectSemester, setSubjectSemester] = useState("");
 
   // constant for notifications
-  const [rowsWithNotifications, setRowsWithNotifications] = useState([])
+  const [rowsWithNotifications, setRowsWithNotifications] = useState([]);
 
   // calls back to check if rows have any notifications
   useEffect(() => {
     if (!rows.length) return;
 
-    const rowIds = rows.map(r => r.row_id).filter(Boolean);
+    const rowIds = rows.map((r) => r.row_id).filter(Boolean);
     if (!rowIds.length) return;
 
     fetch(HOST + "/get_notifications_for_rows", {
       method: "POST",
-      headers: { "Content-Type": "application/json"},
-      body: JSON.stringify({ row_ids: rowIds}),
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ row_ids: rowIds }),
     })
-      .then(res => res.json())
-      .then(data => {
+      .then((res) => res.json())
+      .then((data) => {
         if (data.success) {
           setRowsWithNotifications(data.rows_with_notifications);
         } else {
           console.error("Error fetching notifications:", data.error);
         }
       })
-      .catch(err => console.error("Network error:", err))
+      .catch((err) => console.error("Network error:", err));
   }, [rows]);
 
   useEffect(() => {
@@ -438,7 +438,7 @@ export default function TableSection({
         <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
           <TagInput
             value={subjectName}
-            placeholder= "Subject name"
+            placeholder={subjectName}
             onChange={(val) => {
               setSubjectName(val);
               onUpdateSubjectDetails(val, subjectYear, subjectSemester);
@@ -446,14 +446,14 @@ export default function TableSection({
           />
           <TagInput
             value={subjectYear}
-            placeholder="Year"
+            placeholder={subjectYear}
             onChange={(val) => {
               setSubjectYear(val);
               onUpdateSubjectDetails(subjectName, val, subjectSemester);
             }}
           />
           <DropdownTagInput
-            placeholder="Semester"
+            placeholder={subjectSemester}
             options={["Semester 1", "Semester 2"]}
             onChange={(val) => {
               setSubjectSemester(val);
@@ -613,21 +613,24 @@ export default function TableSection({
                     }}
                   >
                     <span>{data.label || "AI Scale Placeholder"}</span>
-                    {rowsWithNotifications.includes(data.row_id) && !isAdmin && (
-                      <MenuButton
-                        items={[
-                          {
-                            label: "View notifications",
-                            icon: editIcon,
-                            onClick:() => {
-                              console.log("Opening notification for row:", data.row_id);
-                              openNotification(data.row_id);
-                            }
-                            
-                          },
-                        ]}
-                      />
-                    )}
+                    {rowsWithNotifications.includes(data.row_id) &&
+                      !isAdmin && (
+                        <MenuButton
+                          items={[
+                            {
+                              label: "View notifications",
+                              icon: editIcon,
+                              onClick: () => {
+                                console.log(
+                                  "Opening notification for row:",
+                                  data.row_id
+                                );
+                                openNotification(data.row_id);
+                              },
+                            },
+                          ]}
+                        />
+                      )}
                   </td>
 
                   {/* Instruction */}

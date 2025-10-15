@@ -117,7 +117,7 @@ def save_template():
         cursor = connection.cursor()
         cursor.execute(
             "DELETE FROM usescale_entries WHERE usescale_id = ?",
-            (usescale_id)
+            (usescale_id, )
         )
 
         # Insert new rows
@@ -311,7 +311,7 @@ def copy_base_template():
 
         for entry in entries:
             (
-                subject_id, old_usescale_id, entry_id, assessment_task, ai_title,
+                row_id, subject_id, old_usescale_id, entry_id, assessment_task, ai_title,
                 instruction, example, declaration, version, purpose, key_prompts
             ) = entry
 
