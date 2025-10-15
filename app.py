@@ -3,12 +3,15 @@ from flask_cors import CORS
 import sqlite3
 
 
-app = Flask(__name__)
+# app = Flask(__name__)
+app = Flask(__name__, static_folder="client/dist", static_url_path="")
+
 CORS(app)
 
-@app.route("/")
-def hello_world():
-    return render_template("home/index.html")
+# Old static page, remove it
+#@app.route("/")
+#def hello_world():
+#    return render_template("home/index.html")
 
 
 @app.route("/usecase")
@@ -750,3 +753,13 @@ def create_subject_space():
         return jsonify({"success": False, "error": str(e)})
         
 
+@app.route("/", defaults={"path": ""})
+@app.route("/<path:path>")
+def serve_react(path):
+    import os
+    from flask import send_from_directory
+
+    if path != "" and os.path.exists(f"client/dist/{path}"):
+        return send_from_directory("client/dist", path)
+    else:
+        return send_from_directory("client/dist", "index.html")
