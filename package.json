@@ -29,7 +29,7 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:ci": "jest --ci --runInBand --reporters=default --reporters=jest-junit --coverage", 
-    "heroku-postbuild": "npm install --prefix client && npm run build --prefix client"
+    "heroku-postbuild": "cd client && npm ci --include=dev && npm run build"
   },
   "jest-junit": {
     "outputDirectory": "./reports/junit",
