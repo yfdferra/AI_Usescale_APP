@@ -758,8 +758,9 @@ def create_subject_space():
 def serve_react(path):
     import os
     from flask import send_from_directory
-
-    if path != "" and os.path.exists(f"client/dist/{path}"):
-        return send_from_directory("client/dist", path)
-    else:
-        return send_from_directory("client/dist", "index.html")
+    
+    # if the requested path is a real stored build file in client/dist, serve it directly
+    if path != "" and os.path.exists(os.path.join(app.static_folder, path)):
+        return send_from_directory(app.static_folder, path)
+    else:  # otherwise, serve index.html so React Router can handle it
+        return send_from_directory(app.static_folder, 'index.html')
