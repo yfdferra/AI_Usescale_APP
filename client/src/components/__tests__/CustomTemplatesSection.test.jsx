@@ -17,32 +17,6 @@ import userEvent from "@testing-library/user-event";
 import CustomTemplatesSection from "../CustomTemplatesSection";
 
 describe("CustomTemplatesSection", () => {
-
-  // mock the fetch, as the current version calls backend (fetches) and waits for JSON results
-  // mock backend response, as the search now depends on backnd response
-  beforeAll(() => {
-    global.fetch = jest.fn((url) => {
-      if (url.includes("/find_templates")) {
-        // simulate backend returning only Template C
-        return Promise.resolve({
-          json: () =>
-            Promise.resolve({
-              success: true,
-              templates: ["Template C"],
-            }),
-        });
-      }
-      // default for other endpoints
-      return Promise.resolve({
-        json: () => Promise.resolve({ success: true }),
-      });
-    });
-  });
-
-  afterAll(() => {
-    global.fetch.mockRestore();
-  });
-
   test("renders templates, clicking a square calls onTemplateClick passed by parent, search filters by title", async () => {
     const user = userEvent.setup();
     const onTemplateClick = jest.fn();  // mock it

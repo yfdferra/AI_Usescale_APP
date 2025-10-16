@@ -11,7 +11,6 @@ import copyIcon from "../assets/copy.png";
 import deleteIcon from "../assets/delete.png";
 import addIcon from "../assets/add.png";
 import saveIcon from "../assets/save.png";
-import notificationIcon from "../assets/notification.png";
 
 const NOAI = "LEVEL N";
 
@@ -132,8 +131,7 @@ export default function TableSection({
   subjectId,
   initialTitle,
   toHighlight,
-  //onChangeScale,
-  openNotification,
+  onChangeScale,
   onRowsChange,
   onSaveTemplate,
   levelsData = [], // <-- pass levelsData from parent (UseScalePage)
@@ -153,32 +151,6 @@ export default function TableSection({
   const [subjectName, setSubjectName] = useState("");
   const [subjectYear, setSubjectYear] = useState("");
   const [subjectSemester, setSubjectSemester] = useState("");
-
-  // constant for notifications
-  const [rowsWithNotifications, setRowsWithNotifications] = useState([]);
-
-  // calls back to check if rows have any notifications
-  useEffect(() => {
-    if (!rows.length) return;
-
-    const rowIds = rows.map((r) => r.row_id).filter(Boolean);
-    if (!rowIds.length) return;
-
-    fetch(HOST + "/get_notifications_for_rows", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ row_ids: rowIds }),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success) {
-          setRowsWithNotifications(data.rows_with_notifications);
-        } else {
-          console.error("Error fetching notifications:", data.error);
-        }
-      })
-      .catch((err) => console.error("Network error:", err));
-  }, [rows]);
 
   useEffect(() => {
     fetch(HOST + `/get_subject_info?subject_id=${subjectId}`)
@@ -438,7 +410,7 @@ export default function TableSection({
         <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
           <TagInput
             value={subjectName}
-            placeholder={subjectName}
+            placeholder= "Subject name"
             onChange={(val) => {
               setSubjectName(val);
               onUpdateSubjectDetails(val, subjectYear, subjectSemester);
@@ -446,14 +418,14 @@ export default function TableSection({
           />
           <TagInput
             value={subjectYear}
-            placeholder={subjectYear}
+            placeholder="Year"
             onChange={(val) => {
               setSubjectYear(val);
               onUpdateSubjectDetails(subjectName, val, subjectSemester);
             }}
           />
           <DropdownTagInput
-            placeholder={subjectSemester}
+            placeholder="Semester"
             options={["Semester 1", "Semester 2"]}
             onChange={(val) => {
               setSubjectSemester(val);
@@ -587,7 +559,6 @@ export default function TableSection({
                             ...foundEntry,
                             level: newLevel,
                             label: newLabel,
-                            entry_id: foundEntry.entry_id,
                             ...keep,
                           };
                           if (nullify) {
@@ -613,24 +584,15 @@ export default function TableSection({
                     }}
                   >
                     <span>{data.label || "AI Scale Placeholder"}</span>
-                    {rowsWithNotifications.includes(data.row_id) &&
-                      !isAdmin && (
-                        <MenuButton
-                          items={[
-                            {
-                              label: "View notifications",
-                              icon: editIcon,
-                              onClick: () => {
-                                console.log(
-                                  "Opening notification for row:",
-                                  data.row_id
-                                );
-                                openNotification(data.row_id);
-                              },
-                            },
-                          ]}
-                        />
-                      )}
+                    <MenuButton
+                      items={[
+                        {
+                          label: "Change Scale",
+                          icon: editIcon,
+                          onClick: () => onChangeScale(rowIdx),
+                        },
+                      ]}
+                    />
                   </td>
 
                   {/* Instruction */}

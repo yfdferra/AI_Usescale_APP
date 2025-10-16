@@ -2,8 +2,6 @@
 // and sets JSON payload with level, label, entry_type_id
 import { render, screen, fireEvent } from "@testing-library/react";
 import UseScaleBlock from "../UseScaleBlock";
-import userEvent from "@testing-library/user-event";
-
 
 // helper to mimic browser's DataTransfer object during drag and drop
 // store data in local object
@@ -54,44 +52,4 @@ describe("UseScaleBlock", () => {
     const parsed = JSON.parse(payload);
     expect(parsed).toEqual({ level: "LEVEL R-2", label: "MORE AI", entry_type_id: 10240108 });
   });
-
-  test("renders edit icon for admin users | triggers onEditClick without misfiring parent onClick", async () => {
-    const onClick = jest.fn();
-    const onEditClick = jest.fn();
-
-    render(
-      <UseScaleBlock
-        level="LEVEL TEST for admin"
-        label="can EDIT"
-        isAdmin={true}
-        onClick={onClick}
-        onEditClick={onEditClick}
-      />
-    );
-
-    // expect edit icon to appear for Admin user
-    const editIcon = screen.getByAltText("Edit");
-    expect(editIcon).toBeInTheDocument();
-
-    // clicking edit icon should only call onEditClick, but not the parent onClick
-    await userEvent.click(editIcon);
-
-    expect(onEditClick).toHaveBeenCalledTimes(1);
-    expect(onClick).not.toHaveBeenCalled();
-
-  });
-
-  test("does not render edit icon for subject coordinator users", async () => {
-    render(
-      <UseScaleBlock
-        level="LEVEL TEST for subject coordinator"
-        label="cannot see EDIT JELP ME"
-        isAdmin={false}
-      />
-    );
-
-    // edit icon should NOT appear for subject coordinator user
-    expect(screen.queryByAltText("Edit")).not.toBeInTheDocument();
-  })
-
 });

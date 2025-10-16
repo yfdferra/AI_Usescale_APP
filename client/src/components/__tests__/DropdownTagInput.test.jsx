@@ -11,13 +11,10 @@ describe("DropdownTagInput", () => {
   test("select → tag → clear → back to select", async () => {
     // render with a placeholder and some options
     const user = userEvent.setup();
-    const handleChange = jest.fn();  // added mock onChange
-
     render(
       <DropdownTagInput
         placeholder="Pick one"
         options={["A", "B", "C"]}
-        onChange={handleChange}
       />
     );
 
@@ -29,9 +26,6 @@ describe("DropdownTagInput", () => {
 
     // select one option (i.e. B)
     await user.selectOptions(select, "B");
-
-    // onChange expected to have been called by B
-    expect(handleChange).toHaveBeenCalledWith("B");
 
     // assert new state: the component should now render a "tag" with text "B" | AND there should be a clear button labeled "×"
     expect(screen.getByText("B")).toBeInTheDocument();

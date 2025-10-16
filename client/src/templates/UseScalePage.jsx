@@ -1,4 +1,4 @@
-import React, { useState, useEffect, version } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import HorizontalSidebar from "../components/HorizontalSidebar";
@@ -29,7 +29,7 @@ export default function UseScalePage({
   subject_id,
   onLogout,
 }) {
-  //const [pendingRowIdx, setPendingRowIdx] = useState(null);
+  const [pendingRowIdx, setPendingRowIdx] = useState(null);
 
   // new state to store fetched entry types and entries
   const [levelsData, setLevelsData] = useState([]);
@@ -44,43 +44,41 @@ export default function UseScalePage({
   const [editedLevel, setEditedLevel] = useState("");
   const [editedLabel, setEditedLabel] = useState("");
 
-  // ***************** commented out this functionality 
-  //
-  // const handleLevelClick = (levelKey, entries) => {
-  //   if (pendingRowIdx == null) return;
+  const handleLevelClick = (levelKey, entries) => {
+    if (pendingRowIdx == null) return;
 
-  //   // find selected level entry data in db
-  //   const copy = entries.find((e) => e.ai_level == levelKey);
-  //   if (!copy) return;
+    // find selected level entry data in db
+    const copy = entries.find((e) => e.ai_level == levelKey);
+    if (!copy) return;
 
-  //   const FLAT = {
-  //     level: levelKey,
-  //     label: copy.ai_title,
-  //     ...copy,
-  //   };
+    const FLAT = {
+      level: levelKey,
+      label: copy.ai_title,
+      ...copy,
+    };
 
-  //   // save as nulls
-  //   if (levelKey === NOAI) {
-  //     for (const k of TO_NULL) {
-  //       if (k === "instruction") continue;
-  //       FLAT[k] = null;
-  //     }
-  //   }
+    // save as nulls
+    if (levelKey === NOAI) {
+      for (const k of TO_NULL) {
+        if (k === "instruction") continue;
+        FLAT[k] = null;
+      }
+    }
 
-  //   setUsecase((prev) => {
-  //     if (!Array.isArray(prev) || !prev[pendingRowIdx]) return prev;
-  //     const next = prev.slice(); // create copy
-  //     if (!next[pendingRowIdx]) return prev;
+    setUsecase((prev) => {
+      if (!Array.isArray(prev) || !prev[pendingRowIdx]) return prev;
+      const next = prev.slice(); // create copy
+      if (!next[pendingRowIdx]) return prev;
 
-  //     // Keep ID
-  //     const keep = next[pendingRowIdx].id ? { id: next[pendingRowIdx].id } : {};
-  //     // Replace
-  //     next[pendingRowIdx] = { ...keep, ...FLAT };
-  //     return next;
-  //   });
+      // Keep ID
+      const keep = next[pendingRowIdx].id ? { id: next[pendingRowIdx].id } : {};
+      // Replace
+      next[pendingRowIdx] = { ...keep, ...FLAT };
+      return next;
+    });
 
-  //   setPendingRowIdx(null); // empty the row
-  // };
+    setPendingRowIdx(null); // empty the row
+  };
 
   const [subjectName, setSubjectName] = useState("");
   const [subjectYear, setSubjectYear] = useState("");
@@ -200,8 +198,8 @@ export default function UseScalePage({
 
   const [open, setOpen] = useState(false);
 
-  // fetch usecase rows for table function
-  const fetchUseCaseRows = async () => {
+  // fetch usecase rows for table
+  useEffect(() => {
     if (!usescale_id) return;
 
     fetch(`${HOST}/usecase?usescale_id=${usescale_id}`)
@@ -230,19 +228,15 @@ export default function UseScalePage({
           }));
           setUsecase(mapped);
         }
-        // console.log("Fetched data:", data);
+        console.log("Fetched data:", data);
       })
       .catch((error) => {
         console.error("Error fetching data:", error);
       });
-  };
-
-  useEffect(() => {
-    fetchUseCaseRows();
   }, [usescale_id]);
 
   // fetch dynamic levels (entry type and entries) from db
-  const fetchLevelsData = () => {
+  useEffect(() => {
     fetch(`${HOST}/entries`)
       .then((res) => res.json())
       .then((data) => {
@@ -250,56 +244,6 @@ export default function UseScalePage({
         console.log("Fetched levels data:", data);
       })
       .catch((error) => console.error("Error fetching levels:", error));
-  };
-
-  // logic for handling a notification open
-  const [selectedNotification, setSelectedNotification] = useState(null);
-  const [showNotificationModal, setShowNotificationModal] = useState(false);
-  
-  const handleNotificationOpen = async (rowId) => {
-    try {
-      const res = await fetch(HOST + "/get_notification_for_row", {
-        method: "POST",
-        headers: { "Content-Type": "application/json"},
-        body: JSON.stringify({ row_id: rowId}),
-      })
-      const data = await res.json();
-      if (data.success) {
-        setSelectedNotification(data.notification);
-        setShowNotificationModal(true);
-      }
-    } catch (err) {
-      console.error("Error fetching notification:", err);
-    }
-  };
-
-  const handleNotificationAction = async (action) => {
-    if (!selectedNotification) return;
-    try {
-      const res = await fetch(HOST + "/handle_notification", {
-        method: "POST",
-        headers: { "Content-Type": "application/json"},
-        body: JSON.stringify({
-          notification_id: selectedNotification.notification_id,
-          action,
-        })
-      });
-      const data = await res.json();
-      if (data.success) {
-        setSelectedNotification(null);
-        setShowNotificationModal(false);
-        fetchUseCaseRows();
-        // setRowsWithNotification((prev) =>
-        //   prev.filter((id) => id !== selectedNotification.row_id)
-        // );
-      }
-    } catch (err) {
-      console.error("Error handling notification:", err);
-    }
-  };
-  
-  useEffect(() => {
-    fetchLevelsData();
   }, []);
 
   const handleFilterChange = () => {};
@@ -321,61 +265,52 @@ export default function UseScalePage({
           {(() => {
             // filter the levels based on search term
             const filteredLevels = levelsData.map((entryType) => {
-              const filteredEntries = entryType.entries.filter((entry) =>
-                entry.ai_title.toLowerCase().includes(searchTerm)
-              );
-              return { ...entryType, filteredEntries };
-            });
+        const filteredEntries = entryType.entries.filter((entry) =>
+          entry.ai_title.toLowerCase().includes(searchTerm)
+        );
+        return { ...entryType, filteredEntries };
+      });
 
-            // check if any results exist
-            const hasResults = filteredLevels.some(
-              (level) => level.filteredEntries.length > 0
+          // check if any results exist
+          const hasResults = filteredLevels.some(
+        (level) => level.filteredEntries.length > 0
+      );
+
+      if (!hasResults) {
+        return <div className="no-results">No results found</div>;
+      }
+
+      // render the filtered levels
+      return filteredLevels.map((entryType) => {
+        if (entryType.filteredEntries.length === 0) return null;
+
+        return (
+          <VerticalDropdown
+            key={entryType.entry_type_id}
+            title={entryType.title}
+            expanded={searchTerm.length > 0}>
+              {entryType.filteredEntries.map((entry) => (
+                <UseScaleBlock
+                    key={`${entry.ai_level}-${entryType.entry_type_id}`}
+                    level={entry.ai_level}
+                    label={entry.ai_title}
+                    labelBg={
+                      entry.ai_level === "LEVEL N"
+                        ? "#ffb3b3"
+                        : entry.ai_level === "LEVEL R-1"
+                        ? "#ffcfb3ff"
+                        : entry.ai_level === "LEVEL R-2"
+                        ? "#ffffb3ff"
+                        : "#d9b3ffff"
+                    }
+                    entry_type_id={entryType.entry_type_id}
+                    isAdmin={userType === "admin"}
+                    onClick={() => handleLevelClick(entry.ai_level, entryType.filteredEntries)}
+                    onEditClick={() => setEditingScale(entry)}
+                  />
+                ))}
+              </VerticalDropdown>
             );
-
-            if (!hasResults) {
-              return <div className="no-results">No results found</div>;
-            }
-
-            // render the filtered levels
-            return filteredLevels.map((entryType) => {
-              if (entryType.filteredEntries.length === 0) return null;
-
-              return (
-                <VerticalDropdown
-                  key={entryType.entry_type_id}
-                  title={entryType.title}
-                  expanded={searchTerm.length > 0}
-                >
-                  {entryType.filteredEntries.map((entry) => (
-                    <UseScaleBlock
-                      key={`${entry.ai_level}-${entryType.entry_type_id}`}
-                      level={entry.ai_level}
-                      label={entry.ai_title}
-                      labelBg={
-                        entry.ai_level === "LEVEL N"
-                          ? "#ffb3b3"
-                          : entry.ai_level === "LEVEL R-1"
-                          ? "#ffcfb3ff"
-                          : entry.ai_level === "LEVEL R-2"
-                          ? "#ffffb3ff"
-                          : "#d9b3ffff"
-                      }
-                      entry_type_id={entryType.entry_type_id}
-                      isAdmin={userType === "admin"}
-                      onClick={() =>
-                        handleLevelClick(
-                          entry.ai_level,
-                          entryType.filteredEntries
-                        )
-                      }
-                      onEditClick={() => {
-                        setEditingScale(entry);
-                        console.log("Editing entry:", entry);
-                      }}
-                    />
-                  ))}
-                </VerticalDropdown>
-              );
             });
           })()}
         </HorizontalSidebar>
@@ -388,181 +323,95 @@ export default function UseScalePage({
           tableData={usecase}
           subjectId={subject_id}
           initialTitle={template_title}
-          //toHighlight={pendingRowIdx}
-          //onChangeScale={(rowIdx) => setPendingRowIdx(rowIdx)}
-          openNotification={handleNotificationOpen}
+          toHighlight={pendingRowIdx}
+          onChangeScale={(rowIdx) => setPendingRowIdx(rowIdx)}
           onRowsChange={(nextRows) => setUsecase(nextRows)}
           onSaveTemplate={handleSaveTemplate}
           levelsData={levelsData} // <-- pass levelsData for drag-and-drop
           onUpdateSubjectDetails={updateSubjectDetails}
         />
       </div>
-      {/* notification modal */}
-      {showNotificationModal && selectedNotification && (
-        <div className="modal-overlay">
-          <div className="modal">
-            <h3>Review Notification</h3>
-            <div className="data-comparison">
-              <div>
-                <h4>Previous Data</h4>
-                <pre>
-                  {JSON.stringify(selectedNotification.prev_data, null, 2)}
-                </pre>
-              </div>
-              <div>
-                <h4>New Data</h4>
-                <pre>
-                  {JSON.stringify(selectedNotification.curr_data, null, 2)}
-                </pre>
-              </div>
-            </div>
-
-            <div className="modal-buttons">
-              <button
-                onClick={() => handleNotificationAction("accept")}
-                className="accept"
-              >
-                Accept
-              </button>
-              <button
-                onClick={() => handleNotificationAction("reject")}
-              >
-                Reject
-              </button>
-              <button
-                onClick={() => setShowNotificationModal(false)}
-                className="close"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {editingScale && (
-        <div className="modal-overlay">
-          <div className="modal">
-            <h3>Edit Scale</h3>
+  <div className="modal-overlay">
+    <div className="modal">
+      <h3>Edit Scale</h3>
 
-            <div className="modal-field">
-              <label>General Learning or Assessment Tasks</label>
-              <input
-                type="text"
-                value={editingScale.general_learning || ""}
-                onChange={(e) =>
-                  setEditingScale((prev) => ({
-                    ...prev,
-                    general_learning: e.target.value,
-                  }))
-                }
-              />
-            </div>
+      <div className="modal-field">
+        <label>General Learning or Assessment Tasks</label>
+        <input
+          type="text"
+          value={editingScale.general_learning || ""}
+          onChange={(e) =>
+            setEditingScale((prev) => ({ ...prev, general_learning: e.target.value }))
+          }
+        />
+      </div>
 
-            <div className="modal-field">
-              <label>AI Use Scale Level</label>
-              <input
-                type="text"
-                value={editingScale.ai_level || ""}
-                onChange={(e) =>
-                  setEditingScale((prev) => ({
-                    ...prev,
-                    ai_level: e.target.value,
-                  }))
-                }
-              />
-            </div>
+      <div className="modal-field">
+        <label>AI Use Scale Level</label>
+        <input
+          type="text"
+          value={editingScale.ai_level || ""}
+          onChange={(e) =>
+            setEditingScale((prev) => ({ ...prev, ai_level: e.target.value }))
+          }
+        />
+      </div>
 
-            <div className="modal-field">
-              <label>Instruction to Students</label>
-              <input
-                type="text"
-                value={editingScale.instruction || ""}
-                onChange={(e) =>
-                  setEditingScale((prev) => ({
-                    ...prev,
-                    instruction: e.target.value,
-                  }))
-                }
-              />
-            </div>
+      <div className="modal-field">
+        <label>Instruction to Students</label>
+        <input
+          type="text"
+          value={editingScale.instruction || ""}
+          onChange={(e) =>
+            setEditingScale((prev) => ({ ...prev, instruction: e.target.value }))
+          }
+        />
+      </div>
 
-            <div className="modal-field">
-              <label>Examples</label>
-              <input
-                type="text"
-                value={editingScale.example || ""}
-                onChange={(e) =>
-                  setEditingScale((prev) => ({
-                    ...prev,
-                    example: e.target.value,
-                  }))
-                }
-              />
-            </div>
+      <div className="modal-field">
+        <label>Examples</label>
+        <input
+          type="text"
+          value={editingScale.example || ""}
+          onChange={(e) =>
+            setEditingScale((prev) => ({ ...prev, example: e.target.value }))
+          }
+        />
+      </div>
 
-            <div className="modal-field">
-              <label>AI Generated Content in Submission</label>
-              <input
-                type="text"
-                value={editingScale.declaration || ""}
-                onChange={(e) =>
-                  setEditingScale((prev) => ({
-                    ...prev,
-                    declaration: e.target.value,
-                  }))
-                }
-              />
-            </div>
+      <div className="modal-field">
+        <label>AI Generated Content in Submission</label>
+        <input
+          type="text"
+          value={editingScale.declaration || ""}
+          onChange={(e) =>
+            setEditingScale((prev) => ({ ...prev, declaration: e.target.value }))
+          }
+        />
+      </div>
 
-            <div className="modal-buttons">
-              <button
-                onClick={() => {
-                  // Save usescale to DB
-                  fetch(`${HOST}/update_usescale`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                      entry_id: editingScale.entry_id,
-                      ai_level: editingScale.ai_level,
-                      ai_title: editingScale.ai_title,
-                      instruction: editingScale.instruction,
-                      example: editingScale.example,
-                      declaration: editingScale.declaration,
-                      version: editingScale.version,
-                      purpose: editingScale.purpose,
-                      key_prompts: editingScale.key_prompts,
-                    }),
-                  })
-                    .then((res) => res.json())
-                    .then((data) => {
-                      if (data.success) {
-                        console.log("Entry updated successfully");
-                        // re-fetch levelsData
-                        fetchLevelsData();
-                        // also going to need to add notifcation stuff here
-                      } else {
-                        console.error("Update failed:", data.error);
-                      }
-                    })
-                    .catch((err) => console.error("Fetch error:", err));
+      <div className="modal-buttons">
+        <button
+          onClick={() => {
+            // save changes back to usecase array
+            setUsecase((prev) =>
+              prev.map((row) => (row.id === editingScale.id ? editingScale : row))
+            );
+            setEditingScale(null);
+          }}
+        >
+          Save
+        </button>
+        <button onClick={() => setEditingScale(null)}>Cancel</button>
+      </div>
+    </div>
+  </div>
+)}
 
-                  // commented this out because it was causing the overwrite row bug when editing use scale
-                  //setUsecase((prev) =>
-                  //  prev.map((row) =>
-                  //</div>    row.id === editingScale.id ? editingScale : row
-                  //</div>  )
-                  //);
-                  setEditingScale(null);
-                }}
-              >
-                Save
-              </button>
-              <button onClick={() => setEditingScale(null)}>Cancel</button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
+
+  
 }

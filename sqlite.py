@@ -84,7 +84,6 @@ CREATE TABLE usescale_entries (
     row_id INTEGER PRIMARY KEY AUTOINCREMENT,
     subject_id INTEGER,
     usescale_id INTEGER,
-    entry_id INTEGER,
     assessment_task TEXT,
     ai_title TEXT,
     instruction TEXT,
@@ -94,8 +93,7 @@ CREATE TABLE usescale_entries (
     purpose TEXT,
     key_prompts TEXT,
     FOREIGN KEY (subject_id) REFERENCES subjects(subject_id),
-    FOREIGN KEY (usescale_id) REFERENCES usescales(usescale_id),
-    FOREIGN KEY (entry_id) REFERENCES srep_entries(entry_id)
+    FOREIGN KEY (usescale_id) REFERENCES usescales(usescale_id)
 )""")
 
 entries = [
@@ -287,21 +285,4 @@ connection.commit()
 connection.close()
 
 
-# database for notifications
-connection = sqlite3.connect("database/notifications.db")
-cursor = connection.cursor()
-
-cursor.execute("""
-CREATE TABLE notifications (
-    notification_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    entry_id INTEGER NOT NULL,
-    row_id INTEGER NOT NULL,
-    prev_data TEXT NOT NULL,
-    curr_data TEXT NOT NULL,
-    FOREIGN KEY (entry_id) REFERENCES srep_entries(entry_id),
-    FOREIGN KEY (row_id) REFERENCES usescale_rows(row_id)
-)
-""")
-
-connection.commit()
-connection.close()
+# need to create a new database for base templates

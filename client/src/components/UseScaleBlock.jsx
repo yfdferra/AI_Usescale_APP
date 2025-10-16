@@ -49,7 +49,7 @@ export default function UseScaleBlock({
     }, 0);
   };
   return (
-    <div className="use-scale-block" onClick={onClick} role="button" draggable={draggable} onDragStart={handleDragStart} {...rest} style={{ position: "relative" }}>
+    <div className="use-scale-block" onClick={onClick} draggable={draggable} onDragStart={handleDragStart} {...rest} style={{ position: "relative" }}>
       <div className="use-scale-block-level">{level}</div>
       <div className="use-scale-block-label" style={{ background: labelBg }}>
         {label}
