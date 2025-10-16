@@ -758,9 +758,16 @@ def create_subject_space():
 def serve_react(path):
     import os
     from flask import send_from_directory
-    
+
     # if the requested path is a real stored build file in client/dist, serve it directly
     if path != "" and os.path.exists(os.path.join(app.static_folder, path)):
         return send_from_directory(app.static_folder, path)
     else:  # otherwise, serve index.html so React Router can handle it
         return send_from_directory(app.static_folder, 'index.html')
+
+@app.errorhandler(404)
+def not_found(e):
+    from flask import send_from_directory
+    import os
+    # if refresh page, serve index.html instead of showing Flask 404
+    return send_from_directory(app.static_folder, "index.html")
