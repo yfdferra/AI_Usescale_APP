@@ -3,14 +3,12 @@ from flask_cors import CORS
 import sqlite3
 import json
 
-# app = Flask(__name__)
-app = Flask(__name__, static_folder="client/dist", static_url_path="")
+app = Flask(__name__)
 CORS(app)
 
-# Old static page, commenting it out
-# @app.route("/")
-# def hello_world():
-#     return render_template("home/index.html")
+@app.route("/")
+def hello_world():
+    return render_template("home/index.html")
 
 
 @app.route("/usecase")
@@ -956,24 +954,3 @@ def create_subject_space():
     except Exception as e:
         return jsonify({"success": False, "error": str(e)})
         
-
-# route the paths in the build correctly
-@app.route("/", defaults={"path": ""})
-@app.route("/<path:path>")
-def serve_react(path):
-    import os
-    from flask import send_from_directory
-
-    # if the requested path is a real stored build file in client/dist, serve it directly
-    if path != "" and os.path.exists(os.path.join(app.static_folder, path)):
-        return send_from_directory(app.static_folder, path)
-    else:  # otherwise, serve index.html so React Router can handle it
-        return send_from_directory(app.static_folder, 'index.html')
-
-# handle error 404 error for refreshes
-@app.errorhandler(404)
-def not_found(e):
-    from flask import send_from_directory
-    import os
-    # if refresh page, serve index.html instead of showing Flask 404
-    return send_from_directory(app.static_folder, "index.html")
