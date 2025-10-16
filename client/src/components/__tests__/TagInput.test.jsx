@@ -7,8 +7,9 @@ import TagInput from "../TagInput";
 describe("TagInput", () => {
   test("adds a tag on Enter and removes it via  ×  remove button", async () => {
     const user = userEvent.setup();
+    const handleChange = jest.fn(); // add mock onChange
 
-    render(<TagInput placeholder="Add tag..." value={[]} />);
+    render(<TagInput placeholder="Add tag..." value={[]} onChange={handleChange} />);
 
     // input should be initially visible
     const input =
@@ -16,8 +17,11 @@ describe("TagInput", () => {
       screen.getByRole("textbox");
     expect(input).toBeInTheDocument();
 
-    // type in input, then press enter  ->  tag forms and appears
-    await user.type(input, "COMP30022{enter}");
+    // type in input, onChange should be triggered by each key pressed  
+    await user.type(input, "COMP30022");
+    expect(handleChange).toHaveBeenCalled();
+
+    await user.type(input, "{enter}");  // then press enter  ->  tag forms and appears
     expect(screen.getByText(/^COMP30022$/i)).toBeInTheDocument();
 
     // input should become the tag (becomes hidden)
