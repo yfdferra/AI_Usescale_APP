@@ -1,14 +1,16 @@
 from flask import Flask, render_template, request, jsonify
 from flask_cors import CORS
 import sqlite3
+import json
 
-
-app = Flask(__name__)
+# app = Flask(__name__)
+app = Flask(__name__, static_folder="client/dist", static_url_path="")
 CORS(app)
 
-@app.route("/")
-def hello_world():
-    return render_template("home/index.html")
+# Old static page, commenting it out
+# @app.route("/")
+# def hello_world():
+#     return render_template("home/index.html")
 
 
 @app.route("/usecase")
@@ -24,11 +26,6 @@ def usecase():
 
     connection.close()
     return jsonify(data)
-
-
-
-
-    
 
 
 @app.route("/get_subject_info", methods=["GET"])
@@ -121,7 +118,7 @@ def save_template():
         cursor = connection.cursor()
         cursor.execute(
             "DELETE FROM usescale_entries WHERE usescale_id = ?",
-            (usescale_id)
+            (usescale_id, )
         )
 
         # Insert new rows
@@ -129,14 +126,15 @@ def save_template():
             cursor.execute(
                 """
                 INSERT INTO usescale_entries (
-                    subject_id, usescale_id, assessment_task, ai_title, instruction, example, declaration,
+                    subject_id, usescale_id, entry_id, assessment_task, ai_title, instruction, example, declaration,
                     version, purpose, key_prompts
                 )
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     subject_id,
                     usescale_id,
+                    row.get('entry_id'),
                     row.get('assessment_task'),
                     row.get('ai_title'),
                     row.get('instruction'),
@@ -217,6 +215,7 @@ def copy_template():
     data = request.get_json()
     usescale_id = data.get('usescale_id')
     user_id = data.get('user_id')
+    
 
     if not usescale_id:
         return jsonify({"success": False, "error": "missing usescale id"})
@@ -234,8 +233,8 @@ def copy_template():
         new_title = f"{old_title} (Copy)"
 
         cursor.execute(
-            "INSERT INTO usescales (user_id, title) VALUES (?, ?)",
-            (user_id, new_title,)
+            "INSERT INTO usescales (user_id, title, template_type) VALUES (?, ?, ?)",
+            (user_id, new_title, "custom")
         )
         new_usescale_id = cursor.lastrowid
         connection.commit()
@@ -248,16 +247,16 @@ def copy_template():
         entries = cursor_rows.fetchall()
 
         for entry in entries:
-            _, subject_id, _, assessment_task, ai_title, instruction, example, declaration, version, purpose, key_prompts = entry
+            _, subject_id, _, entry_id, assessment_task, ai_title, instruction, example, declaration, version, purpose, key_prompts = entry
             cursor_rows.execute(
                 """
                 INSERT INTO usescale_entries (
-                    subject_id, usescale_id, assessment_task, ai_title, instruction, example, declaration, 
+                    subject_id, usescale_id, entry_id, assessment_task, ai_title, instruction, example, declaration, 
                     version, purpose, key_prompts
                 )           
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)   
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)   
                 """,
-                (subject_id, new_usescale_id, assessment_task, ai_title, instruction, example, declaration, version, purpose, key_prompts)
+                (subject_id, new_usescale_id, entry_id, assessment_task, ai_title, instruction, example, declaration, version, purpose, key_prompts)
                 
             )
         connection_rows.commit()
@@ -274,6 +273,7 @@ def copy_base_template():
     data = request.get_json()
     usescale_id = data.get('usescale_id')
     user_id = data.get('user_id')
+    
 
     if not usescale_id:
         return jsonify({"success": False, "error": "missing usescale id"})
@@ -312,19 +312,19 @@ def copy_base_template():
 
         for entry in entries:
             (
-                entry_id, subject_id, old_usescale_id, assessment_task, ai_title,
+                row_id, subject_id, old_usescale_id, entry_id, assessment_task, ai_title,
                 instruction, example, declaration, version, purpose, key_prompts
             ) = entry
 
             cursor_rows.execute(
                 """
                 INSERT INTO usescale_entries (
-                    subject_id, usescale_id, assessment_task, ai_title, instruction, example, declaration,
+                    subject_id, usescale_id, entry_id, assessment_task, ai_title, instruction, example, declaration,
                     version, purpose, key_prompts
                 )
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
-                (subject_id, new_usescale_id, assessment_task, ai_title, instruction, example, declaration, version, purpose, key_prompts)
+                (subject_id, new_usescale_id, entry_id, assessment_task, ai_title, instruction, example, declaration, version, purpose, key_prompts)
             )
         
         connection_rows.commit()
@@ -627,6 +627,262 @@ def ping():
     return jsonify({"message": "pong"})
 
 
+
+# modified this function to also add notification entries
+@app.route("/update_usescale", methods=["POST"])
+def update_usescale():
+    data = request.get_json()
+
+    entry_id = data.get("entry_id")
+    if not entry_id:
+        return jsonify({"error": "Missing entry_id"}), 400
+
+    fields = [
+        "ai_level",
+        "ai_title",
+        "instruction",
+        "example",
+        "declaration",
+        "version",
+        "purpose",
+        "key_prompts",
+    ]
+
+    updates = []
+    values = []
+    for f in fields:
+        if f in data:
+            updates.append(f"{f} = ?")
+            values.append(data[f])
+
+    if not updates:
+        return jsonify({"error": "No valid fields to update"}), 400
+
+    values.append(entry_id)
+
+    try:
+        # connect to srep entries
+        conn_srep = sqlite3.connect("database/srep_entries.db")
+        conn_srep.row_factory = sqlite3.Row
+        cur_srep = conn_srep.cursor()
+
+        # fetch previous data for notification
+        cur_srep.execute("SELECT * FROM srep_entries WHERE entry_id = ?", (entry_id,))
+        prev_row = cur_srep.fetchone()
+        if not prev_row:
+            conn_srep.close()
+            return jsonify({"error": "Entry not found"})
+        
+        prev_data = {key: prev_row[key] for key in prev_row.keys()}
+
+        # update the entry in srep entries
+        cur_srep.execute(
+            f"UPDATE srep_entries SET {', '.join(updates)} WHERE entry_id = ?",
+            values,
+        )
+        conn_srep.commit()
+
+        # fetch updated row data
+        cur_srep.execute("SELECT * FROM srep_entries WHERE entry_id = ?", (entry_id,))
+        curr_row = cur_srep.fetchone()
+        curr_data = {key: curr_row[key] for key in curr_row.keys()}
+
+        conn_srep.close()
+
+        # connect to usescale_rows to find affected rows
+        conn_rows = sqlite3.connect("database/usescale_rows.db")
+        conn_rows.row_factory = sqlite3.Row
+        cur_rows = conn_rows.cursor()
+
+        cur_rows.execute("SELECT * FROM usescale_entries WHERE entry_id = ?", (entry_id,))
+        affected_rows = cur_rows.fetchall()
+        conn_rows.close()
+
+        # connect to notifications database
+        conn_notif = sqlite3.connect("database/notifications.db")
+        cur_notif = conn_notif.cursor()
+
+        # connect to usescales and users database
+        conn_scales = sqlite3.connect("database/usescales.db")
+        cur_scales = conn_scales.cursor()
+        conn_users = sqlite3.connect("database/users.db")
+        cur_users = conn_users.cursor()
+
+        for row in affected_rows:
+            row_id = row["row_id"]
+            usescale_id = row["usescale_id"]
+
+            # get user_id for this usescale
+            cur_scales.execute("SELECT user_id FROM usescales WHERE usescale_id = ?", (usescale_id,))
+            scale_data = cur_scales.fetchone()
+            if not scale_data:
+                continue
+            user_id = scale_data[0]
+
+            # check user type
+            cur_users.execute("SELECT user_type FROM users WHERE user_id = ?", (user_id,))
+            user_data = cur_users.fetchone()
+            if not user_data:
+                continue
+            if user_data[0] == "admin":
+                continue  # skip notifications for admin users
+
+            # check if notification already exists for this row
+            cur_notif.execute("SELECT * FROM notifications WHERE row_id = ?", (row_id,))
+            existing_notif = cur_notif.fetchone()
+
+            if existing_notif:
+                # update curr_data only, keep prev_data as is
+                cur_notif.execute(
+                    "UPDATE notifications SET curr_data = ? WHERE row_id = ?",
+                    (json.dumps(curr_data), row_id)
+                )
+            else:
+                # insert new notification
+                cur_notif.execute(
+                    """
+                    INSERT INTO notifications (entry_id, row_id, prev_data, curr_data)
+                    VALUES (?, ?, ?, ?)
+                    """,
+                    (entry_id, row_id, json.dumps(prev_data), json.dumps(curr_data))
+                )
+
+        conn_notif.commit()
+        conn_notif.close()
+        conn_scales.close()
+        conn_users.close()
+
+        return jsonify({"success": True, "message": "Entry updated successfully"})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+
+
+# function that accepts row ids and checks if there is a notification
+@app.route("/get_notifications_for_rows", methods=["POST"])
+def get_notifications_for_rows():
+    data = request.get_json()
+    row_ids = data.get("row_ids")
+
+    if not row_ids or not isinstance(row_ids, list):
+        return jsonify({"error": "missing or invalid row_id"})
+    
+    try:
+        connection = sqlite3.connect("database/notifications.db")
+        connection.row_factory = sqlite3.Row
+        cursor = connection.cursor()
+
+        placeholders = ",".join("?" for _ in row_ids)
+        query = f"SELECT row_id FROM notifications WHERE row_id IN ({placeholders})"
+        cursor.execute(query, row_ids)
+        rows_with_notifications = {r["row_id"] for r in cursor.fetchall()}
+
+        connection.close()
+
+        return jsonify({"success": True, "rows_with_notifications": list(rows_with_notifications)})
+    except Exception as e:
+        return jsonify({"error": str(e)})
+    
+
+# function that gets the notification for a certain row
+@app.route("/get_notification_for_row", methods=["POST"])
+def get_notification_for_row():
+    data = request.get_json()
+    row_id = data.get("row_id")
+
+    if not row_id:
+        return jsonify({"error": "Missing row id"})
+    
+    try:
+        connection = sqlite3.connect("database/notifications.db")
+        connection.row_factory = sqlite3.Row
+        cursor = connection.cursor()
+        cursor.execute("SELECT * FROM notifications WHERE row_id = ?", (row_id,))
+        notif = cursor.fetchone()
+        connection.close()
+
+        if not notif:
+            return jsonify({"success": False, "error": "No notification found"})
+        
+        return jsonify({
+            "success": True,
+            "notification": {
+                "notification_id": notif["notification_id"],
+                "entry_id": notif["entry_id"],
+                "row_id": notif["row_id"],
+                "prev_data": json.loads(notif["prev_data"]),
+                "curr_data": json.loads(notif["curr_data"]),
+            }
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)})
+    
+
+# function that handles a notification accept/reject
+@app.route("/handle_notification", methods=["POST"])
+def handle_notification():
+    data = request.get_json()
+    notification_id = data.get("notification_id")
+    action = data.get("action")  # accept or reject
+
+    if not notification_id or action not in ["accept", "reject"]:
+        return jsonify({"error": "Missing or invalid input"})
+
+    try:
+        # connect to notifications DB
+        conn_notif = sqlite3.connect("database/notifications.db")
+        conn_notif.row_factory = sqlite3.Row
+        cursor_notif = conn_notif.cursor()
+
+        # fetch notification
+        cursor_notif.execute(
+            "SELECT * FROM notifications WHERE notification_id = ?",
+            (notification_id,)
+        )
+        notif = cursor_notif.fetchone()
+        if not notif:
+            conn_notif.close()
+            return jsonify({"error": "Notification not found"})
+
+        row_id = notif["row_id"]
+        curr_data = json.loads(notif["curr_data"])
+
+        # if accepted, update the row in usescale_entries
+        if action == "accept":
+            conn_rows = sqlite3.connect("database/usescale_rows.db")
+            cur_rows = conn_rows.cursor()
+
+            allowed_keys = [
+                "assessment_task", "ai_title", "instruction", "example",
+                "declaration", "version", "purpose", "key_prompts"
+            ]
+            updates = [f"{key} = ?" for key in allowed_keys if key in curr_data]
+            values = [curr_data[key] for key in allowed_keys if key in curr_data]
+            values.append(row_id)  # for WHERE clause
+
+            sql = f"UPDATE usescale_entries SET {', '.join(updates)} WHERE row_id = ?"
+            cur_rows.execute(sql, values)
+            conn_rows.commit()
+            conn_rows.close()
+
+        # delete the notification in both cases
+        cursor_notif.execute(
+            "DELETE FROM notifications WHERE notification_id = ?",
+            (notification_id,)
+        )
+        conn_notif.commit()
+        conn_notif.close()
+
+        return jsonify({"success": True})
+
+    except Exception as e:
+        return jsonify({"error": str(e)})
+    
+                             
+
+
+
 # get the srep entries from database and send to front end
 @app.route("/entries", methods=["GET"])
 def get_entries():
@@ -647,7 +903,7 @@ def get_entries():
     result = []
     for et in entry_types:
         cur_entries.execute("""
-            SELECT ai_level, ai_title, instruction, example, declaration, version, purpose, key_prompts
+            SELECT entry_id, ai_level, ai_title, instruction, example, declaration, version, purpose, key_prompts
             FROM srep_entries
             WHERE entry_type_id = ?
             ORDER BY entry_id
@@ -701,3 +957,23 @@ def create_subject_space():
         return jsonify({"success": False, "error": str(e)})
         
 
+# route the paths in the build correctly
+@app.route("/", defaults={"path": ""})
+@app.route("/<path:path>")
+def serve_react(path):
+    import os
+    from flask import send_from_directory
+
+    # if the requested path is a real stored build file in client/dist, serve it directly
+    if path != "" and os.path.exists(os.path.join(app.static_folder, path)):
+        return send_from_directory(app.static_folder, path)
+    else:  # otherwise, serve index.html so React Router can handle it
+        return send_from_directory(app.static_folder, 'index.html')
+
+# handle error 404 error for refreshes
+@app.errorhandler(404)
+def not_found(e):
+    from flask import send_from_directory
+    import os
+    # if refresh page, serve index.html instead of showing Flask 404
+    return send_from_directory(app.static_folder, "index.html")

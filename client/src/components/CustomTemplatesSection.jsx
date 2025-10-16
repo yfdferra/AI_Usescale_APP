@@ -103,9 +103,13 @@ export default function CustomTemplatesSection({
       const res = await fetch(`${HOST}/copy_template`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ usescale_id: id }),
+        body: JSON.stringify({ 
+          usescale_id: id,
+          user_id: userId,
+        }),
       });
       const data = await res.json();
+
 
       if (data.success) {
         setLocalTemplates((prev) => [

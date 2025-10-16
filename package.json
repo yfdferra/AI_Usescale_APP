@@ -28,7 +28,8 @@
   "scripts": {
     "test": "jest",
     "test:watch": "jest --watch",
-    "test:ci": "jest --ci --runInBand --reporters=default --reporters=jest-junit --coverage"
+    "test:ci": "jest --ci --runInBand --reporters=default --reporters=jest-junit --coverage", 
+    "heroku-postbuild": "cd client && npm ci --include=dev && npm run build"
   },
   "jest-junit": {
     "outputDirectory": "./reports/junit",
