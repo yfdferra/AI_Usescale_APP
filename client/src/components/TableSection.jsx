@@ -443,7 +443,7 @@ export default function TableSection({
         <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
           <TagInput
             value={subjectName}
-            placeholder={subjectName}
+            placeholder={subjectName || "Subject Code"}
             onChange={(val) => {
               setSubjectName(val);
               onUpdateSubjectDetails(val, subjectYear, subjectSemester);
@@ -451,14 +451,14 @@ export default function TableSection({
           />
           <TagInput
             value={subjectYear}
-            placeholder={subjectYear}
+            placeholder={subjectYear || "Year"}
             onChange={(val) => {
               setSubjectYear(val);
               onUpdateSubjectDetails(subjectName, val, subjectSemester);
             }}
           />
           <DropdownTagInput
-            placeholder={subjectSemester}
+            placeholder={subjectSemester || "Semester"}
             options={["Semester 1", "Semester 2"]}
             onChange={(val) => {
               setSubjectSemester(val);
