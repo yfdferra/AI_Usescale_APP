@@ -12,6 +12,7 @@ import deleteIcon from "../assets/delete.png";
 import addIcon from "../assets/add.png";
 import saveIcon from "../assets/save.png";
 import notificationIcon from "../assets/notification.png";
+import WindowsConfirm from "../components/WindowsConfirm";
 
 const NOAI = "LEVEL N";
 
@@ -34,6 +35,15 @@ function EditableCell({
   const [editing, setEditing] = useState(false);
   const [tempValue, setTempValue] = useState(value || "");
   const textareaRef = useRef(null);
+
+  const [confirmPopup, setConfirmPopup] = useState({
+      show: false,
+      message: "",
+      onConfirm: null,
+    });
+    const askConfirmation = (message, onConfirm) => {
+      setConfirmPopup({ show: true, message, onConfirm });
+    };
 
   useEffect(() => {
     setTempValue(value || "");
@@ -738,6 +748,14 @@ export default function TableSection({
     </button>
   </div>
 )}
+<WindowsConfirm
+  show={confirmPopup.show}
+  message={confirmPopup.message}
+  onConfirm={() => {
+    confirmPopup.onConfirm?.();
+  }}
+  onCancel={() => setConfirmPopup({ ...confirmPopup, show: false })}
+/>
     </div>
   );
 }

@@ -46,13 +46,13 @@ export default function UseScalePage({
   const [editedLabel, setEditedLabel] = useState("");
 
   const [confirmPopup, setConfirmPopup] = useState({
-  show: false,
-  message: "",
-  onConfirm: null,
-});
-const askConfirmation = (message, onConfirm) => {
-  setConfirmPopup({ show: true, message, onConfirm });
-};
+    show: false,
+    message: "",
+    onConfirm: null,
+  });
+  const askConfirmation = (message, onConfirm) => {
+    setConfirmPopup({ show: true, message, onConfirm });
+  };
 
   // ***************** commented out this functionality 
   //
