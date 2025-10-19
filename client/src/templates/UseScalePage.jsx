@@ -9,6 +9,7 @@ import HOST from "../GLOBALS/Globals";
 
 import FilterSearchBar from "../components/FilterSearchBar";
 import TableSection from "../components/TableSection";
+import WindowsConfirm from "../components/WindowsConfirm";
 import "./UseScalePage.css";
 
 const NOAI = "LEVEL N";
@@ -43,6 +44,15 @@ export default function UseScalePage({
   const [editingScale, setEditingScale] = useState(null);
   const [editedLevel, setEditedLevel] = useState("");
   const [editedLabel, setEditedLabel] = useState("");
+
+  const [confirmPopup, setConfirmPopup] = useState({
+  show: false,
+  message: "",
+  onConfirm: null,
+});
+const askConfirmation = (message, onConfirm) => {
+  setConfirmPopup({ show: true, message, onConfirm });
+};
 
   // ***************** commented out this functionality 
   //
@@ -131,26 +141,37 @@ export default function UseScalePage({
       let finalSubjectId = subject_id;
 
       if (!checkData.exists) {
-        // Ask user if they want to create a new subject
-        const confirmCreate = window.confirm(
-          "Subject does not exist. Create a new subject?"
-        );
-        if (!confirmCreate) return;
-
-        const createResponse = await fetch(`${HOST}/create_subject`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            subjectName,
-            subjectYear,
-            subjectSemester,
-            userId,
-            usescale_id,
-          }),
-        });
-        const createData = await createResponse.json();
-        finalSubjectId = createData.subject_id;
-      } else {
+  // Show popup instead of window.confirm
+  return new Promise((resolve) => {
+    askConfirmation(
+      "Subject does not exist. Create a new subject?",
+      async () => {
+        // user clicked Yes
+        try {
+          const createResponse = await fetch(`${HOST}/create_subject`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              subjectName,
+              subjectYear,
+              subjectSemester,
+              userId,
+              usescale_id,
+            }),
+          });
+          const createData = await createResponse.json();
+          finalSubjectId = createData.subject_id;
+          resolve(finalSubjectId); // continue flow
+        } catch (err) {
+          console.error("Error creating subject:", err);
+          resolve(null);
+        } finally {
+          setConfirmPopup({ ...confirmPopup, show: false });
+        }
+      }
+    );
+  });
+} else {
         const subject_id = checkData.subject_id;
         console.log("subject and usescale:", subject_id, usescale_id);
         // If subject exists, reassign. Do not create new subject.
@@ -563,6 +584,16 @@ export default function UseScalePage({
           </div>
         </div>
       )}
+
+      <WindowsConfirm
+  show={confirmPopup.show}
+  message={confirmPopup.message}
+  onConfirm={() => {
+    confirmPopup.onConfirm?.();
+  }}
+  onCancel={() => setConfirmPopup({ ...confirmPopup, show: false })}
+/>
+
     </div>
   );
 }
