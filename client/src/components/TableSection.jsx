@@ -147,6 +147,7 @@ export default function TableSection({
   const isAdmin = userType?.toLowerCase() === "admin";
   // constant for determining if user can modify rows
   const canModifyRows = !(isBaseTemplate && !isAdmin);
+  const [popup, setPopup] = useState({ show: false, message: "", type: "info" });
 
   // local state for table rows
   const [rows, setRows] = useState(tableData || []);
@@ -156,6 +157,11 @@ export default function TableSection({
 
   // constant for notifications
   const [rowsWithNotifications, setRowsWithNotifications] = useState([]);
+
+  //for pop up
+  const showPopup = (message, type = "info") => {
+    setPopup({ show: true, message, type });
+  };
 
   // calls back to check if rows have any notifications
   useEffect(() => {
@@ -221,7 +227,7 @@ export default function TableSection({
     if (userInput !== null) {
       setTitle(userInput);
     } else {
-      alert("You cancelled the input.");
+      showPopup("You cancelled the input.", "error");
     }
   };
 
@@ -241,14 +247,13 @@ export default function TableSection({
       const data = await res.json();
 
       if (data.success) {
-        alert(`Template copy created: "${data.new_title}"`);
+        showPopup(`Template copy created: "${data.new_title}"`, "success");
         console.log("new template ID:", data.new_usescale_id);
       } else {
-        alert("Failed to copy template:" + (data.error || "Uknown error"));
+        showPopup("Failed to copy template: " + (data.error || "Unknown error"), "error");
       }
     } catch (err) {
-      console.error("Error copying template:", err);
-      alert("Error copying template, please try again.");
+      showPopup("Error copying template, please try again.", "error");
     }
   };
 
@@ -264,7 +269,7 @@ export default function TableSection({
 
     const templateId = rows?.[0]?.usescale_id || usescale_id; // fallback to prop
     if (!templateId) {
-      alert("Cannot determine template ID to save as base template");
+      showPopup("Cannot determine template ID to save as base template", "error");
       return;
     }
 
@@ -277,13 +282,13 @@ export default function TableSection({
 
       const data = await res.json();
       if (data.success) {
-        alert("Template has been successfully saved as a base template");
+        showPopup("Template has been successfully saved as a base template", "success");
       } else {
-        alert("Error saving as base template: " + (data.error || ""));
+        showPopup("Error saving as base template: " + (data.error || ""), "error");
       }
     } catch (err) {
       console.error("Network error:", err);
-      alert("Network error while saving as base template");
+      showPopup("Network error while saving as base template", "error");
     }
   };
 
@@ -304,14 +309,14 @@ export default function TableSection({
       const data = await res.json();
 
       if (data.success) {
-        alert(`Base template copy created: "${data.new_title}"`);
+        showPopup(`Base template copy created: "${data.new_title}"`, "success");
         console.log("new template ID:", data.new_usescale_id);
       } else {
-        alert("Failed to copy base template:" + (data.error || "Uknown error"));
+        showPopup("Failed to copy base template: " + (data.error || "Unknown error"), "error");
       }
     } catch (err) {
-      console.error("Error copying base template:", err);
-      alert("Error copying base template, please try again.");
+      showPopup("Error copying base template, please try again.", "error");
+
     }
   };
 
@@ -438,7 +443,7 @@ export default function TableSection({
         <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
           <TagInput
             value={subjectName}
-            placeholder={subjectName}
+            placeholder={subjectName || "Subject Code"}
             onChange={(val) => {
               setSubjectName(val);
               onUpdateSubjectDetails(val, subjectYear, subjectSemester);
@@ -446,14 +451,14 @@ export default function TableSection({
           />
           <TagInput
             value={subjectYear}
-            placeholder={subjectYear}
+            placeholder={subjectYear || "Year"}
             onChange={(val) => {
               setSubjectYear(val);
               onUpdateSubjectDetails(subjectName, val, subjectSemester);
             }}
           />
           <DropdownTagInput
-            placeholder={subjectSemester}
+            placeholder={subjectSemester || "Semester"}
             options={["Semester 1", "Semester 2"]}
             onChange={(val) => {
               setSubjectSemester(val);
@@ -722,6 +727,17 @@ export default function TableSection({
           </tbody>
         </table>
       </div>
+    {popup.show && (
+  <div className={`popup-box ${popup.type}`}>
+    <p>{popup.message}</p>
+    <button
+      onClick={() => setPopup({ show: false, message: "", type: "info" })}
+      className="popup-close"
+    >
+      ×
+    </button>
+  </div>
+)}
     </div>
   );
 }
