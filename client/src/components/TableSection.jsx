@@ -13,6 +13,7 @@ import addIcon from "../assets/add.png";
 import saveIcon from "../assets/save.png";
 import notificationIcon from "../assets/notification.png";
 import WindowsConfirm from "../components/WindowsConfirm";
+import WindowsInput from "./WindowsInput";
 
 const NOAI = "LEVEL N";
 
@@ -174,6 +175,13 @@ export default function TableSection({
     setConfirmPopup({ show: true, message, onConfirm });
   };
 
+  const [titleModal, setTitleModal] = useState({
+  show: false,
+  oldTitle: "",
+});
+
+  
+
   // calls back to check if rows have any notifications
   useEffect(() => {
     if (!rows.length) return;
@@ -234,13 +242,20 @@ export default function TableSection({
   }, [tableData]);
 
   const editTitle = () => {
-    let userInput = prompt("Please enter new Title", "Title");
-    if (userInput !== null) {
-      setTitle(userInput);
-    } else {
-      showPopup("You cancelled the input.", "error");
-    }
-  };
+  setTitleModal({ show: true, oldTitle: title });
+};
+
+  const handleTitleSubmit = async (newTitle) => {
+  if (!newTitle) {
+    showPopup("You cancelled the input.", "error");
+    setTitleModal({ show: false, oldTitle: "" });
+    return;
+  }
+
+  setTitle(newTitle);
+  setTitleModal({ show: false, oldTitle: "" });
+};
+
 
   const makeCopy = async () => {
     try {
@@ -745,7 +760,14 @@ export default function TableSection({
   }}
   onCancel={() => setConfirmPopup({ show: false, message: "", onConfirm: null })}
 />
-
+<WindowsInput
+  show={titleModal.show}
+  title="Edit Template Title"
+  defaultValue={titleModal.oldTitle}
+  placeholder="Enter new title"
+  onSubmit={handleTitleSubmit}
+  onCancel={() => setTitleModal({ show: false, id: null, oldTitle: "" })}
+/>
     </div>
   );
 }

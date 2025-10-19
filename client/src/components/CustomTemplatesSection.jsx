@@ -10,7 +10,7 @@ import editIcon from "../assets/edit.png";
 import copyIcon from "../assets/copy.png";
 import deleteIcon from "../assets/delete.png";
 import WindowsConfirm from "../components/WindowsConfirm";
-
+import WindowsInput from "./WindowsInput";
 
 // Helper to split array into chunks of 5
 //function chunkArray(array, size = 5) {
@@ -54,39 +54,45 @@ export default function CustomTemplatesSection({
       setConfirmPopup({ show: true, message, onConfirm });
     };
 
+    const [titleModal, setTitleModal] = useState({
+      show: false,
+      id: null,
+      oldTitle: "",
+    });
 
-  // edit title handler
-  const editTitle = async (id, oldTitle) => {
-    const newTitle = prompt(
-      "Please enter new Title",
-      oldTitle || "Untitled Template"
-    );
-    if (!newTitle) return;
+    const editTitle = (id, oldTitle) => {
+  setTitleModal({ show: true, id, oldTitle });
+};
 
-    try {
-      const res = await fetch(`${HOST}/update_title`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          usescale_id: id,
-          title: newTitle,
-        }),
-      });
-      const data = await res.json();
+const handleTitleSubmit = async (newTitle) => {
+  if (!newTitle) return;
 
-      if (data.success) {
-        // update local UI immediately
-        setLocalTemplates((prev) =>
-          prev.map((t) => (t.id === id ? { ...t, title: newTitle } : t))
-        );
-      } else {
-        showPopup("Failed to update title: " + data.error, "error");
-      }
-    } catch (err) {
-      showPopup("Error updating title", "error");
+  const { id } = titleModal;
 
+  try {
+    const res = await fetch(`${HOST}/update_title`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        usescale_id: id,
+        title: newTitle,
+      }),
+    });
+    const data = await res.json();
+
+    if (data.success) {
+      setLocalTemplates((prev) =>
+        prev.map((t) => (t.id === id ? { ...t, title: newTitle } : t))
+      );
+    } else {
+      showPopup("Failed to update title: " + data.error, "error");
     }
-  };
+  } catch (err) {
+    showPopup("Error updating title", "error");
+  } finally {
+    setTitleModal({ show: false, id: null, oldTitle: "" });
+  }
+};
 
   // delete template handler
   const deleteTemplate = async (id) => {
@@ -264,6 +270,16 @@ export default function CustomTemplatesSection({
   }}
   onCancel={() => setConfirmPopup({ ...confirmPopup, show: false })}
 />
+
+<WindowsInput
+  show={titleModal.show}
+  title="Edit Template Title"
+  defaultValue={titleModal.oldTitle}
+  placeholder="Enter new title"
+  onSubmit={handleTitleSubmit}
+  onCancel={() => setTitleModal({ show: false, id: null, oldTitle: "" })}
+/>
+
       </div>
     </section>
   );
