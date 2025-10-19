@@ -30,12 +30,18 @@ export default function CustomTemplatesSection({
 
   //const rows = chunkArray(templates, 5);
   const navigate = useNavigate();
-
+  const [popup, setPopup] = useState({ show: false, message: "", type: "info" });
+  
   const [search, setSearch] = useState("");
   const [localTemplates, setLocalTemplates] = useState(templates || []);
   useEffect(() => {
     setLocalTemplates(templates || []);
   }, [templates]);
+
+  //pop ups
+  const showPopup = (message, type = "info") => {
+    setPopup({ show: true, message, type });
+  };
 
   // edit title handler
   const editTitle = async (id, oldTitle) => {
@@ -62,11 +68,11 @@ export default function CustomTemplatesSection({
           prev.map((t) => (t.id === id ? { ...t, title: newTitle } : t))
         );
       } else {
-        alert("Failed to update title: " + data.error);
+        showPopup("Failed to update title: " + data.error, "error");
       }
     } catch (err) {
-      console.error("Error updating title:", err);
-      alert("Error updating title");
+      showPopup("Error updating title", "error");
+
     }
   };
 
@@ -89,11 +95,11 @@ export default function CustomTemplatesSection({
         // remove from local UI immediately
         setLocalTemplates((prev) => prev.filter((t) => t.id !== id));
       } else {
-        alert("Failed to delete template: " + data.error);
+        showPopup("Failed to delete template: " + data.error, "error");
       }
     } catch (err) {
-      console.error("Error deleting template:", err);
-      alert("Error deleting template");
+      showPopup("Error deleting template", "error");
+
     }
   };
 
@@ -119,11 +125,11 @@ export default function CustomTemplatesSection({
 
         //navigate(`/usescale/${data.new_usescale_id}`);
       } else {
-        alert("failed to copy template:" + data.error);
+        showPopup("Failed to copy template: " + data.error, "error");
       }
     } catch (err) {
-      console.error("error copying template:", err);
-      alert("error copying template");
+      showPopup("Error copying template", "error");
+
     }
   };
 
@@ -221,6 +227,17 @@ export default function CustomTemplatesSection({
             </div>
           ))
         )}
+      {popup.show && (
+  <div className={`popup-box ${popup.type}`}>
+    <p>{popup.message}</p>
+    <button
+      onClick={() => setPopup({ show: false, message: "", type: "info" })}
+      className="popup-close"
+    >
+      ×
+    </button>
+  </div>
+)}
       </div>
     </section>
   );

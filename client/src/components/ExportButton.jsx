@@ -10,9 +10,15 @@ export default function ExportButton({ tableSelector = ".table-section-table", t
   const [showPopup, setShowPopup] = useState(false);
   const [exportStudentDeclaration, setExportStudentDeclaration] = useState(true);
   const [exportAIUsageScale, setExportAIUsageScale] = useState(false);
+  const [popup, setPopup] = useState({ show: false, message: "", type: "info" });
 
   const popupRef = useRef(null);
   const buttonRef = useRef(null);
+
+  //popups
+  const showPopup2 = (message, type = "info") => {
+    setPopup({ show: true, message, type });
+  };
 
   const handleExport = () => {
   const title = document.querySelector(titleSelector)?.textContent || "table";
@@ -33,7 +39,7 @@ export default function ExportButton({ tableSelector = ".table-section-table", t
     if (exportAIUsageScale) {
       const table = document.querySelector(tableSelector);
       if (!table) {
-        alert("No table found for PDF export");
+        showPopup("No table found for PDF export", "error");
         return;
       }
       
@@ -77,7 +83,7 @@ export default function ExportButton({ tableSelector = ".table-section-table", t
 
 
     if (rows.length === 0) {
-      alert("No AI Use Scale data found");
+      showPopup("No AI Use Scale data found", "error");
       return;
     }
 

@@ -22,12 +22,18 @@ export default function BaseTemplatesSection({
   const [newUsername, setNewUsername] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [selectedTemplates, setSelectedTemplates] = useState([]);
+  const [popup, setPopup] = useState({ show: false, message: "", type: "info" });
+
 
   const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
       setLocalTemplates(templates || []);
   }, [templates]);
+
+  const showPopup = (message, type = "info") => {
+    setPopup({ show: true, message, type });
+  };
 
   // change label based on user type
   const createButtonLabel = 
@@ -63,17 +69,18 @@ export default function BaseTemplatesSection({
         // remove from local UI immediately
         setLocalTemplates((prev) => prev.filter((t) => t.id !== id));
       } else {
-        alert("Failed to delete template: " + data.error);
+        showPopup("Failed to delete. Please try again.", "error");
       }
     } catch (err) {
-      console.error("Error deleting template:", err);
-      alert("Error deleting template");
+      showPopup("Error creating subject space. Please try again.", "error");
+      showPopup("Error deleting template. Please try again.", "error");
     }
   };
 
   const handleCreateSubject = async () => {
     if (!newUsername || !newPassword) {
-      alert("Please fill out username and password");
+        showPopup("Please fill in username and password.", "error");
+
       return;
     }
 
@@ -90,17 +97,17 @@ export default function BaseTemplatesSection({
       const data = await res.json();
 
       if (data.success) {
-        alert("Subject space created successfully!");
+        showPopup("Subject space created successfully!", "success");
         setNewUsername("");
         setNewPassword("");
         setSelectedTemplates([]);
         setShowModal(false);
       } else {
-        alert("Failed to create subject space: " + data.error);
+        showPopup("Failed to create subject space: " + data.error, "error");
       }
     } catch (err) {
-      console.error("Error creating subject space:", err);
-      alert("Error creating subject space");
+      showPopup("Subject space created successfully!", "success");
+      showPopup("Error creating subject space", "error");
     }
   };
 
@@ -230,6 +237,14 @@ export default function BaseTemplatesSection({
           </div>
         </div>
       )}
+    {popup.show && (
+  <div className={`popup-box ${popup.type}`}>
+    <p>{popup.message}</p>
+    <button onClick={() => setPopup({ show: false, message: "", type: "info" })}>
+      ×
+    </button>
+  </div>
+)}
 
     </section>
   );
