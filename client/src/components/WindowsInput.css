@@ -1,0 +1,75 @@
+/* Full-screen backdrop like WindowsConfirm */
+.windows-confirm-backdrop {
+  position: fixed;      /* <- fixed to viewport */
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.3); /* semi-transparent */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999; /* high z-index to sit on top */
+}
+
+.windows-confirm-box {
+  background: #f9f9f9;
+  padding: 1.5rem;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.25);
+  max-width: 400px;
+  width: 90%;
+}
+
+.windows-confirm-title {
+  margin: 0 0 1rem 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.windows-confirm-input {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  font-size: 1rem;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  outline: none;
+  margin-bottom: 1rem;
+}
+
+.windows-confirm-input:focus {
+  border-color: #007bff;
+}
+
+.windows-confirm-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.windows-confirm-btn {
+  padding: 0.45rem 0.9rem;
+  font-size: 0.95rem;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.windows-confirm-btn.confirm {
+  background-color: #007bff;
+  color: white;
+}
+
+.windows-confirm-btn.confirm:hover {
+  background-color: #0056b3;
+}
+
+.windows-confirm-btn.cancel {
+  background-color: #e0e0e0;
+  color: #333;
+}
+
+.windows-confirm-btn.cancel:hover {
+  background-color: #c2c2c2;
+}

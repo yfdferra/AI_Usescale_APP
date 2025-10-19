@@ -5,6 +5,8 @@ import StarToggle from "./Star";
 import deleteIcon from "../assets/delete.png";
 import HOST from "../GLOBALS/Globals";
 import "./BaseTemplatesSection.css";
+import WindowsConfirm from "../components/WindowsConfirm";
+
 
 export default function BaseTemplatesSection({ 
   userId,
@@ -35,6 +37,15 @@ export default function BaseTemplatesSection({
     setPopup({ show: true, message, type });
   };
 
+  const [confirmPopup, setConfirmPopup] = useState({
+      show: false,
+      message: "",
+      onConfirm: null,
+    });
+    const askConfirmation = (message, onConfirm) => {
+      setConfirmPopup({ show: true, message, onConfirm });
+    };
+
   // change label based on user type
   const createButtonLabel = 
     userType?.toLowerCase() === "admin"
@@ -54,28 +65,36 @@ export default function BaseTemplatesSection({
 
   // delete template handler
   const deleteTemplate = async (id) => {
-    const confirmDelete = window.confirm("Are you sure you want to delete this template?");
-    if (!confirmDelete) return;
+  return new Promise((resolve) => {
+    // Show our confirmation popup
+    setConfirmPopup({
+      show: true,
+      message: "Are you sure you want to delete this template?",
+      onConfirm: async () => {
+        setConfirmPopup({ ...confirmPopup, show: false }); // close popup
+        try {
+          const res = await fetch(`${HOST}/delete_template`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ usescale_id: id }),
+          });
+          const data = await res.json();
 
-    try {
-      const res = await fetch(`${HOST}/delete_template`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json"},
-        body: JSON.stringify({usescale_id: id}),
-      });
-      const data = await res.json();
+          if (data.success) {
+            setLocalTemplates((prev) => prev.filter((t) => t.id !== id));
+          } else {
+            showPopup("Failed to delete. Please try again.", "error");
+          }
+        } catch (err) {
+          showPopup("Error deleting template. Please try again.", "error");
+        } finally {
+          resolve(); // finish promise
+        }
+      },
+    });
+  });
+};
 
-      if (data.success) {
-        // remove from local UI immediately
-        setLocalTemplates((prev) => prev.filter((t) => t.id !== id));
-      } else {
-        showPopup("Failed to delete. Please try again.", "error");
-      }
-    } catch (err) {
-      showPopup("Error creating subject space. Please try again.", "error");
-      showPopup("Error deleting template. Please try again.", "error");
-    }
-  };
 
   const handleCreateSubject = async () => {
     if (!newUsername || !newPassword) {
@@ -245,7 +264,14 @@ export default function BaseTemplatesSection({
     </button>
   </div>
 )}
-
+<WindowsConfirm
+  show={confirmPopup.show}
+  message={confirmPopup.message}
+  onConfirm={() => {
+    confirmPopup.onConfirm?.();
+  }}
+  onCancel={() => setConfirmPopup({ ...confirmPopup, show: false })}
+/>
     </section>
   );
 }

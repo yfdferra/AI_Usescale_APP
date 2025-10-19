@@ -9,6 +9,8 @@ import { useNavigate } from "react-router-dom";
 import editIcon from "../assets/edit.png";
 import copyIcon from "../assets/copy.png";
 import deleteIcon from "../assets/delete.png";
+import WindowsConfirm from "../components/WindowsConfirm";
+import WindowsInput from "./WindowsInput";
 
 // Helper to split array into chunks of 5
 //function chunkArray(array, size = 5) {
@@ -43,65 +45,87 @@ export default function CustomTemplatesSection({
     setPopup({ show: true, message, type });
   };
 
-  // edit title handler
-  const editTitle = async (id, oldTitle) => {
-    const newTitle = prompt(
-      "Please enter new Title",
-      oldTitle || "Untitled Template"
-    );
-    if (!newTitle) return;
+  const [confirmPopup, setConfirmPopup] = useState({
+      show: false,
+      message: "",
+      onConfirm: null,
+    });
+    const askConfirmation = (message, onConfirm) => {
+      setConfirmPopup({ show: true, message, onConfirm });
+    };
 
-    try {
-      const res = await fetch(`${HOST}/update_title`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          usescale_id: id,
-          title: newTitle,
-        }),
-      });
-      const data = await res.json();
+    const [titleModal, setTitleModal] = useState({
+      show: false,
+      id: null,
+      oldTitle: "",
+    });
 
-      if (data.success) {
-        // update local UI immediately
-        setLocalTemplates((prev) =>
-          prev.map((t) => (t.id === id ? { ...t, title: newTitle } : t))
-        );
-      } else {
-        showPopup("Failed to update title: " + data.error, "error");
-      }
-    } catch (err) {
-      showPopup("Error updating title", "error");
+    const editTitle = (id, oldTitle) => {
+  setTitleModal({ show: true, id, oldTitle });
+};
 
+const handleTitleSubmit = async (newTitle) => {
+  if (!newTitle) return;
+
+  const { id } = titleModal;
+
+  try {
+    const res = await fetch(`${HOST}/update_title`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        usescale_id: id,
+        title: newTitle,
+      }),
+    });
+    const data = await res.json();
+
+    if (data.success) {
+      setLocalTemplates((prev) =>
+        prev.map((t) => (t.id === id ? { ...t, title: newTitle } : t))
+      );
+    } else {
+      showPopup("Failed to update title: " + data.error, "error");
     }
-  };
+  } catch (err) {
+    showPopup("Error updating title", "error");
+  } finally {
+    setTitleModal({ show: false, id: null, oldTitle: "" });
+  }
+};
 
   // delete template handler
   const deleteTemplate = async (id) => {
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete this template?"
-    );
-    if (!confirmDelete) return;
+  return new Promise((resolve) => {
+    // Show our custom confirmation popup
+    setConfirmPopup({
+      show: true,
+      message: "Are you sure you want to delete this template?",
+      onConfirm: async () => {
+        setConfirmPopup({ ...confirmPopup, show: false }); // close popup
+        try {
+          const res = await fetch(`${HOST}/delete_template`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ usescale_id: id }),
+          });
+          const data = await res.json();
 
-    try {
-      const res = await fetch(`${HOST}/delete_template`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ usescale_id: id }),
-      });
-      const data = await res.json();
+          if (data.success) {
+            setLocalTemplates((prev) => prev.filter((t) => t.id !== id));
+          } else {
+            showPopup("Failed to delete. Please try again.", "error");
+          }
+        } catch (err) {
+          showPopup("Error deleting template. Please try again.", "error");
+        } finally {
+          resolve(); // finish promise
+        }
+      },
+    });
+  });
+};
 
-      if (data.success) {
-        // remove from local UI immediately
-        setLocalTemplates((prev) => prev.filter((t) => t.id !== id));
-      } else {
-        showPopup("Failed to delete template: " + data.error, "error");
-      }
-    } catch (err) {
-      showPopup("Error deleting template", "error");
-
-    }
-  };
 
   // make copy handler
   const makeCopy = async (id) => {
@@ -238,6 +262,24 @@ export default function CustomTemplatesSection({
     </button>
   </div>
 )}
+<WindowsConfirm
+  show={confirmPopup.show}
+  message={confirmPopup.message}
+  onConfirm={() => {
+    confirmPopup.onConfirm?.();
+  }}
+  onCancel={() => setConfirmPopup({ ...confirmPopup, show: false })}
+/>
+
+<WindowsInput
+  show={titleModal.show}
+  title="Edit Template Title"
+  defaultValue={titleModal.oldTitle}
+  placeholder="Enter new title"
+  onSubmit={handleTitleSubmit}
+  onCancel={() => setTitleModal({ show: false, id: null, oldTitle: "" })}
+/>
+
       </div>
     </section>
   );
