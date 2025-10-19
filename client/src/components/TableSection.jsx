@@ -36,15 +36,6 @@ function EditableCell({
   const [tempValue, setTempValue] = useState(value || "");
   const textareaRef = useRef(null);
 
-  const [confirmPopup, setConfirmPopup] = useState({
-      show: false,
-      message: "",
-      onConfirm: null,
-    });
-    const askConfirmation = (message, onConfirm) => {
-      setConfirmPopup({ show: true, message, onConfirm });
-    };
-
   useEffect(() => {
     setTempValue(value || "");
   }, [value]);
@@ -173,6 +164,16 @@ export default function TableSection({
     setPopup({ show: true, message, type });
   };
 
+  const [confirmPopup, setConfirmPopup] = useState({
+    show: false,
+    message: "",
+    onConfirm: null,
+  });
+
+  const askConfirmation = (message, onConfirm) => {
+    setConfirmPopup({ show: true, message, onConfirm });
+  };
+
   // calls back to check if rows have any notifications
   useEffect(() => {
     if (!rows.length) return;
@@ -268,18 +269,11 @@ export default function TableSection({
   };
 
   // function for saving as base template for admin
-  const saveAsBaseTemplate = async () => {
-    if (
-      !window.confirm(
-        "Are you sure you want to save as a global base template?"
-      )
-    ) {
-      return;
-    }
-
-    const templateId = rows?.[0]?.usescale_id || usescale_id; // fallback to prop
+  const saveAsBaseTemplate = () => {
+  askConfirmation("Are you sure you want to save as a global base template?", async () => {
+    const templateId = rows?.[0]?.usescale_id || usescale_id;
     if (!templateId) {
-      showPopup("Cannot determine template ID to save as base template", "error");
+      showPopup("Cannot determine template ID", "error");
       return;
     }
 
@@ -289,18 +283,15 @@ export default function TableSection({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ usescale_id: templateId }),
       });
-
       const data = await res.json();
-      if (data.success) {
-        showPopup("Template has been successfully saved as a base template", "success");
-      } else {
-        showPopup("Error saving as base template: " + (data.error || ""), "error");
-      }
+      if (data.success) showPopup("Template saved as base template", "success");
+      else showPopup("Error: " + (data.error || ""), "error");
     } catch (err) {
-      console.error("Network error:", err);
-      showPopup("Network error while saving as base template", "error");
+      showPopup("Network error while saving template", "error");
     }
-  };
+  });
+};
+
 
   // function for copying a base template as a coordinator
   const copyBaseTemplate = async () => {
@@ -376,15 +367,12 @@ export default function TableSection({
 
   // delete row
   const deleteRow = (rowIdx) => {
-    const confirmed = window.confirm(
-      "Are you sure you want to delete this row?"
-    );
-    if (!confirmed) return;
-
+  askConfirmation("Are you sure you want to delete this row?", () => {
     const newRows = rows.filter((_, idx) => idx !== rowIdx);
     setRows(newRows);
-    onRowsChange(newRows);
-  };
+    onRowsChange?.(newRows);
+  });
+};
 
   // duplicate row
   const duplicateRow = (rowIdx) => {
@@ -753,9 +741,11 @@ export default function TableSection({
   message={confirmPopup.message}
   onConfirm={() => {
     confirmPopup.onConfirm?.();
+    setConfirmPopup({ show: false, message: "", onConfirm: null });
   }}
-  onCancel={() => setConfirmPopup({ ...confirmPopup, show: false })}
+  onCancel={() => setConfirmPopup({ show: false, message: "", onConfirm: null })}
 />
+
     </div>
   );
 }
