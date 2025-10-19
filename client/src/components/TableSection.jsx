@@ -12,6 +12,8 @@ import deleteIcon from "../assets/delete.png";
 import addIcon from "../assets/add.png";
 import saveIcon from "../assets/save.png";
 import notificationIcon from "../assets/notification.png";
+import WindowsConfirm from "../components/WindowsConfirm";
+import WindowsInput from "./WindowsInput";
 
 const NOAI = "LEVEL N";
 
@@ -163,6 +165,23 @@ export default function TableSection({
     setPopup({ show: true, message, type });
   };
 
+  const [confirmPopup, setConfirmPopup] = useState({
+    show: false,
+    message: "",
+    onConfirm: null,
+  });
+
+  const askConfirmation = (message, onConfirm) => {
+    setConfirmPopup({ show: true, message, onConfirm });
+  };
+
+  const [titleModal, setTitleModal] = useState({
+  show: false,
+  oldTitle: "",
+});
+
+  
+
   // calls back to check if rows have any notifications
   useEffect(() => {
     if (!rows.length) return;
@@ -223,13 +242,20 @@ export default function TableSection({
   }, [tableData]);
 
   const editTitle = () => {
-    let userInput = prompt("Please enter new Title", "Title");
-    if (userInput !== null) {
-      setTitle(userInput);
-    } else {
-      showPopup("You cancelled the input.", "error");
-    }
-  };
+  setTitleModal({ show: true, oldTitle: title });
+};
+
+  const handleTitleSubmit = async (newTitle) => {
+  if (!newTitle) {
+    showPopup("You cancelled the input.", "error");
+    setTitleModal({ show: false, oldTitle: "" });
+    return;
+  }
+
+  setTitle(newTitle);
+  setTitleModal({ show: false, oldTitle: "" });
+};
+
 
   const makeCopy = async () => {
     try {
@@ -258,18 +284,11 @@ export default function TableSection({
   };
 
   // function for saving as base template for admin
-  const saveAsBaseTemplate = async () => {
-    if (
-      !window.confirm(
-        "Are you sure you want to save as a global base template?"
-      )
-    ) {
-      return;
-    }
-
-    const templateId = rows?.[0]?.usescale_id || usescale_id; // fallback to prop
+  const saveAsBaseTemplate = () => {
+  askConfirmation("Are you sure you want to save as a global base template?", async () => {
+    const templateId = rows?.[0]?.usescale_id || usescale_id;
     if (!templateId) {
-      showPopup("Cannot determine template ID to save as base template", "error");
+      showPopup("Cannot determine template ID", "error");
       return;
     }
 
@@ -279,18 +298,15 @@ export default function TableSection({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ usescale_id: templateId }),
       });
-
       const data = await res.json();
-      if (data.success) {
-        showPopup("Template has been successfully saved as a base template", "success");
-      } else {
-        showPopup("Error saving as base template: " + (data.error || ""), "error");
-      }
+      if (data.success) showPopup("Template saved as base template", "success");
+      else showPopup("Error: " + (data.error || ""), "error");
     } catch (err) {
-      console.error("Network error:", err);
-      showPopup("Network error while saving as base template", "error");
+      showPopup("Network error while saving template", "error");
     }
-  };
+  });
+};
+
 
   // function for copying a base template as a coordinator
   const copyBaseTemplate = async () => {
@@ -366,15 +382,12 @@ export default function TableSection({
 
   // delete row
   const deleteRow = (rowIdx) => {
-    const confirmed = window.confirm(
-      "Are you sure you want to delete this row?"
-    );
-    if (!confirmed) return;
-
+  askConfirmation("Are you sure you want to delete this row?", () => {
     const newRows = rows.filter((_, idx) => idx !== rowIdx);
     setRows(newRows);
-    onRowsChange(newRows);
-  };
+    onRowsChange?.(newRows);
+  });
+};
 
   // duplicate row
   const duplicateRow = (rowIdx) => {
@@ -738,6 +751,23 @@ export default function TableSection({
     </button>
   </div>
 )}
+<WindowsConfirm
+  show={confirmPopup.show}
+  message={confirmPopup.message}
+  onConfirm={() => {
+    confirmPopup.onConfirm?.();
+    setConfirmPopup({ show: false, message: "", onConfirm: null });
+  }}
+  onCancel={() => setConfirmPopup({ show: false, message: "", onConfirm: null })}
+/>
+<WindowsInput
+  show={titleModal.show}
+  title="Edit Template Title"
+  defaultValue={titleModal.oldTitle}
+  placeholder="Enter new title"
+  onSubmit={handleTitleSubmit}
+  onCancel={() => setTitleModal({ show: false, id: null, oldTitle: "" })}
+/>
     </div>
   );
 }
