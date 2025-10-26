@@ -3,14 +3,6 @@
  *
  * This component renders a section displaying custom/draft templates with search functionality.
  *
- * Features:
- * - Search/filter templates by name
- * - Edit template titles
- * - Copy templates
- * - Delete templates
- * - Star/favorite templates
- * - Responsive grid layout
- *
  * @component
  * @param {Object} props - Component props
  * @param {string} props.userId - The current user's ID

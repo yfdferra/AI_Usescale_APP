@@ -3,12 +3,6 @@
  *
  * This component renders a section displaying base templates for different user types.
  *
- * It provides functionality for:
- * - Displaying base templates as clickable squares
- * - Creating new templates from scratch
- * - Admin-specific features: deleting templates, creating subject spaces
- * - Different UI layouts based on user type (admin vs coordinator)
- *
  * @component
  * @param {Object} props - Component props
  * @param {string} props.userId - The current user's ID
