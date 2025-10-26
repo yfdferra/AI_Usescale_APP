@@ -206,7 +206,7 @@ const handleTitleSubmit = async (newTitle) => {
             : "Custom Templates"}
         </h2>
         <FilterSearchBar
-          filterOptions={["Default", "Recent", "Favorites"]}
+          filterOptions={["Default"]}
           onFilterChange={() => {}}
           onSearch={(value) => {
             setSearch(value);

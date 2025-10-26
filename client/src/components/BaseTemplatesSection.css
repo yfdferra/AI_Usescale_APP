@@ -73,7 +73,7 @@
 }
 
 .create-subject-button:hover {
-  background-color: #6abdf5;
+  background-color: #6daecf;
 }
 
 .modal-overlay {
@@ -174,7 +174,7 @@
 }
 
 button.confirm {
-  background: #6abdf5;
+  background: #75cef9;
   color: white;
 }
 

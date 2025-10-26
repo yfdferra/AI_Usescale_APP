@@ -17,8 +17,7 @@
 }
 
 .export-btn:hover:not(:disabled) {
-  background: #1c50a4;
-  border-color: #a1a1aa;
+  background: #6daecf;
   color: #ffffff;
 }
 
