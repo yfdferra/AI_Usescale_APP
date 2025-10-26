@@ -1,3 +1,14 @@
+/**
+ * Sidebar Component
+ *
+ * A vertical sidebar with profile and widget buttons. Opens popups for widgets and handles logout.
+ *
+ * @component
+ * @param {Object} props - Component props
+ * @param {Function} props.onLogout - Callback for logging out
+ * @returns {JSX.Element} The Sidebar component
+ */
+
 import "./Sidebar.css";
 import settingsIcon from "../assets/settings.png";
 import notificationIcon from "../assets/appointment-reminders.png";
@@ -9,6 +20,7 @@ import React, { useState } from "react";
 
 import { NavLink, useNavigate } from "react-router-dom";
 
+// Widget popup content
 const widgetPopups = {
   profile: {
     title: "Profile",

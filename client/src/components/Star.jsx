@@ -1,3 +1,12 @@
+/**
+ * StarToggle Component
+ *
+ * A clickable star icon that toggles between "filled" and "empty".
+ *
+ * @component
+ * @returns {JSX.Element} The StarToggle component
+ */
+
 import React, { useState } from "react";
 import starClosed from "../assets/starFilled.png";
 import starOpen from "../assets/starEmpty.png";
