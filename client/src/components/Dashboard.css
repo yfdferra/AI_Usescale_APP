@@ -3,7 +3,7 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  background: #ecf2f7ff;
+  background: rgb(255, 255, 255);
   min-height: 100vh;
   width: 100%;
   padding-left: 5rem;
