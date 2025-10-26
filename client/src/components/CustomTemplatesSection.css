@@ -7,7 +7,7 @@
 
 .custom-templates-title {
   font-size: 1.5rem;
-  font-weight: bold; /* Optional: for spacing from sidebar */
+  font-weight: bold; 
 }
 
 .custom-templates-row {
@@ -19,7 +19,7 @@
 .custom-templates-header {
   display: flex;
   align-items: flex-start;
-  margin-bottom: 1rem; /* space below header */
+  margin-bottom: 1rem; 
   margin-top: 3rem;
 }
 
@@ -55,6 +55,7 @@
   display: inline-block;
 }
 
+/* No results message */
 .no-results {
   width: 100%;
   text-align: center;
@@ -62,7 +63,6 @@
   font-style: italic;
   color: #888;
 }
-
 
 .popup-box {
   position: fixed;
@@ -91,6 +91,8 @@
   font-size: 1.2rem;
   cursor: pointer;
 }
+
+/* Fade-in animation */
 @keyframes fadeIn {
   from { opacity: 0; transform: translate(-50%, -10px); }
   to { opacity: 1; transform: translate(-50%, 0); }
