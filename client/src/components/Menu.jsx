@@ -1,5 +1,5 @@
 /**
- * DropdownMenu Component
+ * Menu Component
  *
  * A reusable dropdown menu component that renders a list of clickable menu items.
  *
@@ -10,7 +10,7 @@
  * @param {string} [props.items[].icon] - Optional icon image source
  * @param {Function} props.items[].onClick - Click handler function for the menu item
  * @param {Function} [props.onClose] - Optional callback function called when menu should close
- * @returns {JSX.Element} The DropdownMenu component
+ * @returns {JSX.Element} The Menu component
  */
 
 import "./Menu.css";

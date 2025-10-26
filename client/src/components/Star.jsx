@@ -1,10 +1,10 @@
 /**
- * StarToggle Component
+ * Star Component
  *
  * A clickable star icon that toggles between "filled" and "empty".
  *
  * @component
- * @returns {JSX.Element} The StarToggle component
+ * @returns {JSX.Element} The Star component
  */
 
 import React, { useState } from "react";

@@ -1,3 +1,21 @@
+/**
+ * UseScaleBlock Component
+ *
+ * Displays a draggable block with a vertical level indicator and a label. Supports custom label background and an optional edit icon for admin users.
+ *
+ * @component
+ * @param {Object} props
+ * @param {string} props.level - Text for the level indicator
+ * @param {string} props.label - Label text
+ * @param {string} props.labelBg - Background color for the label
+ * @param {string|number} props.entry_type_id - Identifier for drag data
+ * @param {function} props.onClick - Callback for block click
+ * @param {boolean} [props.draggable=true] - Enable drag functionality
+ * @param {boolean} [props.isAdmin=false] - Show edit icon if true
+ * @param {function} props.onEditClick - Callback when edit icon is clicked
+ * @returns {JSX.Element} The UseScaleBlock component
+ */
+
 import React from "react";
 import "./UseScaleBlock.css";
 import editIcon from "../assets/edit.png";

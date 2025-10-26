@@ -1,3 +1,19 @@
+/**
+ * WindowsInputComponent
+ *
+ * A modal input dialog similar to Windows-style prompts. 
+ *
+ * @component
+ * @param {Object} props
+ * @param {boolean} props.show - Whether the modal is visible
+ * @param {string} props.title - Modal title
+ * @param {string} props.placeholder - Input placeholder text
+ * @param {string} props.defaultValue - Initial input value
+ * @param {function} props.onSubmit - Callback when user confirms
+ * @param {function} props.onCancel - Callback when user cancels
+ * @returns {JSX.Element|null} The modal or null if hidden
+ */
+
 import { useState, useEffect } from "react";
 import "./WindowsInput.css";
 
@@ -11,6 +27,7 @@ export default function WindowsInputModal({
 }) {
   const [inputValue, setInputValue] = useState(defaultValue);
 
+  // Reset input when modal opens
   useEffect(() => {
     if (show) setInputValue(defaultValue);
   }, [show, defaultValue]);
