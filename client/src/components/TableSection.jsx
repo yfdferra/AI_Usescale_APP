@@ -1,3 +1,13 @@
+/**
+ * TableSection Component
+ *
+ * An editable table section for student declarations or AI use scales.
+ * 
+ * @component
+ * @param {Object} props - Component props
+ * @returns {JSX.Element} The TableSection component
+ */
+
 import { useState, useEffect, useRef, useLayoutEffect } from "react";
 import "./TableSection.css";
 import MenuButton from "./MenuButton";

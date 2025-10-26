@@ -1,3 +1,17 @@
+/**
+ * CustomTemplatesSection Component
+ *
+ * This component renders a section displaying custom/draft templates with search functionality.
+ *
+ * @component
+ * @param {Object} props - Component props
+ * @param {string} props.userId - The current user's ID
+ * @param {string} props.userType - The type of user ("admin" or "coordinator")
+ * @param {Array} props.templates - Array of template objects with id, title, and subject_id
+ * @param {Function} props.onTemplateClick - Callback when a template is clicked
+ * @returns {JSX.Element} The CustomTemplatesSection component
+ */
+
 import Square from "./Square";
 import "./CustomTemplatesSection.css";
 import FilterSearchBar from "./FilterSearchBar";
@@ -12,14 +26,6 @@ import deleteIcon from "../assets/delete.png";
 import WindowsConfirm from "../components/WindowsConfirm";
 import WindowsInput from "./WindowsInput";
 
-// Helper to split array into chunks of 5
-//function chunkArray(array, size = 5) {
-//  const result = [];
-//  for (let i = 0; i < array.length; i += size) {
-//    result.push(array.slice(i, i + size));
-//  }
-//  return result;
-//}
 
 export default function CustomTemplatesSection({
   userId,
@@ -60,6 +66,14 @@ export default function CustomTemplatesSection({
       oldTitle: "",
     });
 
+    /**
+   * Handles editing a template's title
+   * Shows prompt dialog and updates the title and local state
+   *
+   * @param {string|number} id - The ID of the template to edit
+   * @param {string} oldTitle - The current title of the template
+   */
+  
     const editTitle = (id, oldTitle) => {
   setTitleModal({ show: true, id, oldTitle });
 };
@@ -206,7 +220,7 @@ const handleTitleSubmit = async (newTitle) => {
             : "Custom Templates"}
         </h2>
         <FilterSearchBar
-          filterOptions={["Default", "Recent", "Favorites"]}
+          filterOptions={["Default"]}
           onFilterChange={() => {}}
           onSearch={(value) => {
             setSearch(value);

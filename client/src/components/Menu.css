@@ -19,6 +19,7 @@
   min-width: 9rem;
 }
 
+/* Individual dropdown items */
 .menu-item {
   padding: 0.25rem 0.5rem;
   cursor: pointer;
@@ -32,6 +33,7 @@
   background-color: #f0f0f0;
 }
 
+/* Icons inside menu items */
 .menu-icon {
   width: 14px;
   height: 14px;

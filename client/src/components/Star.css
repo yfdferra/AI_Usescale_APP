@@ -12,6 +12,7 @@
   justifyContent: "center";
 }
 
+/*hover effect*/
 .star-toggle:hover {
   transform: scale(1.1);
 }
