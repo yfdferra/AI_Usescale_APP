@@ -4,7 +4,6 @@ import Sidebar from "../components/Sidebar";
 import HorizontalSidebar from "../components/HorizontalSidebar";
 import VerticalDropdown from "../components/VerticalDropdown";
 import UseScaleBlock from "../components/UseScaleBlock";
-import Textbox from "../components/Textbox";
 import HOST from "../GLOBALS/Globals";
 
 import FilterSearchBar from "../components/FilterSearchBar";
