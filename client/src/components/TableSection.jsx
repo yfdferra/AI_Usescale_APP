@@ -570,7 +570,6 @@ export default function TableSection({
               return (
                 <tr
                   key={`row-${rowIdx}`}
-                  className={shouldHighlight ? "row-highlight" : ""}
                 >
                   {/* Task column */}
                   <td className="table-section-td cell-with-menu">

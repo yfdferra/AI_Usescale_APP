@@ -82,7 +82,26 @@ export default function UseScalePage({
       .catch((err) => console.error("Fetch error:", err));
   }, [subject_id]);
 
-  // Update subject details state when triggered my save button component
+  // Utility to wrap your confirmation popup as a promise
+  const askConfirmationAsync = (message) => {
+    return new Promise((resolve) => {
+      askConfirmation(
+        message,
+        () => {
+          // User confirmed
+          setConfirmPopup((prev) => ({ ...prev, show: false })); // hide popup
+          resolve(true);
+        },
+        () => {
+          // User cancelled
+          setConfirmPopup((prev) => ({ ...prev, show: false })); // hide popup
+          resolve(false);
+        }
+      );
+    });
+  };
+
+  // Update subject details state when triggered by save button
   const handleSaveTemplate = async (currentTitle) => {
     if (!usecase || !Array.isArray(usecase)) {
       console.error("No data to save.");
@@ -99,61 +118,55 @@ export default function UseScalePage({
       const checkData = await checkResponse.json();
       console.log("Check subject response:", checkData);
 
-      // Create new subject if it does not exist and assign
-      let finalSubjectId = subject_id;
+      let finalSubjectId = subject_id; // default to existing
 
       if (!checkData.exists) {
-        // Show popup instead of window.confirm
-        return new Promise((resolve) => {
-          askConfirmation(
-            "Subject does not exist. Create a new subject?",
-            async () => {
-              // User confirmed, create new subject
-              try {
-                const createResponse = await fetch(`${HOST}/create_subject`, {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({
-                    subjectName,
-                    subjectYear,
-                    subjectSemester,
-                    userId,
-                    usescale_id,
-                  }),
-                });
-                const createData = await createResponse.json();
-                finalSubjectId = createData.subject_id;
-                resolve(finalSubjectId); // continue flow
-              } catch (err) {
-                console.error("Error creating subject:", err);
-                resolve(null);
-              } finally {
-                setConfirmPopup({ ...confirmPopup, show: false });
-              }
-            }
-          );
-        });
-      } else {
-        const subject_id = checkData.subject_id;
-        console.log("subject and usescale:", subject_id, usescale_id);
-        // If subject exists, reassign. Do not create new subject.
-        const reassignSubject = await fetch(`${HOST}/reassign_subject`, {
+        // Ask user if they want to create a new subject
+        const confirmed = await askConfirmationAsync(
+          "Subject does not exist. Create a new subject?"
+        );
+
+        if (!confirmed) {
+          console.log("User cancelled creating a new subject.");
+          return; // stop saving if user cancels
+        }
+
+        // User confirmed: create new subject
+        const createResponse = await fetch(`${HOST}/create_subject`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
+            subjectName,
+            subjectYear,
+            subjectSemester,
+            userId,
             usescale_id,
-            subject_id,
           }),
         });
-        const reassignData = await reassignSubject.json();
+        const createData = await createResponse.json();
+
+        if (createData.success) {
+          finalSubjectId = createData.subject_id;
+          console.log("Created new subject:", finalSubjectId);
+        } else {
+          console.error("Error creating subject:", createData.error);
+          alert("Failed to create new subject.");
+          return;
+        }
+      } else {
+        // Subject exists: reassign it to the usescale
+        const existingSubjectId = checkData.subject_id;
+        const reassignResponse = await fetch(`${HOST}/reassign_subject`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ usescale_id, subject_id: existingSubjectId }),
+        });
+        const reassignData = await reassignResponse.json();
         console.log("Reassign subject response:", reassignData);
+        finalSubjectId = existingSubjectId;
       }
 
-      if (!finalSubjectId) {
-        finalSubjectId = subject_id;
-      }
-
-      // 2. Build payload after finalSubjectId is set
+      // 2. Build payload with final subject ID
       const savePayload = {
         usescale_id,
         subject_id: finalSubjectId,
