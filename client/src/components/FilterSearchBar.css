@@ -11,6 +11,8 @@
   width: 21.25rem;
 }
 
+/* Dropdown select inside filter bar*/
+
 .filter-select {
   padding: 0.5rem 1rem;
   outline: none;
@@ -21,6 +23,7 @@
   background: #f8fafc;
 }
 
+/*Text input inside filter bar */
 .filter-input {
   padding: 0.5rem 1rem;
   outline: none;

@@ -28,6 +28,7 @@
   line-height: 1;
 }
 
+/* Remove button inside each tag */
 .tag button {
   background: none;
   border: none;

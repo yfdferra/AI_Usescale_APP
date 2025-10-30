@@ -9,6 +9,7 @@
   margin: 0.5rem;
 }
 
+/*level indicator*/
 .use-scale-block-level {
   flex: 1;
   display: flex;
@@ -21,6 +22,7 @@
   transform: rotate(180deg);
 }
 
+/*layer value*/
 .use-scale-block-label {
   flex: 3;
   display: flex;
@@ -33,6 +35,8 @@
   font-size: 1rem;
 }
 
+/* Edit icon positioned on the block */
+/*same icon from other menus*/
 .use-scale-block-edit-img {
   position: absolute;
   top: 0.6rem;

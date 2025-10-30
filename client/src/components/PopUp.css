@@ -1,3 +1,4 @@
+/* Overlay background */
 .popup-overlay {
   position: fixed;
   top: 0;
@@ -12,6 +13,7 @@
   z-index: 9999;
 }
 
+/* Main popup box*/
 .popup-block {
   background: #fff;
   border-radius: 1rem;
@@ -23,6 +25,7 @@
   position: relative;
 }
 
+/* Title text */
 .popup-title {
   font-size: 1.5rem;
   font-weight: 600;
@@ -30,6 +33,7 @@
   margin-bottom: 1rem;
 }
 
+/* Close button */
 .popup-close {
   position: absolute;
   top: 1rem;
@@ -49,6 +53,7 @@
   font-size: 3rem;
 }
 
+/* Main message */
 .popup-message {
   font-size: 1.2rem;
   font-weight: 500;
@@ -56,6 +61,7 @@
   color: #222;
 }
 
+/* Subtitle text */
 .popup-subtitle {
   font-size: 1rem;
   color: #666;

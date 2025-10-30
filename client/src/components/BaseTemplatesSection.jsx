@@ -1,3 +1,18 @@
+/**
+ * BaseTemplatesSection Component
+ *
+ * This component renders a section displaying base templates for different user types.
+ *
+ * @component
+ * @param {Object} props - Component props
+ * @param {string} props.userId - The current user's ID
+ * @param {string} props.userType - The type of user ("admin" or "coordinator")
+ * @param {Array} props.templates - Array of template objects with id, title, and subject_id
+ * @param {Function} props.onBaseTemplateClick - Callback when a base template is clicked
+ * @param {Function} props.onCreateFromScratchClick - Callback when "create from scratch" is clicked
+ * @returns {JSX.Element} The BaseTemplatesSection component
+ */
+
 import React, { useState, useEffect } from "react";
 import Square from "./Square";
 import MenuButton from "./MenuButton";
@@ -15,28 +30,33 @@ export default function BaseTemplatesSection({
   onBaseTemplateClick,
   onCreateFromScratchClick 
 }) {
-
+  // State management for local templates, synced with props
   const [localTemplates, setLocalTemplates] = useState(templates || []);
     useEffect(() => {
       setLocalTemplates(templates || []);
     }, [templates]);
+
+  // State for the subject space creation modal
   const [showModal, setShowModal] = useState(false);
   const [newUsername, setNewUsername] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [selectedTemplates, setSelectedTemplates] = useState([]);
   const [popup, setPopup] = useState({ show: false, message: "", type: "info" });
-
-
   const [showPassword, setShowPassword] = useState(false);
-
-  useEffect(() => {
-      setLocalTemplates(templates || []);
-  }, [templates]);
-
+  // Bool for whether admin is logged in
+  const isAdmin = userType?.toLowerCase() === "admin";
   const showPopup = (message, type = "info") => {
     setPopup({ show: true, message, type });
   };
 
+  // Sync local templates state with incoming templates prop
+  useEffect(() => {
+      setLocalTemplates(templates || []);
+  }, [templates]);
+
+  /***
+   * Handles confirming popup 
+   */
   const [confirmPopup, setConfirmPopup] = useState({
       show: false,
       message: "",
@@ -52,7 +72,10 @@ export default function BaseTemplatesSection({
      ? "+ Create new base template draft"
      : "+ Create from scratch";
 
-  // helper to add + for coordinators and not for admin
+  /***
+   * Helper to add + in base template title display for coordinators and not for admin
+   * Checks user type and adds + accordingly
+   */
   const getTemplateLabel = (title) => {
     if (userType?.toLowerCase() === "coordinator") {
       return `+ ${title}`;
@@ -60,10 +83,12 @@ export default function BaseTemplatesSection({
     return title;
   };
 
-  // bool for whether admin is logged in
-  const isAdmin = userType?.toLowerCase() === "admin";
 
-  // delete template handler
+  /***
+   * Handles deletion of template in the admin homepage
+   * Confirms with user that they are sure they want to delete
+   * Makes API call to remove tempalte from database
+   */
   const deleteTemplate = async (id) => {
   return new Promise((resolve) => {
     // Show our confirmation popup
@@ -95,7 +120,11 @@ export default function BaseTemplatesSection({
   });
 };
 
-
+/**
+   * Handles creation of a new subject space
+   * Validates input fields and makes API call to create subject coordinator account
+   * Resets form state and closes modal on success
+   */
   const handleCreateSubject = async () => {
     if (!newUsername || !newPassword) {
         showPopup("Please fill in username and password.", "error");
@@ -104,6 +133,7 @@ export default function BaseTemplatesSection({
     }
 
     try {
+      // API call to create subject space
       const res = await fetch(`${HOST}/create_subject_space`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -125,19 +155,14 @@ export default function BaseTemplatesSection({
         showPopup("Failed to create subject space: " + data.error, "error");
       }
     } catch (err) {
-      showPopup("Subject space created successfully!", "success");
       showPopup("Error creating subject space", "error");
     }
   };
 
-  const toggleTemplateSelection = (id) => {
-    setSelectedTemplates((prev) =>
-      prev.includes(id) ? prev.filter((tid) => tid !== id) : [...prev, id]
-    );
-  };
 
   return (
     <section className="base-templates-section">
+      {/* Admin-only: Button to create new subject space */}
       {isAdmin && (
         <div className="create-subject-space-header">
           <button
@@ -148,6 +173,7 @@ export default function BaseTemplatesSection({
           </button>
         </div>
       )}
+      {/* Section title changes based on user type */}
       <h2 className="base-templates-title">
       {isAdmin ? "Global Base Templates" : "Base Templates"}
       </h2>
@@ -174,6 +200,7 @@ export default function BaseTemplatesSection({
             )}
           </div>
         ))}
+        {/* "Create from scratch" option - always last item */}
         <Square
           key="create-new-template"
           text={createButtonLabel}
@@ -222,28 +249,6 @@ export default function BaseTemplatesSection({
     {showPassword ? "Hide" : "Show"}
   </button>
 </div>
-
-            
-            
-            {/*Function to show and hide a password */}
-            {/* I've just commented this part out for now, but can be added back in 
-            
-            
-            <div className="template-selector">
-              <p>Select base templates accessible to this coordinator:</p>
-              <div className="template-list">
-                {localTemplates.map((t) => (
-                  <label key={t.id} className="template-option">
-                    <input
-                      type="checkbox"
-                      checked={selectedTemplates.includes(t.id)}
-                      onChange={() => toggleTemplateSelection(t.id)}
-                    />
-                    <span>{t.title}</span>
-                  </label>
-                ))}
-              </div>
-            </div>*/}
 
             <div className="modal-buttons">
               <button className="confirm" onClick={handleCreateSubject}>
