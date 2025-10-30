@@ -1,3 +1,17 @@
+/**
+ * ExportButton Component
+ *
+ * A button that allows exporting table data to Excel or PDF.
+ * Shows a popup for selecting export options.
+ *
+ * @component
+ * @param {Object} props - Component props
+ * @param {string} [props.tableSelector=".table-section-table"] - CSS selector for the table to export
+ * @param {string} [props.titleSelector=".table-section-title"] - CSS selector for table title
+ * @returns {JSX.Element} The ExportButton component
+ */
+
+
 import React, { useState, useRef, useEffect } from "react";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
@@ -10,9 +24,15 @@ export default function ExportButton({ tableSelector = ".table-section-table", t
   const [showPopup, setShowPopup] = useState(false);
   const [exportStudentDeclaration, setExportStudentDeclaration] = useState(true);
   const [exportAIUsageScale, setExportAIUsageScale] = useState(false);
+  const [popup, setPopup] = useState({ show: false, message: "", type: "info" });
 
   const popupRef = useRef(null);
   const buttonRef = useRef(null);
+
+  //popups
+  const showPopup2 = (message, type = "info") => {
+    setPopup({ show: true, message, type });
+  };
 
   const handleExport = () => {
   const title = document.querySelector(titleSelector)?.textContent || "table";
@@ -33,7 +53,7 @@ export default function ExportButton({ tableSelector = ".table-section-table", t
     if (exportAIUsageScale) {
       const table = document.querySelector(tableSelector);
       if (!table) {
-        alert("No table found for PDF export");
+        showPopup("No table found for PDF export", "error");
         return;
       }
       
@@ -45,7 +65,7 @@ export default function ExportButton({ tableSelector = ".table-section-table", t
   "MORE AI": [255, 255, 179],     
   "AI FOR LEARNING": [217, 179, 255]
 };
-      
+// Extract rows from table
       let rows = Array.from(table.rows)
     .slice(1)
     .map(tr => {
@@ -60,11 +80,11 @@ export default function ExportButton({ tableSelector = ".table-section-table", t
       return [aiScale, instructions, acknowledgement];
     })
     .filter(r => r.some(cell => cell !== ""));
-
+    // Remove duplicates
     rows = Array.from(new Set(rows.map(r => JSON.stringify(r)))).map(r =>
       JSON.parse(r)
     );
-
+    // Sort rows by AI scale
     const order = ["NO AI", "SOME AI", "MORE AI", "AI FOR LEARNING"];
     rows.sort((a, b) => {
       const indexA = order.indexOf(a[0]);
@@ -77,10 +97,10 @@ export default function ExportButton({ tableSelector = ".table-section-table", t
 
 
     if (rows.length === 0) {
-      alert("No AI Use Scale data found");
+      showPopup("No AI Use Scale data found", "error");
       return;
     }
-
+    // Merge repeated acknowledgement cells
     const mergeMap = {};
     for (let i = 0; i < rows.length; i++) {
       const value = rows[i][2];
@@ -93,7 +113,7 @@ export default function ExportButton({ tableSelector = ".table-section-table", t
   if (span > 1) mergeMap[i] = span;
   i += span - 1;
 }
-
+    // Generate PDF
     const doc = new jsPDF();
     doc.setFont("helvetica", "bold");
     doc.text(title, 14, 16);
@@ -142,7 +162,7 @@ export default function ExportButton({ tableSelector = ".table-section-table", t
   };
 
   const canExport = exportStudentDeclaration || exportAIUsageScale;
-
+  // Close popup when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (

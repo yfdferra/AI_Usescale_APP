@@ -1,3 +1,4 @@
+/* Basic square button */
 .square {
   background: #000f46;
   color: #fff;
@@ -19,17 +20,18 @@
   box-shadow: 0 0.25rem 1rem 0 rgb(6, 28, 114);
 }
 .square--selected {
-  border: 0.125rem solid #a78bfa;
+  border: 0.125rem solid #6daecf;
 }
 .square__title {
   text-align: center;
   width: 100%;
 }
 .custom-square {
-  background-color: #6abdf5;
+  background-color: #6daecf;
   color: rgb(255, 255, 255);
 }
 
+/* Hover effect*/
 .custom-square:hover {
-  box-shadow: 0 0.25rem 1rem 0 #5587a9;
+  box-shadow: 0 0.25rem 1rem 0 #6daecf;
 }

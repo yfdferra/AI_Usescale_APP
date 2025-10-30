@@ -1,3 +1,17 @@
+/**
+ * CustomTemplatesSection Component
+ *
+ * This component renders a section displaying custom/draft templates with search functionality.
+ *
+ * @component
+ * @param {Object} props - Component props
+ * @param {string} props.userId - The current user's ID
+ * @param {string} props.userType - The type of user ("admin" or "coordinator")
+ * @param {Array} props.templates - Array of template objects with id, title, and subject_id
+ * @param {Function} props.onTemplateClick - Callback when a template is clicked
+ * @returns {JSX.Element} The CustomTemplatesSection component
+ */
+
 import Square from "./Square";
 import "./CustomTemplatesSection.css";
 import FilterSearchBar from "./FilterSearchBar";
@@ -9,15 +23,9 @@ import { useNavigate } from "react-router-dom";
 import editIcon from "../assets/edit.png";
 import copyIcon from "../assets/copy.png";
 import deleteIcon from "../assets/delete.png";
+import WindowsConfirm from "../components/WindowsConfirm";
+import WindowsInput from "./WindowsInput";
 
-// Helper to split array into chunks of 5
-//function chunkArray(array, size = 5) {
-//  const result = [];
-//  for (let i = 0; i < array.length; i += size) {
-//    result.push(array.slice(i, i + size));
-//  }
-//  return result;
-//}
 
 export default function CustomTemplatesSection({
   userId,
@@ -30,72 +38,108 @@ export default function CustomTemplatesSection({
 
   //const rows = chunkArray(templates, 5);
   const navigate = useNavigate();
-
+  const [popup, setPopup] = useState({ show: false, message: "", type: "info" });
+  
   const [search, setSearch] = useState("");
   const [localTemplates, setLocalTemplates] = useState(templates || []);
   useEffect(() => {
     setLocalTemplates(templates || []);
   }, [templates]);
 
-  // edit title handler
-  const editTitle = async (id, oldTitle) => {
-    const newTitle = prompt(
-      "Please enter new Title",
-      oldTitle || "Untitled Template"
-    );
-    if (!newTitle) return;
-
-    try {
-      const res = await fetch(`${HOST}/update_title`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          usescale_id: id,
-          title: newTitle,
-        }),
-      });
-      const data = await res.json();
-
-      if (data.success) {
-        // update local UI immediately
-        setLocalTemplates((prev) =>
-          prev.map((t) => (t.id === id ? { ...t, title: newTitle } : t))
-        );
-      } else {
-        alert("Failed to update title: " + data.error);
-      }
-    } catch (err) {
-      console.error("Error updating title:", err);
-      alert("Error updating title");
-    }
+  //pop ups
+  const showPopup = (message, type = "info") => {
+    setPopup({ show: true, message, type });
   };
+
+  const [confirmPopup, setConfirmPopup] = useState({
+      show: false,
+      message: "",
+      onConfirm: null,
+    });
+    const askConfirmation = (message, onConfirm) => {
+      setConfirmPopup({ show: true, message, onConfirm });
+    };
+
+    const [titleModal, setTitleModal] = useState({
+      show: false,
+      id: null,
+      oldTitle: "",
+    });
+
+    /**
+   * Handles editing a template's title
+   * Shows prompt dialog and updates the title and local state
+   *
+   * @param {string|number} id - The ID of the template to edit
+   * @param {string} oldTitle - The current title of the template
+   */
+  
+    const editTitle = (id, oldTitle) => {
+  setTitleModal({ show: true, id, oldTitle });
+};
+
+const handleTitleSubmit = async (newTitle) => {
+  if (!newTitle) return;
+
+  const { id } = titleModal;
+
+  try {
+    const res = await fetch(`${HOST}/update_title`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        usescale_id: id,
+        title: newTitle,
+      }),
+    });
+    const data = await res.json();
+
+    if (data.success) {
+      setLocalTemplates((prev) =>
+        prev.map((t) => (t.id === id ? { ...t, title: newTitle } : t))
+      );
+    } else {
+      showPopup("Failed to update title: " + data.error, "error");
+    }
+  } catch (err) {
+    showPopup("Error updating title", "error");
+  } finally {
+    setTitleModal({ show: false, id: null, oldTitle: "" });
+  }
+};
 
   // delete template handler
   const deleteTemplate = async (id) => {
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete this template?"
-    );
-    if (!confirmDelete) return;
+  return new Promise((resolve) => {
+    // Show our custom confirmation popup
+    setConfirmPopup({
+      show: true,
+      message: "Are you sure you want to delete this template?",
+      onConfirm: async () => {
+        setConfirmPopup({ ...confirmPopup, show: false }); // close popup
+        try {
+          const res = await fetch(`${HOST}/delete_template`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ usescale_id: id }),
+          });
+          const data = await res.json();
 
-    try {
-      const res = await fetch(`${HOST}/delete_template`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ usescale_id: id }),
-      });
-      const data = await res.json();
+          if (data.success) {
+            setLocalTemplates((prev) => prev.filter((t) => t.id !== id));
+          } else {
+            showPopup("Failed to delete. Please try again.", "error");
+          }
+        } catch (err) {
+          showPopup("Error deleting template. Please try again.", "error");
+        } finally {
+          resolve(); // finish promise
+        }
+      },
+    });
+  });
+};
 
-      if (data.success) {
-        // remove from local UI immediately
-        setLocalTemplates((prev) => prev.filter((t) => t.id !== id));
-      } else {
-        alert("Failed to delete template: " + data.error);
-      }
-    } catch (err) {
-      console.error("Error deleting template:", err);
-      alert("Error deleting template");
-    }
-  };
 
   // make copy handler
   const makeCopy = async (id) => {
@@ -119,11 +163,11 @@ export default function CustomTemplatesSection({
 
         //navigate(`/usescale/${data.new_usescale_id}`);
       } else {
-        alert("failed to copy template:" + data.error);
+        showPopup("Failed to copy template: " + data.error, "error");
       }
     } catch (err) {
-      console.error("error copying template:", err);
-      alert("error copying template");
+      showPopup("Error copying template", "error");
+
     }
   };
 
@@ -159,13 +203,7 @@ export default function CustomTemplatesSection({
 
     fetchTemplates();
   }, [search, localTemplates]);
-
-  // fetch(`${HOST}/find_templates?subject_name=${search}`)
-
-  // console.log(
-  //   "Rendering CustomTemplatesSection with templates:",
-  //   filteredTemplates
-  // );
+  
 
   return (
     <section className="custom-templates-section">
@@ -176,7 +214,7 @@ export default function CustomTemplatesSection({
             : "Custom Templates"}
         </h2>
         <FilterSearchBar
-          filterOptions={["Default", "Recent", "Favorites"]}
+          filterOptions={["Default"]}
           onFilterChange={() => {}}
           onSearch={(value) => {
             setSearch(value);
@@ -221,6 +259,35 @@ export default function CustomTemplatesSection({
             </div>
           ))
         )}
+      {popup.show && (
+  <div className={`popup-box ${popup.type}`}>
+    <p>{popup.message}</p>
+    <button
+      onClick={() => setPopup({ show: false, message: "", type: "info" })}
+      className="popup-close"
+    >
+      ×
+    </button>
+  </div>
+)}
+<WindowsConfirm
+  show={confirmPopup.show}
+  message={confirmPopup.message}
+  onConfirm={() => {
+    confirmPopup.onConfirm?.();
+  }}
+  onCancel={() => setConfirmPopup({ ...confirmPopup, show: false })}
+/>
+
+<WindowsInput
+  show={titleModal.show}
+  title="Edit Template Title"
+  defaultValue={titleModal.oldTitle}
+  placeholder="Enter new title"
+  onSubmit={handleTitleSubmit}
+  onCancel={() => setTitleModal({ show: false, id: null, oldTitle: "" })}
+/>
+
       </div>
     </section>
   );

@@ -3,10 +3,26 @@ import Login from "./templates/Login";
 import MainTemplate from "./templates/MainTemplate";
 import UseScalePage from "./templates/UseScalePage";
 import HOST from "./GLOBALS/Globals";
-
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useParams } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
+
+/***
+ * UseScaleRoute Component
+ * 
+ * Route handler that extracts the usescale ID from the URL and
+ * renders the corresponding UseScalePage component
+ * 
+ * @component 
+ * @param {Object} props - Component props
+ * @param {Function} props.onLogout - Callback triggered when the user logs out
+ * @param {string} props.template_title - title of the current template
+ * @param {string} props.subject_id - ID of the subject associated with the template
+ * @param {string} props.userId - ID of the current user
+ * @param {string} props.userType - Type of the current user (admin or coordinator)
+ * @param {boolean} props.isBaseTemplate - Whether the current template is base or custom
+ * @returns {JSX.Element} The rendered UseScalePage component for the current route
+ */
 
 function UseScaleRoute({ onLogout, template_title, subject_id, userId, userType, isBaseTemplate }) {
   // extract usescale_id from the route path (i.e.: /usescale/1)
@@ -24,6 +40,18 @@ function UseScaleRoute({ onLogout, template_title, subject_id, userId, userType,
   );
 }
 
+/***
+ * App Component
+ * 
+ * The main application router and state container
+ * Manages user authentication state, navifation, and routing between key views
+ * - Login page
+ * - Main Template page
+ * - UseScale editing page
+ * 
+ * @component
+ * @returns {JSX.Element} The App Component
+ */
 
 export default function App() {
   const [loggedIn, setLoggedIn] = useState(false);

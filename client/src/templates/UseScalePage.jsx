@@ -4,13 +4,14 @@ import Sidebar from "../components/Sidebar";
 import HorizontalSidebar from "../components/HorizontalSidebar";
 import VerticalDropdown from "../components/VerticalDropdown";
 import UseScaleBlock from "../components/UseScaleBlock";
-import Textbox from "../components/Textbox";
 import HOST from "../GLOBALS/Globals";
 
 import FilterSearchBar from "../components/FilterSearchBar";
 import TableSection from "../components/TableSection";
+import WindowsConfirm from "../components/WindowsConfirm";
 import "./UseScalePage.css";
 
+// Defition of constants
 const NOAI = "LEVEL N";
 const TO_NULL = [
   "instruction",
@@ -21,6 +22,7 @@ const TO_NULL = [
   "key_prompts",
 ];
 
+// Use Scale Page Component
 export default function UseScalePage({
   isBaseTemplate,
   userId,
@@ -29,65 +31,33 @@ export default function UseScalePage({
   subject_id,
   onLogout,
 }) {
-  //const [pendingRowIdx, setPendingRowIdx] = useState(null);
-
   // new state to store fetched entry types and entries
   const [levelsData, setLevelsData] = useState([]);
 
-  // get usescale id from the url
+  // get usescale_id from URL params
   const { id: usescale_id } = useParams();
 
+  // define states for search, usecase, editing
   const [searchTerm, setSearchTerm] = useState("");
-
   const [usecase, setUsecase] = useState(null);
   const [editingScale, setEditingScale] = useState(null);
-  const [editedLevel, setEditedLevel] = useState("");
-  const [editedLabel, setEditedLabel] = useState("");
 
-  // ***************** commented out this functionality 
-  //
-  // const handleLevelClick = (levelKey, entries) => {
-  //   if (pendingRowIdx == null) return;
+  // state and function for confirmation popups
+  const [confirmPopup, setConfirmPopup] = useState({
+    show: false,
+    message: "",
+    onConfirm: null,
+  });
+  const askConfirmation = (message, onConfirm) => {
+    setConfirmPopup({ show: true, message, onConfirm });
+  };
 
-  //   // find selected level entry data in db
-  //   const copy = entries.find((e) => e.ai_level == levelKey);
-  //   if (!copy) return;
-
-  //   const FLAT = {
-  //     level: levelKey,
-  //     label: copy.ai_title,
-  //     ...copy,
-  //   };
-
-  //   // save as nulls
-  //   if (levelKey === NOAI) {
-  //     for (const k of TO_NULL) {
-  //       if (k === "instruction") continue;
-  //       FLAT[k] = null;
-  //     }
-  //   }
-
-  //   setUsecase((prev) => {
-  //     if (!Array.isArray(prev) || !prev[pendingRowIdx]) return prev;
-  //     const next = prev.slice(); // create copy
-  //     if (!next[pendingRowIdx]) return prev;
-
-  //     // Keep ID
-  //     const keep = next[pendingRowIdx].id ? { id: next[pendingRowIdx].id } : {};
-  //     // Replace
-  //     next[pendingRowIdx] = { ...keep, ...FLAT };
-  //     return next;
-  //   });
-
-  //   setPendingRowIdx(null); // empty the row
-  // };
-
+  // Define and set states for subject tags
   const [subjectName, setSubjectName] = useState("");
   const [subjectYear, setSubjectYear] = useState("");
   const [subjectSemester, setSubjectSemester] = useState("");
 
   const updateSubjectDetails = (name, year, semester) => {
-    // console.log("Updating subject details:", { name, year, semester });
     setSubjectName(name);
     setSubjectYear(year);
     setSubjectSemester(semester);
@@ -96,6 +66,7 @@ export default function UseScalePage({
   const [subjectNameFromDB, setSubjectNameFromDB] = useState("");
   const [subjectYearFromDB, setSubjectYearFromDB] = useState("");
   const [subjectSemesterFromDB, setsubjectSemesterFromDB] = useState("");
+  // Fetch subject info on from backend API and set initial subject details
   useEffect(() => {
     fetch(HOST + `/get_subject_info?subject_id=${subject_id}`)
       .then((res) => res.json())
@@ -111,6 +82,26 @@ export default function UseScalePage({
       .catch((err) => console.error("Fetch error:", err));
   }, [subject_id]);
 
+  // Utility to wrap your confirmation popup as a promise
+  const askConfirmationAsync = (message) => {
+    return new Promise((resolve) => {
+      askConfirmation(
+        message,
+        () => {
+          // User confirmed
+          setConfirmPopup((prev) => ({ ...prev, show: false })); // hide popup
+          resolve(true);
+        },
+        () => {
+          // User cancelled
+          setConfirmPopup((prev) => ({ ...prev, show: false })); // hide popup
+          resolve(false);
+        }
+      );
+    });
+  };
+
+  // Update subject details state when triggered by save button
   const handleSaveTemplate = async (currentTitle) => {
     if (!usecase || !Array.isArray(usecase)) {
       console.error("No data to save.");
@@ -127,16 +118,20 @@ export default function UseScalePage({
       const checkData = await checkResponse.json();
       console.log("Check subject response:", checkData);
 
-      // Create new subject if it does not exist and assign
-      let finalSubjectId = subject_id;
+      let finalSubjectId = subject_id; // default to existing
 
       if (!checkData.exists) {
         // Ask user if they want to create a new subject
-        const confirmCreate = window.confirm(
+        const confirmed = await askConfirmationAsync(
           "Subject does not exist. Create a new subject?"
         );
-        if (!confirmCreate) return;
 
+        if (!confirmed) {
+          console.log("User cancelled creating a new subject.");
+          return; // stop saving if user cancels
+        }
+
+        // User confirmed: create new subject
         const createResponse = await fetch(`${HOST}/create_subject`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -149,28 +144,29 @@ export default function UseScalePage({
           }),
         });
         const createData = await createResponse.json();
-        finalSubjectId = createData.subject_id;
+
+        if (createData.success) {
+          finalSubjectId = createData.subject_id;
+          console.log("Created new subject:", finalSubjectId);
+        } else {
+          console.error("Error creating subject:", createData.error);
+          alert("Failed to create new subject.");
+          return;
+        }
       } else {
-        const subject_id = checkData.subject_id;
-        console.log("subject and usescale:", subject_id, usescale_id);
-        // If subject exists, reassign. Do not create new subject.
-        const reassignSubject = await fetch(`${HOST}/reassign_subject`, {
+        // Subject exists: reassign it to the usescale
+        const existingSubjectId = checkData.subject_id;
+        const reassignResponse = await fetch(`${HOST}/reassign_subject`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            usescale_id,
-            subject_id,
-          }),
+          body: JSON.stringify({ usescale_id, subject_id: existingSubjectId }),
         });
-        const reassignData = await reassignSubject.json();
+        const reassignData = await reassignResponse.json();
         console.log("Reassign subject response:", reassignData);
+        finalSubjectId = existingSubjectId;
       }
 
-      if (!finalSubjectId) {
-        finalSubjectId = subject_id;
-      }
-
-      // 2. Build payload **after finalSubjectId is set**
+      // 2. Build payload with final subject ID
       const savePayload = {
         usescale_id,
         subject_id: finalSubjectId,
@@ -255,14 +251,14 @@ export default function UseScalePage({
   // logic for handling a notification open
   const [selectedNotification, setSelectedNotification] = useState(null);
   const [showNotificationModal, setShowNotificationModal] = useState(false);
-  
+
   const handleNotificationOpen = async (rowId) => {
     try {
       const res = await fetch(HOST + "/get_notification_for_row", {
         method: "POST",
-        headers: { "Content-Type": "application/json"},
-        body: JSON.stringify({ row_id: rowId}),
-      })
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ row_id: rowId }),
+      });
       const data = await res.json();
       if (data.success) {
         setSelectedNotification(data.notification);
@@ -278,11 +274,11 @@ export default function UseScalePage({
     try {
       const res = await fetch(HOST + "/handle_notification", {
         method: "POST",
-        headers: { "Content-Type": "application/json"},
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           notification_id: selectedNotification.notification_id,
           action,
-        })
+        }),
       });
       const data = await res.json();
       if (data.success) {
@@ -297,7 +293,7 @@ export default function UseScalePage({
       console.error("Error handling notification:", err);
     }
   };
-  
+
   useEffect(() => {
     fetchLevelsData();
   }, []);
@@ -339,7 +335,7 @@ export default function UseScalePage({
             // render the filtered levels
             return filteredLevels.map((entryType) => {
               if (entryType.filteredEntries.length === 0) return null;
-
+              // render entry type dropdown with filtered entries based on level
               return (
                 <VerticalDropdown
                   key={entryType.entry_type_id}
@@ -388,12 +384,10 @@ export default function UseScalePage({
           tableData={usecase}
           subjectId={subject_id}
           initialTitle={template_title}
-          //toHighlight={pendingRowIdx}
-          //onChangeScale={(rowIdx) => setPendingRowIdx(rowIdx)}
           openNotification={handleNotificationOpen}
           onRowsChange={(nextRows) => setUsecase(nextRows)}
           onSaveTemplate={handleSaveTemplate}
-          levelsData={levelsData} // <-- pass levelsData for drag-and-drop
+          levelsData={levelsData}
           onUpdateSubjectDetails={updateSubjectDetails}
         />
       </div>
@@ -424,9 +418,7 @@ export default function UseScalePage({
               >
                 Accept
               </button>
-              <button
-                onClick={() => handleNotificationAction("reject")}
-              >
+              <button onClick={() => handleNotificationAction("reject")}>
                 Reject
               </button>
               <button
@@ -546,13 +538,6 @@ export default function UseScalePage({
                       }
                     })
                     .catch((err) => console.error("Fetch error:", err));
-
-                  // commented this out because it was causing the overwrite row bug when editing use scale
-                  //setUsecase((prev) =>
-                  //  prev.map((row) =>
-                  //</div>    row.id === editingScale.id ? editingScale : row
-                  //</div>  )
-                  //);
                   setEditingScale(null);
                 }}
               >
@@ -563,6 +548,15 @@ export default function UseScalePage({
           </div>
         </div>
       )}
+
+      <WindowsConfirm
+        show={confirmPopup.show}
+        message={confirmPopup.message}
+        onConfirm={() => {
+          confirmPopup.onConfirm?.();
+        }}
+        onCancel={() => setConfirmPopup({ ...confirmPopup, show: false })}
+      />
     </div>
   );
 }

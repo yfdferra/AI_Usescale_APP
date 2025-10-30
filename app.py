@@ -7,17 +7,40 @@ import json
 app = Flask(__name__)
 CORS(app)
 
+"""
+This module contains all Flask route handlers and back-end functions
+that interact with the SQLite database for the application
+"""
+
+# Render homepage
 @app.route("/")
 def hello_world():
+    """Renders the homepage of the application"""
     return render_template("home/index.html")
 
 
+# Test react and flask connection
+@app.route("/api/ping")
+def ping():
+    return jsonify({"message": "pong"})
+
+
+# Find all use scale rows of a specific usescale id
 @app.route("/usecase")
 def usecase():
+    """
+    Retrieves all use scale rows associated with a given usescale ID
+    
+    Query Parameters:
+        usescale_id (str): the unqiue identifier for the usescale
+        
+    Returns: 
+        flask.Response: A JSON array containing all matching rows from the
+        'usescale_entries' table
+    """
     connection = sqlite3.connect("database/usescale_rows.db")
     connection.row_factory = sqlite3.Row
     cursor = connection.cursor()
-    # changed this variable name to usescale id for clarity 
     usescale_id = request.args.get("usescale_id")
     cursor.execute("SELECT * FROM usescale_entries WHERE usescale_id = (?)", (usescale_id,))
     rows = cursor.fetchall()
@@ -27,16 +50,31 @@ def usecase():
     return jsonify(data)
 
 
+# Find subject associated with a subject id
 @app.route("/get_subject_info", methods=["GET"])
 def get_subject_info():
+    """
+    Retrieves the subject associated with the given subject ID
+
+    Query Parameters:
+        subject_id (str): the unique identifier for the subject
+
+    Returns:
+        flask.Reponse: A JSON containing the subject object that matches
+        the subject_id from the 'subjects' table
+    """
     subject_id = request.args.get("subject_id")
     if not subject_id:
-        return jsonify({"error": "No subject_id provided"}), 400
+        return jsonify({
+                "subject_id": None,
+                "subject_name": "",
+                "subject_year": "",
+                "subject_semester": ""
+            })
 
     connection = sqlite3.connect("database/subjects.db")
     connection.row_factory = sqlite3.Row
     cursor = connection.cursor()
-
 
     cursor.execute(
         "SELECT * FROM subjects WHERE subject_id = ?", (subject_id,)
@@ -50,8 +88,18 @@ def get_subject_info():
         return jsonify({"error": "Subject not found"}), 404
 
 
+# Find templates matching a search term
 @app.route('/find_templates', methods=["GET"])
 def find_template_matches():
+    """
+    Search for templates or subjects matching a given keyword
+    
+    Query Parameters:
+        subject_name (str): Search term for template or subject fields
+    
+    Returns:
+        flask.Response: JSON containing a list of matching template titles
+    """
     search_term = request.args.get("subject_name")
     print("Search Term:", search_term)
     search = search_term.lower()
@@ -89,10 +137,21 @@ def find_template_matches():
         connection.close()
 
 
-
-# modified this function to save the title
+# Save full template (title and entry rows)
 @app.route('/save_template', methods=['POST'])
 def save_template():
+    """
+    Save an entire template including its title and all associated rows
+    
+    Request Body (JSON):
+        usescale_id (int): the template's unique ID
+        subject_id (int): associated subject ID
+        title (str): template title
+        rows (list): list of row objects containing entry data
+        
+    Returns:
+        flask.Response: JSON with success message or error details
+    """
     data = request.get_json()
     usescale_id = data.get('usescale_id')
     subject_id = data.get('subject_id')
@@ -110,8 +169,6 @@ def save_template():
         )
         connection.commit()
         connection.close()
-
-        
 
         connection = sqlite3.connect("database/usescale_rows.db")
         cursor = connection.cursor()
@@ -153,9 +210,19 @@ def save_template():
         return jsonify({"success": False, "error": str(e)})
 
 
-# just editting title
+# Update only the template title
 @app.route('/update_title', methods=["POST"])
 def update_title():
+    """
+    Update only the title of a template
+    
+    Request Body (JSON):
+        usescale_id (int): Template ID to update
+        title (str): New title value
+    
+    Returns:
+        flask.Response: JSON indicating success or failure
+    """
     data = request.get_json()
     usescale_id = data.get('usescale_id')
     title = data.get('title')
@@ -179,9 +246,18 @@ def update_title():
         return jsonify({"success": False, "error": str(e)})
 
 
-# deleting templates from homepage
+# Delete a template from the homepage
 @app.route('/delete_template', methods=["POST"])
 def delete_template():
+    """
+    Delete a template and all its associated entry rows
+    
+    Request Body (JSON):
+        usescale_id (int): the ID of the template to delete
+        
+    Returns:
+        flask.Response: JSON indicating success or failure
+    """
     data = request.get_json()
     usescale_id = data.get('usescale_id')
 
@@ -208,13 +284,22 @@ def delete_template():
         return jsonify({"success": False, "error": str(e)})
     
 
-# makeing a copy of templates from homepage
+# Copying an existing custom template
 @app.route('/copy_template', methods=["POST"])
 def copy_template():
+    """
+    Create a duplicate of an exisitng custom template
+    
+    Request Body (JSON):
+        usescale_id (int): the ID of the template to copy
+        user_id: the user creating this copy
+        
+    Returns:
+        flask.Response: JSON containing new template ID and title
+    """
     data = request.get_json()
     usescale_id = data.get('usescale_id')
     user_id = data.get('user_id')
-    
 
     if not usescale_id:
         return jsonify({"success": False, "error": "missing usescale id"})
@@ -266,9 +351,19 @@ def copy_template():
         return jsonify({"success": False, "error": str(e)})
     
 
-# function for copying a base template
+# Copy a base template
 @app.route('/copy_base_template', methods=["POST"])
 def copy_base_template():
+    """
+    Duplicate a base template and convert it to a custom user template
+    
+    Request Body (JSON):
+        usescale_id (int): the base template ID to copy
+        user_id (int): the ID of the user creating the copy
+        
+    Returns:
+        flask.Response: JSON containing the new tempalte ID and title
+    """
     data = request.get_json()
     usescale_id = data.get('usescale_id')
     user_id = data.get('user_id')
@@ -340,9 +435,21 @@ def copy_base_template():
 
 
     
-# when we log in we need to return some data, the user id and the user type
+# User login
 @app.route("/login", methods=["POST"])
 def login():
+    """
+    Authenticates user with username and password
+    
+    Query Parameters:
+        user_id (int): the unique ID of the user logging in
+        user_type (str): the type of user logging in
+        password (str): the inputted password
+
+    Returns:
+        flask.Response: JSON object indicating login success. 
+                        If successful, includes 'user_id' and 'user_type' from 'users' table
+    """
     username = request.form.get("username")
     password = request.form.get("password")
 
@@ -371,8 +478,18 @@ def login():
         return jsonify({"logged_in": False})
     
 
+# Get all users data
 @app.route("/data", methods=["GET"])
 def getdata():
+    """
+    Retrieve all user records
+    
+    Query:
+       SELECT * FROM users
+    
+    Returns:
+        flask.Response: JSON list of all user records from 'users' table
+    """
     connection = sqlite3.connect("database/users.db")
     connection.row_factory = sqlite3.Row
     cursor = connection.cursor()
@@ -383,10 +500,19 @@ def getdata():
     return jsonify(data)
 
 
-# returns the user's use scales, need to only get custom scales
-# need to mofidy this to check for user id as well 
+# Get custom scales for a user
 @app.route("/get_custom_scales", methods=["GET"])
 def get_usescales():
+    """
+    Retrieves all custom templates for a specific user
+    
+    Query Parameters:
+        user_id (int): the unique identifier of the current user
+        template_type (str): the template type, whether custom or base
+
+    Returns:
+        flask.Response: JSON with user's custom scales from 'usescale' table
+    """
     user_id = request.args.get("user_id")
     user_id = int(user_id)
 
@@ -400,9 +526,18 @@ def get_usescales():
     return jsonify(data)
 
 
-# will need a new function that retrieves the base templates
+# Get all base templates
 @app.route("/get_base_scales", methods=["GET"])
 def get_base_scales():
+    """
+    Retrieve all base templates
+    
+    Query Parameters:
+        template_type (str): the template type identifies (base or custom)
+        
+    Returns:
+        flask.Reponse: JSON list of base templates from 'usescales' table
+    """
     connection = sqlite3.connect("database/usescales.db")
     connection.row_factory = sqlite3.Row
     cursor = connection.cursor()
@@ -413,9 +548,18 @@ def get_base_scales():
     return jsonify(data)
 
 
-
+# Get rows for a specific template
 @app.route("/get_usescale_rows", methods=["GET"])
 def get_usescale_rows():
+    """
+    Retrieve all row entries for a given template
+    
+    Query Parameters:
+        usescale_id (int): unique identifier of the template
+        
+    Returns:
+        flask.Response: JSON list of entries from 'usescale_rows' table
+    """
     usescale_id = request.args.get("usescale_id")
     connection = sqlite3.connect("database/usescale_rows.db")
     connection.row_factory = sqlite3.Row
@@ -426,9 +570,18 @@ def get_usescale_rows():
     connection.close()
     return jsonify(data)
 
-#reassign_subject
+
+# Reassign a subject to a template
 @app.route("/reassign_subject", methods=["POST"])
 def reassign_subject():
+    """
+    Query Parameters:
+        subject_id (int): ID of the subject
+        usescale_id (int): ID of the template
+        
+    Returns:
+        flask.Response: JSON object indicating success or failure
+    """
     data = request.get_json()
     subject_id = data.get("subject_id")
     usescale_id = data.get("usescale_id")
@@ -454,8 +607,22 @@ def reassign_subject():
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
 
+
+# Check if a subject exists
 @app.route("/check_in_subjects", methods=["POST"])
 def check_in_subjects():
+    """
+    Check whether a subject with a given name, year, and semester exists
+    
+    Query Parameters:
+        subject_id (int): ID of the subject
+        subject_name (str): name of the subject
+        subject_year (int): subject year
+        subject_semester (str): subjest semester (semester 1 or semester 2)
+        
+    Returns:
+        flask.Response: JSON response with 'exists' and optional 'subject_id' from 'subjects' table
+    """
     data = request.get_json()
     subject_name = data.get("subjectName")
     subject_year = data.get("subjectYear")
@@ -489,9 +656,19 @@ def check_in_subjects():
         return jsonify({"success": False, "error": str(e)}), 500
 
 
-
+# Create a new subject
 @app.route("/create_subject", methods=["POST"])
 def create_subject():
+    """
+    Create a new subject and map it to a template
+    
+    Queries:
+        INSERT INTO subjects (subject_name, subject_year, subject_semester) VALUES (?, ?, ?)
+        UPDATE usescales SET subject_id = ? WHERE usescale_id = ?
+
+    Returns:
+        flask.Response: JSON response with success message
+    """
     # Parse the JSON data from the request
     info = request.get_json()
     subject_name = info.get("subjectName")
@@ -546,9 +723,18 @@ def create_subject():
         return jsonify({"success": False, "error": str(e)}), 500
 
 
-# update this function to create a new entry in usescales db
+# Create a new custom template
 @app.route("/create_template", methods=["POST"])
 def create_template():
+    """
+    Create a new custom template
+    
+    Query:
+        INSERT INTO usescales (subject_id, user_id, title, template_type) VALUES (?, ?, ?, ?)
+        
+    Returns:
+        flask.Response: JSON success message and 'usescale_id' from 'usescales' table
+    """
     info = request.get_json()
     title = info.get("title", "Untitled Template")  # default title
     subject_id = info.get("subject_id")  # optional
@@ -586,10 +772,19 @@ def create_template():
         "title": title
     })
 
-# will need a new function for specifically when the admin selects save as base template where the type will be edited
-# to be base template
+
+# Save a custom template as a base template (admin function)
 @app.route("/save_as_base_template", methods=["POST"])
 def save_as_base_template():
+    """
+    Convert a custom template to a base template
+    
+    Query:
+        UPDATE usescales SET template_type = "base" WHERE usescale_id = ? AND template_type = "custom"
+
+    Returns:
+        flask.Response: JSON success message or failure details
+    """
     try:
         data = request.get_json()
         usescale_id = data.get("usescale_id")
@@ -618,18 +813,20 @@ def save_as_base_template():
         return jsonify({"success": False, "error": str(e)})
     
 
-            
-
-# testing react and flask connetion 
-@app.route("/api/ping")
-def ping():
-    return jsonify({"message": "pong"})
-
-
-
-# modified this function to also add notification entries
+# Update SRep scale cell entry and handle notifications
 @app.route("/update_usescale", methods=["POST"])
 def update_usescale():
+    """
+    Update an SRep entry and create/update notifications for affected rows
+    
+    Queries:
+        SELECT * FROM srep_entries WHERE entry_id = ?
+        UPDATE srep_entries SET ... WHERE entry_id = ?
+        INSERT/UPDATE notifications
+        
+    Returns:
+        flask.Response: JSON success or failure message
+    """
     data = request.get_json()
 
     entry_id = data.get("entry_id")
@@ -756,11 +953,18 @@ def update_usescale():
         return jsonify({"error": str(e)}), 500
 
 
-
-
-# function that accepts row ids and checks if there is a notification
+# Checks if there are notifications associated with a list of row IDs
 @app.route("/get_notifications_for_rows", methods=["POST"])
 def get_notifications_for_rows():
+    """
+    Retrieves all rows that currently have notifications
+    
+    Query:
+        SELECT row_id FROM notifications WHERE row_id IN (?)
+        
+    Returns:
+        flask.Response: JSON response with 'rows_with_notifications' or error message
+    """
     data = request.get_json()
     row_ids = data.get("row_ids")
 
@@ -784,9 +988,18 @@ def get_notifications_for_rows():
         return jsonify({"error": str(e)})
     
 
-# function that gets the notification for a certain row
+# Get notification for a specific row
 @app.route("/get_notification_for_row", methods=["POST"])
 def get_notification_for_row():
+    """
+    Retrieve the entire notification entry associated with a specific row
+    
+    Query Parameters:
+        row_id (int): the ID of the row
+        
+    Returns:
+        flask.Response: JSON response with 'notification' object from 'notifications' table or error
+    """
     data = request.get_json()
     row_id = data.get("row_id")
 
@@ -818,9 +1031,20 @@ def get_notification_for_row():
         return jsonify({"error": str(e)})
     
 
-# function that handles a notification accept/reject
+# Handle accept or reject of a notification
 @app.route("/handle_notification", methods=["POST"])
 def handle_notification():
+    """
+    Handle user action on a notification (accept or reject) 
+    
+    Queries:
+        SELECT * FROM notifications WHERE notification_id = ?
+        If accepted: UPDATE usescale_entries SET ... WHERE row_id = ?
+        Finally: DELETE FROM notifications WHERE notification_id = ?
+        
+    Returns:
+        flask.Response: confirming update or rejection
+    """
     data = request.get_json()
     notification_id = data.get("notification_id")
     action = data.get("action")  # accept or reject
@@ -879,12 +1103,19 @@ def handle_notification():
         return jsonify({"error": str(e)})
     
                              
-
-
-
-# get the srep entries from database and send to front end
+# Retrieve all SRep entries grouped by entry type
 @app.route("/entries", methods=["GET"])
 def get_entries():
+    """
+    Retrieve all SRep entries grouped by their entry type
+    
+    Queries:
+        SELECT entry_type_id, entry_type_name FROM srep_entry_type
+        SELECT * FROM srep_entries WHERE entry_type_id = ?
+    
+    Returns:
+        flask.Resposne: JSON list with entries grouped by entry type
+    """
     # connect to srep entry types database
     conn_types = sqlite3.connect("database/srep_entry_type.db")
     conn_types.row_factory = sqlite3.Row
@@ -920,8 +1151,19 @@ def get_entries():
     return jsonify(result)
 
 
+# Create a new subject space (user account for coordinator)
 @app.route("/create_subject_space", methods=["POST"])
 def create_subject_space():
+    """
+    Create a new subject space by registering a coordinator user
+    
+    Queries:
+        SELECT user_id FROM users WHERE username = ?
+        INSERT INTO users (username, password, user_type) VALUES (?, ?, 'coordinator')
+        
+    Returns:
+        flask.Response: JSON response indicating success or failure
+    """
     try:
         data = request.get_json()
         username = data.get("username")
@@ -954,4 +1196,3 @@ def create_subject_space():
     
     except Exception as e:
         return jsonify({"success": False, "error": str(e)})
-        
