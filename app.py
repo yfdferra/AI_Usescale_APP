@@ -14,13 +14,6 @@ This module contains all Flask route handlers and back-end functions
 that interact with the SQLite database for the application
 """
 
-## Render homepage
-#@app.route("/")
-#def hello_world():
-#    """Renders the homepage of the application"""
-#    return render_template("home/index.html")
-
-
 # Test react and flask connection
 @app.route("/api/ping")
 def ping():
