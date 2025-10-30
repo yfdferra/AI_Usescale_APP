@@ -1,11 +1,23 @@
+/**
+ * MenuButton Component
+ *
+ * A button that toggles a dropdown menu.
+ *
+ * @component
+ * @param {Object} props - Component props
+ * @param {Array} props.items - Array of menu items with { label: string, onClick: function }
+ * @param {boolean} [props.inline=false] - Whether the button is inline or absolute
+ * @returns {JSX.Element} The MenuButton component
+ */
+
 import { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
 import Menu from "./Menu";
 
 export default function MenuButton({ items, inline = false }) {
-  const [open, setOpen] = useState(false);
-  const buttonRef = useRef(null);
-  const menuRef = useRef(null);
+  const [open, setOpen] = useState(false); // menu in open state
+  const buttonRef = useRef(null); //ref to button
+  const menuRef = useRef(null); //ref to menu
   const [pos, setPos] = useState({ top: 0, left: 0 });
 
   useEffect(() => {
@@ -23,6 +35,7 @@ export default function MenuButton({ items, inline = false }) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+   // Update menu position when opened
   useEffect(() => {
     if (open && buttonRef.current) {
       const rect = buttonRef.current.getBoundingClientRect();
@@ -41,7 +54,7 @@ export default function MenuButton({ items, inline = false }) {
     ...item,
     onClick: () => {
       item.onClick && item.onClick(); // run original
-      setOpen(false);              
+      setOpen(false);           //close     
     },
   }));
 

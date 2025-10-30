@@ -1,3 +1,18 @@
+/**
+ * PopUp Component
+ *
+ * A popup/dialog component that displays information or messages to users.
+ *
+ * @component
+ * @param {Object} props - Component props
+ * @param {string} props.title - The main title/heading of the popup
+ * @param {string} props.message - The primary message content
+ * @param {string} [props.subtitle] - additional information
+ * @param {React.ReactNode} [props.icon] - Optional icon element to display
+ * @param {Function} props.onClose - Callback function called when popup should close
+ * @returns {JSX.Element} The PopUp component
+ */
+
 import "./PopUp.css";
 
 export default function PopUp({ title, message, subtitle, icon, onClose }) {

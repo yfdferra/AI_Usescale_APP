@@ -9,11 +9,14 @@
   flex-direction: row;
   position: relative;
 }
+
+/* Sidebar open state */
 .horizontal-sidebar.open {
   width: 25rem;
   min-width: 25rem;
   max-width: 25rem;
 }
+/* Sidebar collapsed state */
 .horizontal-sidebar:not(.open) {
   width: 2rem;
   min-width: 2rem;
@@ -55,7 +58,7 @@
   justify-content: center;
   outline: none;
 }
-
+/* Toggle icon inside button */
 .horizontal-sidebar-toggle-icon {
   font-size: 1.375rem;
 }
