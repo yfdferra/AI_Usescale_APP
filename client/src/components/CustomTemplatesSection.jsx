@@ -203,13 +203,7 @@ const handleTitleSubmit = async (newTitle) => {
 
     fetchTemplates();
   }, [search, localTemplates]);
-
-  // fetch(`${HOST}/find_templates?subject_name=${search}`)
-
-  // console.log(
-  //   "Rendering CustomTemplatesSection with templates:",
-  //   filteredTemplates
-  // );
+  
 
   return (
     <section className="custom-templates-section">

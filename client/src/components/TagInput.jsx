@@ -15,7 +15,8 @@ import { useState } from "react";
 import "./TagInput.css";
 
 export default function TagInput({ placeholder, value, onChange }) {
-  const [tags, setTags] = useState(null); // current tag value
+  // State definitions
+  const [tags, setTags] = useState(null);
   const [inputValue, setInputValue] = useState(value || "");
 
   const handleKeyDown = (e) => {
@@ -39,6 +40,9 @@ export default function TagInput({ placeholder, value, onChange }) {
           <button onClick={removeTag}>×</button>
         </div>
       ) : (
+        // Input field for entering a tag
+        // Placeholder text is shown when input is empty, value changes based on user input
+        // onChange updates inputValue state and calls the onChange prop
         <input
           type="text"
           placeholder={placeholder}

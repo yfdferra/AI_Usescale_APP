@@ -31,30 +31,32 @@ export default function BaseTemplatesSection({
   onCreateFromScratchClick 
 }) {
   // State management for local templates, synced with props
-
   const [localTemplates, setLocalTemplates] = useState(templates || []);
     useEffect(() => {
       setLocalTemplates(templates || []);
     }, [templates]);
 
-      // State for the subject space creation modal
+  // State for the subject space creation modal
   const [showModal, setShowModal] = useState(false);
   const [newUsername, setNewUsername] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [selectedTemplates, setSelectedTemplates] = useState([]);
   const [popup, setPopup] = useState({ show: false, message: "", type: "info" });
-
-
   const [showPassword, setShowPassword] = useState(false);
+  // Bool for whether admin is logged in
+  const isAdmin = userType?.toLowerCase() === "admin";
+  const showPopup = (message, type = "info") => {
+    setPopup({ show: true, message, type });
+  };
+
   // Sync local templates state with incoming templates prop
   useEffect(() => {
       setLocalTemplates(templates || []);
   }, [templates]);
 
-  const showPopup = (message, type = "info") => {
-    setPopup({ show: true, message, type });
-  };
-
+  /***
+   * Handles confirming popup 
+   */
   const [confirmPopup, setConfirmPopup] = useState({
       show: false,
       message: "",
@@ -70,7 +72,10 @@ export default function BaseTemplatesSection({
      ? "+ Create new base template draft"
      : "+ Create from scratch";
 
-  // helper to add + for coordinators and not for admin
+  /***
+   * Helper to add + in base template title display for coordinators and not for admin
+   * Checks user type and adds + accordingly
+   */
   const getTemplateLabel = (title) => {
     if (userType?.toLowerCase() === "coordinator") {
       return `+ ${title}`;
@@ -78,10 +83,12 @@ export default function BaseTemplatesSection({
     return title;
   };
 
-  // bool for whether admin is logged in
-  const isAdmin = userType?.toLowerCase() === "admin";
 
-  // delete template handler
+  /***
+   * Handles deletion of template in the admin homepage
+   * Confirms with user that they are sure they want to delete
+   * Makes API call to remove tempalte from database
+   */
   const deleteTemplate = async (id) => {
   return new Promise((resolve) => {
     // Show our confirmation popup
@@ -148,22 +155,10 @@ export default function BaseTemplatesSection({
         showPopup("Failed to create subject space: " + data.error, "error");
       }
     } catch (err) {
-      showPopup("Subject space created successfully!", "success");
       showPopup("Error creating subject space", "error");
     }
   };
 
-  /**
-   * Toggles template selection for subject space creation
-   * Adds template to selection if not present, removes if already selected
-   *
-   * @param {string|number} id - The ID of the template to toggle
-   */
-  const toggleTemplateSelection = (id) => {
-    setSelectedTemplates((prev) =>
-      prev.includes(id) ? prev.filter((tid) => tid !== id) : [...prev, id]
-    );
-  };
 
   return (
     <section className="base-templates-section">

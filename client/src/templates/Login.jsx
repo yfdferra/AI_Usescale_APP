@@ -7,7 +7,6 @@ import "../templates/Login.css";
 import { useNavigate } from "react-router-dom";
 
 export default function Login({ onLogin }) {
-  // export default function Login({ onNext }) {
   // pop up for forgot password
   const [showPopup, setShowPopup] = useState(false);
   // navigation (to main page on successful login)
@@ -15,8 +14,9 @@ export default function Login({ onLogin }) {
   //state to show and hide visibility
   const [showPassword, setShowPassword] = useState(false);
 
-
+  // handle form submission for login
   const handleSubmit = async (e) => {
+    // prevent default form submission from reloading page and call login API
     e.preventDefault();
     var formData = new FormData(e.target);
     var res = await fetch(HOST + "/login", {
@@ -24,16 +24,12 @@ export default function Login({ onLogin }) {
       body: formData,
     });
     var data = await res.json();
+    // if login successful, call onLogin and navigate to main page else alert error
     if (data.logged_in) {
-      // onNext();
-      onLogin(
-        // modified this to pass user info to app.jsx
-        data.user_id,
-        data.user_type,
-      );
-      navigate("/main", { 
-        replace: true
-      }); // replace: true -> replaces /login from history stack as /main | wont be able to go back to login page
+      onLogin(data.user_id, data.user_type);
+      navigate("/main", {
+        replace: true,
+      });
     } else {
       alert("Incorrect Username/Password");
     }
@@ -45,6 +41,7 @@ export default function Login({ onLogin }) {
         <img src={logo} alt="Logo" className="login-logo" />
 
         <h2 className="login-title">Log in</h2>
+        {/* Setup onsubmit to callback handleSubmit function */}
         <form className="login-form" onSubmit={handleSubmit}>
           <label htmlFor="username" className="login-label">
             Username
@@ -63,36 +60,36 @@ export default function Login({ onLogin }) {
           >
             Password
           </label>
-          
+
           <div style={{ position: "relative" }}>
             <div className="password-wrapper">
-  <input
-    id="password"
-    name="password"
-    className="login-input"
-    type={showPassword ? "text" : "password"}
-    placeholder="Enter your password"
-    style={{ paddingRight: "3rem" }}
-  />
-  <button
-    type="button"
-    onClick={() => setShowPassword(!showPassword)}
-    style={{
-      position: "absolute",
-      right: "0.75rem",
-      top: "50%",
-      transform: "translateY(-50%)",
-      background: "none",
-      border: "none",
-      cursor: "pointer",
-      fontSize: "0.9rem",
-      color: "#666",
-    }}
-  >
-    {showPassword ? "Hide" : "Show"}
-  </button>
-</div>
-</div>
+              <input
+                id="password"
+                name="password"
+                className="login-input"
+                type={showPassword ? "text" : "password"}
+                placeholder="Enter your password"
+                style={{ paddingRight: "3rem" }}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                style={{
+                  position: "absolute",
+                  right: "0.75rem",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  fontSize: "0.9rem",
+                  color: "#666",
+                }}
+              >
+                {showPassword ? "Hide" : "Show"}
+              </button>
+            </div>
+          </div>
           <button
             className="login-button"
             type="submit"
@@ -111,11 +108,6 @@ export default function Login({ onLogin }) {
             >
               Forgot Password ?
             </a>
-
-            {/* Not sure if we need to be able to create accounts from here */}
-            {/* <a href="#" className="login-link">
-              Create Account
-            </a> */}
           </div>
         </form>
         {showPopup && (

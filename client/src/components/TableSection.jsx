@@ -1,11 +1,5 @@
-/**
- * TableSection Component
- *
- * An editable table section for student declarations or AI use scales.
- * 
- * @component
- * @param {Object} props - Component props
- * @returns {JSX.Element} The TableSection component
+/***
+ * This file contains both the Editable cell component and the TableSection component
  */
 
 import { useState, useEffect, useRef, useLayoutEffect } from "react";
@@ -34,8 +28,20 @@ const LEVEL_COLORS = {
   "AI FOR LEARNING": "#d9b3ffff",
 };
 
-// Editable cell component
-// add a readonly mode for coordinators viewing base templates
+/***
+ * Editable cell component
+ * 
+ * This component renders and sets capabilities of editable cells in the template editing page
+ * 
+ * @component
+ * @param {Object} props - Component props
+ * @param {string} [props.value] - Initial input value
+ * @param {Function} props.onChange - Callback when input value changes
+ * @param {boolean} [props.multiline=false] - Whether the cell should support multiple lines
+ * @param {boolean} [props.grayed=false] - Whether the cell should appear grayed out
+ * @param {boolean} [props.readOnly=false] - Whether the cell should be non-editable
+ * @returns {JSX.Element} The Editable Cell Component
+ */
 function EditableCell({
   value,
   onChange,
@@ -46,6 +52,10 @@ function EditableCell({
   const [editing, setEditing] = useState(false);
   const [tempValue, setTempValue] = useState(value || "");
   const textareaRef = useRef(null);
+  const handleBlur = () => {
+    setEditing(false);
+    onChange(tempValue);
+  };
 
   useEffect(() => {
     setTempValue(value || "");
@@ -58,18 +68,16 @@ function EditableCell({
       ta.style.height = ta.scrollHeight + "px"; // fit content
     }
   }, [editing, tempValue, multiline]);
+
   useEffect(() => {
     if (grayed && editing) {
       setEditing(false);
     }
   }, [grayed, editing]);
 
-  const handleBlur = () => {
-    setEditing(false);
-    onChange(tempValue);
-  };
-
-  // handle read only
+  /***
+   * Handles when the read only boolean is set to true
+   */
   if (readOnly) {
     return (
       <div
@@ -81,7 +89,9 @@ function EditableCell({
     );
   }
 
-  // if grayed out, unclickable
+  /***
+   * Ensures cell is unclickable when grayed boolean is true
+   */
   if (grayed) {
     return (
       <div className="editable-cell grayed" title="Uneditable for NO-AI rows">
@@ -89,6 +99,10 @@ function EditableCell({
       </div>
     );
   }
+
+  /***
+   * Sets cell input to 'Click to edit' if it is empty and not being edited
+   */
   if (!editing) {
     return (
       <div
@@ -101,6 +115,9 @@ function EditableCell({
     );
   }
 
+  /***
+   * If cell needs to span multiple lines, ensure this is possible
+   */
   if (multiline) {
     return (
       <textarea
@@ -135,6 +152,29 @@ function EditableCell({
   );
 }
 
+/***
+ * TableSection Component
+ * 
+ * Renders the main editable table area within the template editing page
+ * Supports both base templates and custom templates
+ * Allows for dynamic updates to table data
+ * 
+ * @component
+ * @param {Object} props - Component props
+ * @param {boolean} props.open - Whether the table section is currently visible
+ * @param {boolean} props.isBaseTemplate - Indicates if the template being displayed is a base template
+ * @param {string} props.userId - ID of the current user
+ * @param {string} props.userType - Type of the current user (admin or coordinator)
+ * @param {Array<Object>} props.tableData - Data for the table rows
+ * @param {string} props.subjectId - ID of the associated subject tag (if applicable)
+ * @param {string} props.initialTitle - Initial title of the template 
+ * @param {Function} props.openNotification - Callback to display user notification
+ * @param {Function} props.onRowsChange - Callback triggered when table row data changes
+ * @param {Function} props.onSaveTemplate - Callback to save the current template state
+ * @param {Array<Object>} [props.levelsData] - Array of SRep use scale entries
+ * @param {Function} props.onUpdateSubjectDetails - Callback for updated subject tag details
+ * @returns {JSX.Element} The TableSection component
+ */
 export default function TableSection({
   open,
   isBaseTemplate,
@@ -143,8 +183,6 @@ export default function TableSection({
   tableData,
   subjectId,
   initialTitle,
-  toHighlight,
-  //onChangeScale,
   openNotification,
   onRowsChange,
   onSaveTemplate,
@@ -155,22 +193,20 @@ export default function TableSection({
     initialTitle || "Untitled student declaration"
   );
 
-  // constant for determining if user is admin
+  // Constant for determining if user is admin
   const isAdmin = userType?.toLowerCase() === "admin";
-  // constant for determining if user can modify rows
+  // Constant for determining if user can modify rows
   const canModifyRows = !(isBaseTemplate && !isAdmin);
   const [popup, setPopup] = useState({ show: false, message: "", type: "info" });
-
-  // local state for table rows
+  // Local state for table rows
   const [rows, setRows] = useState(tableData || []);
   const [subjectName, setSubjectName] = useState("");
   const [subjectYear, setSubjectYear] = useState("");
   const [subjectSemester, setSubjectSemester] = useState("");
-
-  // constant for notifications
+  // Constant for notifications
   const [rowsWithNotifications, setRowsWithNotifications] = useState([]);
 
-  //for pop up
+  // For pop up
   const showPopup = (message, type = "info") => {
     setPopup({ show: true, message, type });
   };
@@ -188,11 +224,22 @@ export default function TableSection({
   const [titleModal, setTitleModal] = useState({
   show: false,
   oldTitle: "",
-});
+  });
 
-  
+  // Empty row template
+  const emptyRow = {
+    assessment_task: "",
+    level: "",
+    label: "",
+    instruction: "",
+    example: "",
+    declaration: "",
+    version: "",
+    purpose: "",
+    key_prompts: "",
+  };
 
-  // calls back to check if rows have any notifications
+  // Calls back to check if rows have any notifications
   useEffect(() => {
     if (!rows.length) return;
 
@@ -215,6 +262,7 @@ export default function TableSection({
       .catch((err) => console.error("Network error:", err));
   }, [rows]);
 
+  // Fetches subject tagging information
   useEffect(() => {
     fetch(HOST + `/get_subject_info?subject_id=${subjectId}`)
       .then((res) => res.json())
@@ -230,19 +278,22 @@ export default function TableSection({
       .catch((err) => console.error("Fetch error:", err));
   }, [subjectId]);
 
+  // Updates subject tagging information
   useEffect(() => {
     if (typeof onUpdateSubjectDetails === "function") {
       onUpdateSubjectDetails(subjectName, subjectYear, subjectSemester);
     }
   }, [subjectName, subjectYear, subjectSemester, onUpdateSubjectDetails]);
 
+  // Renders template title with the intial title
   useEffect(() => {
     if (initialTitle) setTitle(initialTitle);
   }, [initialTitle]);
 
+  // Maps tableData to rows
   useEffect(() => {
     if (tableData) {
-      // map tableData to mark NO AI rows as grayed to make sure they render properly
+      // Map tableData to mark NO AI rows as grayed to make sure they render properly
       const mappedRows = tableData.map((row) => ({
         ...row,
         grayed: row.ai_title === "NO AI",
@@ -251,9 +302,10 @@ export default function TableSection({
     }
   }, [tableData]);
 
+  // Logic for editing title
   const editTitle = () => {
   setTitleModal({ show: true, oldTitle: title });
-};
+  };
 
   const handleTitleSubmit = async (newTitle) => {
   if (!newTitle) {
@@ -264,9 +316,11 @@ export default function TableSection({
 
   setTitle(newTitle);
   setTitleModal({ show: false, oldTitle: "" });
-};
+  };
 
-
+  /***
+   * Handles making a copy of the selected template
+   */
   const makeCopy = async () => {
     try {
       const res = await fetch(HOST + "/copy_template", {
@@ -293,32 +347,35 @@ export default function TableSection({
     }
   };
 
-  // function for saving as base template for admin
+  /***
+   * Handles saving as a base template if in admin view
+   */
   const saveAsBaseTemplate = () => {
-  askConfirmation("Are you sure you want to save as a global base template?", async () => {
-    const templateId = rows?.[0]?.usescale_id || usescale_id;
-    if (!templateId) {
-      showPopup("Cannot determine template ID", "error");
-      return;
-    }
+    askConfirmation("Are you sure you want to save as a global base template?", async () => {
+      const templateId = rows?.[0]?.usescale_id || usescale_id;
+      if (!templateId) {
+        showPopup("Cannot determine template ID", "error");
+        return;
+      }
 
-    try {
-      const res = await fetch(HOST + "/save_as_base_template", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ usescale_id: templateId }),
-      });
-      const data = await res.json();
-      if (data.success) showPopup("Template saved as base template", "success");
-      else showPopup("Error: " + (data.error || ""), "error");
-    } catch (err) {
-      showPopup("Network error while saving template", "error");
-    }
-  });
-};
+      try {
+        const res = await fetch(HOST + "/save_as_base_template", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ usescale_id: templateId }),
+        });
+        const data = await res.json();
+        if (data.success) showPopup("Template saved as base template", "success");
+        else showPopup("Error: " + (data.error || ""), "error");
+      } catch (err) {
+        showPopup("Network error while saving template", "error");
+      }
+    });
+  };
 
-
-  // function for copying a base template as a coordinator
+  /***
+   * Handles copying base template as a coordinator 
+   */
   const copyBaseTemplate = async () => {
     try {
       const res = await fetch(HOST + "/copy_base_template", {
@@ -346,29 +403,9 @@ export default function TableSection({
     }
   };
 
-  // empty row template
-  const emptyRow = {
-    assessment_task: "",
-    level: "",
-    label: "",
-    instruction: "",
-    example: "",
-    declaration: "",
-    version: "",
-    purpose: "",
-    key_prompts: "",
-  };
-
-  // update cell and notify parent
-  const updateCell = (rowIdx, key, value) => {
-    const next = rows.slice();
-    const keep = next[rowIdx]?.id ? { id: next[rowIdx].id } : {}; // keep id if available
-    next[rowIdx] = { ...keep, ...next[rowIdx], [key]: value }; // new row object, starting with id, and all other row cells, and overwrite old value with new value
-    setRows(next); // update local row state
-    onRowsChange && onRowsChange(next); // if it was changed, call it so the parent will stay in sync too
-  };
-
-  // add row above
+  /***
+   * Handles adding a row above
+   */
   const addRowAbove = (rowIdx) => {
     const newRows = [
       ...rows.slice(0, rowIdx),
@@ -379,7 +416,9 @@ export default function TableSection({
     onRowsChange(newRows);
   };
 
-  // add row below
+  /***
+   * Handles adding a row below
+   */
   const addRowBelow = (rowIdx) => {
     const newRows = [
       ...rows.slice(0, rowIdx + 1),
@@ -390,16 +429,20 @@ export default function TableSection({
     onRowsChange(newRows);
   };
 
-  // delete row
+  /***
+   * Handles deleting selected row
+   */
   const deleteRow = (rowIdx) => {
-  askConfirmation("Are you sure you want to delete this row?", () => {
-    const newRows = rows.filter((_, idx) => idx !== rowIdx);
-    setRows(newRows);
-    onRowsChange?.(newRows);
-  });
-};
+    askConfirmation("Are you sure you want to delete this row?", () => {
+      const newRows = rows.filter((_, idx) => idx !== rowIdx);
+      setRows(newRows);
+      onRowsChange?.(newRows);
+    });
+  };
 
-  // duplicate row
+  /***
+   * Handles duplicating selected row
+   */
   const duplicateRow = (rowIdx) => {
     const rowCopy = rows[rowIdx];
     const newRows = [
@@ -411,6 +454,9 @@ export default function TableSection({
     onRowsChange(newRows);
   };
 
+  /***
+   * Handles the updating of cell changes
+   */
   const handleCellChange = (rowIdx, field, value) => {
     const updatedRows = rows.map((row, idx) =>
       idx === rowIdx ? { ...row, [field]: value } : row
@@ -419,8 +465,12 @@ export default function TableSection({
     onRowsChange(updatedRows);
   };
 
-  // define the menu items outside the jsx based on user type
-  // render extra button if admin is logged in
+  /***
+   * Menu button options logic
+   * If admin logged in: we have - save as base template option for custom templates
+   *                             
+   * If coordinator logged in: we have - copy base template option for base templates
+   */
   let menuItems = [];
 
   if (canModifyRows) {
@@ -452,7 +502,6 @@ export default function TableSection({
       },
     ];
   }
-  //onUpdateSubjectDetails(subjectName, subjectYear, subjectSemester);
 
   return (
     <div className="table-section">
@@ -515,14 +564,12 @@ export default function TableSection({
           </thead>
           <tbody>
             {rows.map((data, rowIdx) => {
-              const shouldHighlight = toHighlight === rowIdx;
               const noAI = data?.level === NOAI;
               const isGray = data.grayed;
 
               return (
                 <tr
                   key={`row-${rowIdx}`}
-                  className={shouldHighlight ? "row-highlight" : ""}
                 >
                   {/* Task column */}
                   <td className="table-section-td cell-with-menu">

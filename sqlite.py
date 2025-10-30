@@ -1,4 +1,6 @@
 import os
+
+# Remove existing db files
 for i in os.listdir('./database'):
     if i.endswith('.db'):
         os.remove('./database/'+i)
@@ -6,11 +8,12 @@ for i in os.listdir('./database'):
 
 import sqlite3
 
+# Create users database
 connection = sqlite3.connect("database/users.db")
 cursor = connection.cursor()
 
 
-# Accounts
+# Create users table and insert default users
 cursor.execute("""
 CREATE TABLE users (
     user_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -18,15 +21,16 @@ CREATE TABLE users (
     password TEXT,
     user_type TEXT
 )""")
-
+# Default users
 user_list = [
     ("admin", "admin", "admin"),
     ("lulu", "lulu", "coordinator")
 ]
+# Insert default users
 cursor.executemany("INSERT INTO users (username, password, user_type) VALUES (?, ?, ?)", user_list)
 connection.commit()
 
-#Subjects
+# Create subjects database and insert default subjects
 connection = sqlite3.connect("database/subjects.db")
 cursor = connection.cursor()
 cursor.execute("""
@@ -37,11 +41,13 @@ CREATE TABLE subjects (
     subject_semester TEXT
 )""")
 
+# Default subject entries
 entries = [
     ("English", "2025", "Semester 1"),
     ("Mathematics", "2025", "Semester 2"),
 ]
 
+# Insert default subjects
 cursor.executemany(
     """
     INSERT INTO subjects (subject_name, subject_year, subject_semester)
@@ -58,7 +64,7 @@ connection.close()
 connection = sqlite3.connect("database/usescales.db")
 cursor = connection.cursor()
 
-# update this db to store user_id
+# Create usescales table and insert default usescales
 cursor.execute("""
 CREATE TABLE usescales (
     usescale_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -68,17 +74,20 @@ CREATE TABLE usescales (
     template_type TEXT,
     FOREIGN KEY (subject_id) REFERENCES subjects(subject_id)
 )""")
+# Default usescale entries
 usescale_list = [
     (1, 1, "Essay Template", "custom"),
     (2, 1, "Mathematics Template", "custom"),
 ]
+# Insert default usescales
 cursor.executemany("INSERT INTO usescales (subject_id, user_id, title, template_type) VALUES (?, ?, ?, ?)", usescale_list)
 connection.commit()
 
-
+# Create usescale_entries database and insert default entries
 connection = sqlite3.connect("database/usescale_rows.db")
 cursor = connection.cursor()
-## THIS IS THE RELEVANT TABLE FOR IMPLEMENTATION OF USE CASES
+
+# Create usescale_entries table and insert default usescale entries
 cursor.execute("""
 CREATE TABLE usescale_entries (
     row_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -98,6 +107,7 @@ CREATE TABLE usescale_entries (
     FOREIGN KEY (entry_id) REFERENCES srep_entries(entry_id)
 )""")
 
+# Default usescale entries
 entries = [
     (
         1,
@@ -173,6 +183,7 @@ entries = [
     ),
 ]
 
+# Insert default usescale entries
 cursor.executemany(
     """
     INSERT INTO usescale_entries
@@ -185,24 +196,25 @@ cursor.executemany(
 connection.commit()
 connection.close()
 
-# for the srep entry types
+# database for srep_entry_type
 connection = sqlite3.connect("database/srep_entry_type.db")
 cursor = connection.cursor()
 
+# Create srep_entry_type table and insert default entry types
 cursor.execute("""
 CREATE TABLE srep_entry_type (
     entry_type_id INTEGER PRIMARY KEY AUTOINCREMENT,
     entry_type_name TEXT
 )
 """)
-
+# Default entry types
 entry_types = [
     ("Written",),
     ("Coding",),
     ("Oral",),
     ("Presentation",),
 ]
-
+# Insert default entry types
 cursor.executemany("""
     INSERT INTO srep_entry_type (entry_type_name)
     VALUES (?)
@@ -211,10 +223,11 @@ cursor.executemany("""
 connection.commit()
 connection.close()
 
-# for the srep_entries 
+# database for srep_entries
 connection = sqlite3.connect("database/srep_entries.db")
 cursor = connection.cursor()
 
+# Create srep_entries table and insert default srep entries
 cursor.execute("""
 CREATE TABLE srep_entries (
     entry_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -230,6 +243,7 @@ CREATE TABLE srep_entries (
 )
 """)
 
+# Default srep entries
 srep_entries = [
     # Written
     (1, 'LEVEL N', 'NO AI', 'No AI use for this task is allowed', None, None, None, None, None),
@@ -276,6 +290,7 @@ srep_entries = [
      'Scenario 1 (AI appropriate)', None, 'https://students.unimelb.edu.au/academic-skills/resources/reading,-writing-and-referencing/referencing-and-research/paraphrasing', None, None),
 ]
 
+# Insert default srep entries
 cursor.executemany("""
     INSERT INTO srep_entries
     (entry_type_id, ai_level, ai_title, instruction, example, declaration, version, purpose, key_prompts)
@@ -287,10 +302,11 @@ connection.commit()
 connection.close()
 
 
-# database for notifications
+# Create notifications database for tracking changes
 connection = sqlite3.connect("database/notifications.db")
 cursor = connection.cursor()
 
+# Create notifications table
 cursor.execute("""
 CREATE TABLE notifications (
     notification_id INTEGER PRIMARY KEY AUTOINCREMENT,

@@ -4,7 +4,7 @@
  * Displays a draggable block with a vertical level indicator and a label. Supports custom label background and an optional edit icon for admin users.
  *
  * @component
- * @param {Object} props
+ * @param {Object} props - Component props
  * @param {string} props.level - Text for the level indicator
  * @param {string} props.label - Label text
  * @param {string} props.labelBg - Background color for the label
