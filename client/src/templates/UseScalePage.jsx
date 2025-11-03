@@ -31,6 +31,12 @@ export default function UseScalePage({
   subject_id,
   onLogout,
 }) {
+  //for UI popups
+  const [popup, setPopup] = useState({ show: false, message: "", type: "info" });
+  const showPopup = (message, type = "info") => {
+    setPopup({ show: true, message, type });    
+  };
+  
   // new state to store fetched entry types and entries
   const [levelsData, setLevelsData] = useState([]);
 
@@ -150,7 +156,7 @@ export default function UseScalePage({
           console.log("Created new subject:", finalSubjectId);
         } else {
           console.error("Error creating subject:", createData.error);
-          alert("Failed to create new subject.");
+          showPopup("Failed to create new subject.", "error");
           return;
         }
       } else {
@@ -183,14 +189,14 @@ export default function UseScalePage({
       const saveData = await saveResponse.json();
 
       if (saveData.success) {
-        alert("Template saved successfully!");
+        showPopup("Template saved successfully!", "success");
       } else {
         console.error("Error saving template:", saveData.error);
-        alert("Failed to save template.");
+        showPopup("Failed to save template.", "error");
       }
     } catch (error) {
       console.error("Error in saving process:", error);
-      alert("An error occurred. Check console for details.");
+      showPopup("An error occurred. Check console for details.", "error");
     }
   };
 
@@ -549,6 +555,14 @@ export default function UseScalePage({
         </div>
       )}
 
+{popup.show && (
+  <div className={`popup-box ${popup.type}`}>
+    <p>{popup.message}</p>
+    <button onClick={() => setPopup({ show: false, message: "", type: "info" })}>
+      ×
+    </button>
+  </div>
+)}
       <WindowsConfirm
         show={confirmPopup.show}
         message={confirmPopup.message}
