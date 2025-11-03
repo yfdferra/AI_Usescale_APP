@@ -14,6 +14,12 @@ export default function Login({ onLogin }) {
   //state to show and hide visibility
   const [showPassword, setShowPassword] = useState(false);
 
+  //alert replacement
+  const [popup, setPopup] = useState({ show: false, message: "", type: "info" });
+  const showPopup2 = (message, type = "info") => {
+    setPopup({ show: true, message, type });
+  };
+
   // handle form submission for login
   const handleSubmit = async (e) => {
     // prevent default form submission from reloading page and call login API
@@ -31,9 +37,10 @@ export default function Login({ onLogin }) {
         replace: true,
       });
     } else {
-      alert("Incorrect Username/Password");
+      showPopup2("Wrong password. Please try again.", "error");
     }
   };
+
 
   return (
     <div className="login-bg">
@@ -124,6 +131,16 @@ export default function Login({ onLogin }) {
           />
         )}
       </div>
+      {popup.show && (
+  <div className={`popup-box ${popup.type}`}>
+    <p>{popup.message}</p>
+    <button onClick={() => setPopup({ show: false, message: "", type: "info" })}>
+      ×
+    </button>
+  </div>
+)}
     </div>
+    
   );
+  
 }
