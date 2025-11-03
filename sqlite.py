@@ -21,10 +21,9 @@ CREATE TABLE users (
     password TEXT,
     user_type TEXT
 )""")
-# Default users
+# Default user - Admin account
 user_list = [
-    ("admin", "admin", "admin"),
-    ("lulu", "lulu", "coordinator")
+    ("admin", "admin", "admin")
 ]
 # Insert default users
 cursor.executemany("INSERT INTO users (username, password, user_type) VALUES (?, ?, ?)", user_list)
@@ -76,8 +75,8 @@ CREATE TABLE usescales (
 )""")
 # Default usescale entries
 usescale_list = [
-    (1, 1, "Essay Template", "custom"),
-    (2, 1, "Mathematics Template", "custom"),
+    (1, 1, "Essay Template", "base"),
+    (2, 1, "Coding Assessment Template", "base"),
 ]
 # Insert default usescales
 cursor.executemany("INSERT INTO usescales (subject_id, user_id, title, template_type) VALUES (?, ?, ?, ?)", usescale_list)
@@ -112,74 +111,79 @@ entries = [
     (
         1,
         1, 
+        4,
+        "Idea Generation",
+        "AI FOR LEARNING",  
+        "For this written task, you may use AI for general learning: e.g. explaining concepts, creating revision quizzes",
+        "Scenario 1 (AI appropriate)",
         None,
-        None,
-        "Idea Generation",  
-        "'Generate me a list of 10 concerns regarding coral reef sustainability'",
-        "Allowed; all prompts must be submitted",
-        "ChatGPT v4.0",
-        "Brainstorm possible issues for research",
-        "'Generate me a list of 10 concerns regarding coral reef sustainability'"
-    ),
-    (
-        1,
-        1,
-        None,
-        None,
-        "Proofreading",
-        "DO NOT SUBMIT PROMPTS FOR PROOFREADING",
-        "Not permitted",
-        None,
-        "Ensure student work is entirely original",
+        "https://students.unimelb.edu.au/academic-skills/resources/reading,-writing-and-referencing/referencing-and-research/paraphrasing",
         None
     ),
     (
         1,
         1,
+        2,
+        "Proofreading",
+        "SOME AI",
+        "For this written task, you may use AI tools only for: e.g. basic spelling and grammar checking",
+        "Scenario 1 (AI appropriate)/Scenario 2 (AI inappropriate)",
+        "Students MUST acknowledge the use of AI by adding a declaration at the end of their submission",
+        "https://students.unimelb.edu.au/academic-skills/resources/reading,-writing-and-referencing/referencing-and-research/paraphrasing",
         None,
-        None,
+        None
+    ),
+    (
+        1,
+        1,
+        3,
         "Research",
-        "'Prompt: summarise the main points of this paper with citations in the format (page number, line number, any figures references)'",
-        "Allowed; must cite sources",
-        "ChatGPT v4.0",
-        "Assist with summarising external sources",
-        "'Summarise the main points of this paper...'"
+        "MORE AI",
+        "For this written task, you may use AI tools only for: e.g. understanding the broad context, rewording",
+        "Scenario 1 (AI appropriate)/Scenario 2 (AI inappropriate)",
+        "Students MUST acknowledge the use of AI by adding a declaration at the end of their submission",
+        "https://students.unimelb.edu.au/academic-skills/resources/reading,-writing-and-referencing/referencing-and-research/paraphrasing",
+        None,
+        None
     ),
     (
         2,
         2,
-        None,
-        None,
+        5,
         "Problem Solving",
-        "'Solve the equation 2x + 3 = 7 and show all steps'",
-        "Allowed; must show work",
-        "Wolfram Alpha API",
-        "Check problem-solving methodology",
-        "'Solve 2x + 3 = 7...'"
+        "NO AI",
+        "No AI use for this task is allowed",
+        None,
+        None,
+        None,
+        None,
+        None
     ),
     (
         2,
         2,
-        None,
-        None,
+        8,
         "Concept Explanation",
-        "'Explain the concept of derivatives in calculus with examples'",
-        "Allowed; must be clear and concise",
-        "ChatGPT v4.0",
-        "Help explain complex topics",
-        "'Explain the concept of derivatives in calculus...'"
+        "AI FOR LEARNING",
+        "For this coding task, you may use AI for general learning: e.g. finding common coding techniques and processes",
+        "Scenario 1 (AI appropriate)",
+        None,
+        "https://students.unimelb.edu.au/academic-skills/resources/reading,-writing-and-referencing/referencing-and-research/paraphrasing",
+        None,
+        None
     ),
     (
         2,
         2,
-        None,
-        None,
+        7,
         "Graph Interpretation",
-        "'Interpret the following graph showing the relationship between x and y coordinates'",
-        "Allowed; must reference specific graphs",
-        "ChatGPT v4.0",
-        "Guide students in understanding graphs",
-        "'Interpret the following graph...'"
+        "MORE AI",
+        "For this coding task, you may use AI tools only for: e.g. debugging code",
+        "Scenario 1 (AI appropriate)/Scenario 2 (AI inappropriate)",
+        "Students MUST acknowledge the use of AI by adding a declaration at the end of their submission",
+        "https://students.unimelb.edu.au/academic-skills/resources/reading,-writing-and-referencing/referencing-and-research/paraphrasing",
+        None,
+        None
     ),
 ]
 
@@ -187,8 +191,8 @@ entries = [
 cursor.executemany(
     """
     INSERT INTO usescale_entries
-    (subject_id, usescale_id, assessment_task, ai_title, instruction, example, declaration, version, purpose, key_prompts)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    (subject_id, usescale_id, entry_id, assessment_task, ai_title, instruction, example, declaration, version, purpose, key_prompts)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """,
     entries
 )
