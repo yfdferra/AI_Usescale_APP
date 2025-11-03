@@ -5,6 +5,9 @@ HOST = "http://localhost:5000";
 frame = document.getElementById("frame");
 usescale = document.getElementById("usescale");
 
+//Event listener for saving template
+document.getElementById("save").addEventListener("click", () => {});
+
 // Event listeners for creating templates
 document
   .getElementById("create_template")
@@ -18,8 +21,12 @@ document.getElementById("open_template").addEventListener("click", () => {
 });
 
 // Event listener for adding rows
-document.getElementById("add_row").addEventListener("click", addRow);
-activateScript();
+document.getElementById("add_row").addEventListener("click", add_row);
+
+// Event listener for deleting rows
+document.getElementById("delete_row").addEventListener("click", delete_row);
+
+activate_script();
 
 // Event listener for getting JSON
 document.getElementById("jsonify").addEventListener("click", () => {
@@ -33,6 +40,7 @@ function jsonify() {
     let textareas = row.querySelectorAll("textarea");
     if (textareas.length === 3) {
       let obj = {
+        id: row.dataset.id || null,
         category: textareas[0].value,
         description: textareas[1].value,
         comments: textareas[2].value,
@@ -87,16 +95,16 @@ function createTemplate(event) {
     .then((response) => response.json())
     .then((data) => {
       console.log("Success:", data);
-      activateScript();
+      activate_script();
     })
     .catch((error) => {
       console.error("Failed, error:", error);
     });
-  activateScript();
+  activate_script();
 }
 
 // Function to populate the dropdown
-function activateScript() {
+function activate_script() {
   dropdown = frame.querySelector("select");
   if (dropdown) {
     dropdown.innerHTML = "";
@@ -121,7 +129,7 @@ function activateScript() {
 }
 
 // Function to add a new row of textareas
-function addRow() {
+function add_row() {
   var row = document.createElement("div");
   var type = document.createElement("textarea");
   var shortDescription = document.createElement("textarea");
