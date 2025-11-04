@@ -118,6 +118,7 @@ entries = [
         "Scenario 1 (AI appropriate)",
         None,
         "https://students.unimelb.edu.au/academic-skills/resources/reading,-writing-and-referencing/referencing-and-research/paraphrasing",
+        None,
         None
     ),
     (
